@@ -24,7 +24,7 @@ const DB_NAME = "zzupzzup-web";
 const DB_VERSION = 2;
 const DB_STORE = "handles";
 const HISTORY_STORE = "history";
-const MAX_HISTORY_ITEMS = 30;
+const MAX_HISTORY_ITEMS = 3;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
@@ -42,7 +42,8 @@ const state = {
   favoriteOnly: false,
   calendarOpen: false,
   editingId: "",
-  historyItems: []
+  historyItems: [],
+  toastTimer: 0
 };
 
 const RANGE_LABELS = {
@@ -95,6 +96,7 @@ const el = {
   exportPendingCsv: document.querySelector("#exportPendingCsv"),
   exportDoneCsv: document.querySelector("#exportDoneCsv"),
   fileStatus: document.querySelector("#fileStatus"),
+  toast: document.querySelector("#toast"),
   stats: document.querySelector("#stats"),
   calendar: document.querySelector("#calendar"),
   cards: document.querySelector("#cards"),
@@ -956,6 +958,23 @@ function setFileStatus(message) {
   el.fileStatus.textContent = message;
 }
 
+function notifyAction(message) {
+  setFileStatus(message);
+  showToast(message);
+}
+
+function showToast(message) {
+  if (!el.toast) return;
+  window.clearTimeout(state.toastTimer);
+  el.toast.textContent = message;
+  el.toast.hidden = false;
+  el.toast.classList.add("is-visible");
+  state.toastTimer = window.setTimeout(() => {
+    el.toast.classList.remove("is-visible");
+    el.toast.hidden = true;
+  }, 2600);
+}
+
 function renderClock() {
   const now = new Date();
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
@@ -1109,7 +1128,7 @@ async function downloadCsv() {
 function downloadPendingCsv() {
   const pending = state.clips.filter((clip) => clip.status !== "정리 완료");
   if (!pending.length) {
-    setFileStatus("정리 완료 제외 후 내보낼 항목이 없습니다.");
+    notifyAction("정리 완료 제외 후 내보낼 항목이 없습니다.");
     return;
   }
   downloadClipsCsv(pending, "줍줍노트-정리대기.csv");
@@ -1118,7 +1137,7 @@ function downloadPendingCsv() {
 function downloadSentenceCsv() {
   const sentences = state.clips.filter((clip) => clip.contentType === "문장");
   if (!sentences.length) {
-    setFileStatus("내보낼 문장 항목이 없습니다.");
+    notifyAction("내보낼 문장 항목이 없습니다.");
     return;
   }
   downloadClipsCsv(sentences, "줍줍노트-문장.csv");
@@ -1127,7 +1146,7 @@ function downloadSentenceCsv() {
 function downloadDoneCsv() {
   const done = state.clips.filter((clip) => clip.status === "정리 완료");
   if (!done.length) {
-    setFileStatus("정리 완료된 항목이 아직 없습니다.");
+    notifyAction("정리 완료된 항목이 아직 없습니다.");
     return;
   }
   downloadClipsCsv(done, "줍줍노트-정리완료.csv");
@@ -1142,7 +1161,7 @@ function downloadClipsCsv(clips, filename) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
-  setFileStatus(`${filename}을 내보냈습니다.`);
+  notifyAction(`${filename}을 내보냈습니다.`);
 }
 
 function clipsToCsvText(clips) {
@@ -1196,10 +1215,10 @@ async function saveConnectedCsv() {
     const writable = await state.csvHandle.createWritable();
     await writable.write(`\uFEFF${nextText}`);
     await writable.close();
-    setFileStatus(`${state.csvFilename || "줍줍노트.csv"}에 변경사항을 저장했습니다.`);
+    notifyAction(`${state.csvFilename || "줍줍노트.csv"}에 변경사항을 저장했습니다.`);
     return true;
   } catch (error) {
-    setFileStatus(error.message || "연결된 CSV에 저장하지 못했습니다. CSV 저장으로 파일을 내려받아 주세요.");
+    notifyAction(error.message || "연결된 CSV에 저장하지 못했습니다. CSV 저장으로 파일을 내려받아 주세요.");
     return false;
   }
 }
@@ -1301,15 +1320,15 @@ function formatHistoryDate(value) {
 async function copyNotionMarkdown() {
   const markdown = buildNotionMarkdown(state.clips);
   if (!markdown.trim()) {
-    setFileStatus("복사할 항목이 없습니다.");
+    notifyAction("복사할 항목이 없습니다.");
     return;
   }
   try {
     await navigator.clipboard.writeText(markdown);
-    setFileStatus("Notion에 붙여넣을 Markdown을 복사했습니다.");
+    notifyAction("Notion에 붙여넣을 Markdown을 복사했습니다.");
   } catch {
     downloadText("줍줍노트-notion.md", markdown, "text/markdown;charset=utf-8");
-    setFileStatus("클립보드 복사가 막혀 Markdown 파일로 내보냈습니다.");
+    notifyAction("클립보드 복사가 막혀 Markdown 파일로 내보냈습니다.");
   }
 }
 

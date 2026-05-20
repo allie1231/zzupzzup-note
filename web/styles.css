@@ -823,6 +823,34 @@ select:focus {
   background: var(--paper);
 }
 
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  max-width: min(360px, calc(100vw - 48px));
+  padding: 12px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  color: var(--paper);
+  background: var(--ink);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast[hidden] {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .app {
     width: min(100% - 28px, 1080px);

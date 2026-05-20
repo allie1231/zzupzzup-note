@@ -20,10 +20,16 @@
             <strong id="clockText">--:--</strong>
           </time>
           <div class="actions">
+            <button id="connectCsv" class="secondary">CSV 연결</button>
             <label class="file-button">
               CSV 열기
               <input id="csvInput" type="file" accept=".csv,text/csv">
             </label>
+            <label class="file-button secondary">
+              모바일 CSV 합치기
+              <input id="mergeCsvInput" type="file" accept=".csv,text/csv">
+            </label>
+            <button id="connectImageFolder" class="secondary">이미지 폴더 연결</button>
             <label class="file-button secondary">
               이미지 폴더 열기
               <input id="imageInput" type="file" accept="image/*" webkitdirectory directory multiple>
@@ -88,7 +94,10 @@
           <option value="아이디어">아이디어</option>
         </select>
         <input id="tagFilter" placeholder="#태그">
-        <button id="randomFive" class="secondary">랜덤 5개</button>
+        <label class="check-filter">
+          <input id="excludeDone" type="checkbox">
+          정리 완료 제외
+        </label>
         <button id="showAll" class="secondary">전체 보기</button>
       </section>
 
@@ -114,6 +123,7 @@
         <div class="export-actions">
           <button id="exportCsv">변경사항 CSV 내보내기</button>
           <button id="copyNotion" class="secondary">Notion용 Markdown 복사</button>
+          <button id="exportPendingCsv" class="secondary">정리 완료 제외 CSV</button>
           <button id="exportDoneCsv" class="secondary">정리 완료만 CSV</button>
         </div>
       </section>

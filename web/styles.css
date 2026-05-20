@@ -133,6 +133,23 @@ button:hover,
   opacity: 0;
 }
 
+.check-filter {
+  min-height: 38px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.check-filter input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: var(--ink);
+}
+
 .file-status {
   margin: 0 0 14px;
   color: var(--muted);

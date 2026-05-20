@@ -4,6 +4,7 @@ import { createClip, deriveSiteName, localDateParts } from "./shared/schema.js";
 const STORAGE_KEY = "zzupzzup-mobile-clips";
 const el = {
   install: document.querySelector("#install"),
+  quickSave: document.querySelector("#quickSave"),
   clear: document.querySelector("#clear"),
   contentType: document.querySelector("#contentType"),
   status: document.querySelector("#status"),
@@ -22,7 +23,6 @@ const el = {
   save: document.querySelector("#save"),
   statusText: document.querySelector("#statusText"),
   exportCsv: document.querySelector("#exportCsv"),
-  exportImages: document.querySelector("#exportImages"),
   copyCsv: document.querySelector("#copyCsv"),
   search: document.querySelector("#search"),
   showStarred: document.querySelector("#showStarred"),
@@ -48,12 +48,12 @@ el.install.addEventListener("click", async () => {
 });
 
 el.clear.addEventListener("click", clearEditor);
+el.quickSave.addEventListener("click", saveClip);
 el.imageFile.addEventListener("change", handleImageFile);
 el.imageUrl.addEventListener("input", syncImageUrlPreview);
 el.removeImage.addEventListener("click", clearImage);
 el.save.addEventListener("click", saveClip);
 el.exportCsv.addEventListener("click", exportCsv);
-el.exportImages.addEventListener("click", exportImages);
 el.copyCsv.addEventListener("click", copyCsv);
 el.search.addEventListener("input", render);
 el.showStarred.addEventListener("click", () => {
@@ -105,13 +105,13 @@ async function handleImageFile() {
     imageDataUrl = await imageFileToDataUrl(file);
     el.contentType.value = "이미지";
     el.imageUrl.value = imageDataUrl;
-    el.imagePath.value = createMobileImagePath(file);
+    el.imagePath.value = "";
     el.imagePreview.src = imageDataUrl;
     el.imagePreview.hidden = false;
     el.removeImage.hidden = false;
     if (!el.title.value) el.title.value = "모바일에서 주운 이미지";
     if (!el.tags.value) el.tags.value = "#이미지 #모바일";
-    setStatus("이미지를 추가했습니다. 메모를 적고 저장해 주세요.");
+    setStatus("이미지를 추가했습니다. CSV에 함께 담기므로 별도 폴더 저장은 필요 없습니다.");
   } catch (error) {
     setStatus(error.message || "이미지를 추가하지 못했습니다.");
   }
@@ -156,20 +156,6 @@ function exportCsv() {
   setStatus("CSV를 내보냈습니다.");
 }
 
-function exportImages() {
-  const clips = filteredClips().filter((clip) => isEmbeddedImage(clip.imageUrl));
-  if (!clips.length) {
-    setStatus("내보낼 이미지가 없습니다.");
-    return;
-  }
-
-  clips.forEach((clip, index) => {
-    const filename = filenameFromImagePath(clip.imagePath, index);
-    downloadDataUrl(filename, clip.imageUrl);
-  });
-  setStatus(`${clips.length}개 이미지를 내려받았습니다. 파일 앱에서 줍줍노트/images 폴더에 저장해 주세요.`);
-}
-
 async function copyCsv() {
   const clips = filteredClips();
   if (!clips.length) {
@@ -204,7 +190,6 @@ function cardView(clip) {
   const actions = document.createElement("div");
   const star = document.createElement("button");
   const remove = document.createElement("button");
-  const saveImage = document.createElement("button");
 
   title.textContent = clip.title || clip.source || clip.sentence || "주운 정보";
   memo.textContent = clip.sentence || "";
@@ -223,16 +208,6 @@ function cardView(clip) {
   remove.textContent = "삭제";
   remove.addEventListener("click", () => deleteClip(clip.id));
   actions.append(star, remove);
-
-  if (isEmbeddedImage(clip.imageUrl)) {
-    saveImage.className = "secondary";
-    saveImage.textContent = "이미지 저장";
-    saveImage.addEventListener("click", () => {
-      downloadDataUrl(filenameFromImagePath(clip.imagePath), clip.imageUrl);
-      setStatus("이미지를 내려받았습니다. 파일 앱에서 줍줍노트/images 폴더에 저장해 주세요.");
-    });
-    actions.append(saveImage);
-  }
 
   if (clip.imageUrl) {
     const image = document.createElement("img");
@@ -335,30 +310,6 @@ function inferType(source, imageUrl) {
   return "링크";
 }
 
-function isEmbeddedImage(value) {
-  return String(value || "").startsWith("data:image/");
-}
-
-function filenameFromImagePath(imagePath, index = 0) {
-  const filename = String(imagePath || "").split("/").filter(Boolean).pop();
-  return filename || `mobile-image-${String(index + 1).padStart(2, "0")}.jpg`;
-}
-
-function createMobileImagePath(file) {
-  const extension = file.type.includes("gif") || file.type.includes("svg")
-    ? extensionFromFilename(file.name) || "png"
-    : "jpg";
-  return `images/mobile-${timestamp()}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
-}
-
-function extensionFromFilename(name) {
-  const match = String(name || "").match(/\.([a-z0-9]{2,5})$/i);
-  if (!match) return "";
-  const extension = match[1].toLowerCase();
-  if (extension === "jpeg") return "jpg";
-  return extension;
-}
-
 function downloadText(filename, text, type) {
   const blob = new Blob(["\uFEFF", text], { type });
   const url = URL.createObjectURL(blob);
@@ -367,13 +318,6 @@ function downloadText(filename, text, type) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-function downloadDataUrl(filename, dataUrl) {
-  const anchor = document.createElement("a");
-  anchor.href = dataUrl;
-  anchor.download = filename;
-  anchor.click();
 }
 
 function setStatus(message) {
@@ -410,10 +354,4 @@ function readFileAsDataUrl(file) {
     reader.onerror = () => reject(reader.error || new Error("파일을 읽지 못했습니다."));
     reader.readAsDataURL(file);
   });
-}
-
-function timestamp() {
-  const date = new Date();
-  const pad = (value) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }

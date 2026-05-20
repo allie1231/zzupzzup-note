@@ -20,10 +20,20 @@ const HEADERS = [
   "마지막 확인"
 ];
 
+const DB_NAME = "zzupzzup-web";
+const DB_STORE = "handles";
+const CSV_HANDLE_KEY = "csv";
+const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
+const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
+
 const state = {
   clips: [],
   visible: [],
   imageUrls: new Map(),
+  csvHandle: null,
+  imageFolderHandle: null,
+  csvFilename: "",
+  autoSaveTimer: 0,
   activeDate: "",
   activeRange: "",
   favoriteOnly: false,
@@ -39,7 +49,10 @@ const RANGE_LABELS = {
 };
 
 const el = {
+  connectCsv: document.querySelector("#connectCsv"),
   csvInput: document.querySelector("#csvInput"),
+  mergeCsvInput: document.querySelector("#mergeCsvInput"),
+  connectImageFolder: document.querySelector("#connectImageFolder"),
   imageInput: document.querySelector("#imageInput"),
   downloadCsv: document.querySelector("#downloadCsv"),
   clockPanel: document.querySelector("#clockPanel"),
@@ -53,7 +66,7 @@ const el = {
   statusFilter: document.querySelector("#statusFilter"),
   useForFilter: document.querySelector("#useForFilter"),
   tagFilter: document.querySelector("#tagFilter"),
-  randomFive: document.querySelector("#randomFive"),
+  excludeDone: document.querySelector("#excludeDone"),
   showAll: document.querySelector("#showAll"),
   showToday: document.querySelector("#showToday"),
   showWeek: document.querySelector("#showWeek"),
@@ -65,6 +78,7 @@ const el = {
   showCalendar: document.querySelector("#showCalendar"),
   exportCsv: document.querySelector("#exportCsv"),
   copyNotion: document.querySelector("#copyNotion"),
+  exportPendingCsv: document.querySelector("#exportPendingCsv"),
   exportDoneCsv: document.querySelector("#exportDoneCsv"),
   fileStatus: document.querySelector("#fileStatus"),
   stats: document.querySelector("#stats"),
@@ -88,7 +102,10 @@ const el = {
   detailDelete: document.querySelector("#detailDelete")
 };
 
+el.connectCsv.addEventListener("click", connectCsvFile);
 el.csvInput.addEventListener("change", loadCsv);
+el.mergeCsvInput.addEventListener("change", mergeCsv);
+el.connectImageFolder.addEventListener("click", connectImageFolder);
 el.imageInput.addEventListener("change", loadImages);
 el.downloadCsv.addEventListener("click", downloadCsv);
 el.search.addEventListener("input", applyFilters);
@@ -96,7 +113,7 @@ el.typeFilter.addEventListener("change", applyFilters);
 el.statusFilter.addEventListener("change", applyFilters);
 el.useForFilter.addEventListener("change", applyFilters);
 el.tagFilter.addEventListener("input", applyFilters);
-el.randomFive.addEventListener("click", showRandom);
+el.excludeDone.addEventListener("change", toggleExcludeDone);
 el.showAll.addEventListener("click", showAll);
 el.showToday.addEventListener("click", showToday);
 el.showWeek.addEventListener("click", showWeek);
@@ -110,14 +127,114 @@ el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
 el.exportCsv.addEventListener("click", downloadCsv);
 el.copyNotion.addEventListener("click", copyNotionMarkdown);
+el.exportPendingCsv.addEventListener("click", downloadPendingCsv);
 el.exportDoneCsv.addEventListener("click", downloadDoneCsv);
 el.hideOnboarding.addEventListener("click", hideOnboarding);
 el.showOnboarding.addEventListener("click", showOnboarding);
 
 restoreOnboarding();
+restoreExcludeDone();
 renderClock();
 setInterval(renderClock, 30 * 1000);
 render();
+restoreConnectedCsv();
+restoreConnectedImageFolder();
+
+async function connectCsvFile() {
+  if (!window.showOpenFilePicker) {
+    setFileStatus("이 브라우저에서는 CSV 연결을 지원하지 않습니다. Chrome에서 GitHub Pages 주소로 열어 주세요.");
+    return;
+  }
+
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      multiple: false,
+      types: [
+        {
+          description: "CSV",
+          accept: { "text/csv": [".csv"] }
+        }
+      ]
+    });
+    await storeHandle(CSV_HANDLE_KEY, handle);
+    await verifyPermission(handle, true);
+    await loadCsvFromHandle(handle);
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    setFileStatus(error.message || "CSV 파일을 연결하지 못했습니다.");
+  }
+}
+
+async function restoreConnectedCsv() {
+  if (!window.showOpenFilePicker) return;
+  try {
+    const handle = await getStoredHandle(CSV_HANDLE_KEY);
+    if (!handle) return;
+    const allowed = await hasPermission(handle, false);
+    if (!allowed) {
+      state.csvHandle = handle;
+      setFileStatus("이전에 연결한 CSV가 있습니다. CSV 저장/자동 반영을 쓰려면 CSV 연결을 다시 눌러 권한을 허용해 주세요.");
+      return;
+    }
+    await loadCsvFromHandle(handle, { restored: true });
+  } catch {
+    setFileStatus("이전에 연결한 CSV를 다시 읽지 못했습니다. CSV 연결을 다시 눌러 주세요.");
+  }
+}
+
+async function connectImageFolder() {
+  if (!window.showDirectoryPicker) {
+    setFileStatus("이 브라우저에서는 이미지 폴더 연결을 지원하지 않습니다. Chrome에서 GitHub Pages 주소로 열어 주세요.");
+    return;
+  }
+
+  try {
+    const handle = await window.showDirectoryPicker({ mode: "read" });
+    await storeHandle(IMAGE_FOLDER_HANDLE_KEY, handle);
+    await loadImagesFromHandle(handle);
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    setFileStatus(error.message || "이미지 폴더를 연결하지 못했습니다.");
+  }
+}
+
+async function restoreConnectedImageFolder() {
+  if (!window.showDirectoryPicker) return;
+  try {
+    const handle = await getStoredHandle(IMAGE_FOLDER_HANDLE_KEY);
+    if (!handle) return;
+    const allowed = await hasPermission(handle, false);
+    if (!allowed) return;
+    await loadImagesFromHandle(handle, { restored: true });
+  } catch {
+    setFileStatus("이전에 연결한 이미지 폴더를 다시 읽지 못했습니다. 이미지 폴더 연결을 다시 눌러 주세요.");
+  }
+}
+
+async function loadImagesFromHandle(handle, options = {}) {
+  const allowed = await verifyPermission(handle, false);
+  if (!allowed) {
+    setFileStatus("이미지 폴더를 읽을 권한이 없습니다. 이미지 폴더 연결을 다시 눌러 주세요.");
+    return;
+  }
+  state.imageFolderHandle = handle;
+  const count = await collectImageFiles(handle);
+  render();
+  setFileStatus(options.restored ? `이미지 폴더 ${count}개를 자동으로 다시 연결했습니다.` : `이미지 폴더에서 ${count}개를 연결했습니다.`);
+}
+
+async function loadCsvFromHandle(handle, options = {}) {
+  const file = await handle.getFile();
+  const text = await file.text();
+  state.csvHandle = handle;
+  state.csvFilename = file.name || "줍줍노트.csv";
+  loadCsvText(text);
+  setFileStatus(
+    options.restored
+      ? `${state.csvFilename}을 자동으로 다시 열었습니다. 수정하면 연결된 CSV에 반영됩니다.`
+      : `${state.csvFilename}을 연결했습니다. 수정하면 연결된 CSV에 반영됩니다.`
+  );
+}
 
 async function loadCsv() {
   const file = el.csvInput.files?.[0];
@@ -125,11 +242,9 @@ async function loadCsv() {
   setFileStatus(`${file.name} 여는 중...`);
   try {
     const text = await file.text();
-    const rows = parseCsv(text);
-    state.clips = rows.map(rowToClip);
-    state.visible = [...state.clips].sort(sortNewest);
-    resetFilters();
-    render();
+    state.csvHandle = null;
+    state.csvFilename = file.name;
+    loadCsvText(text);
     setFileStatus(
       state.clips.length
         ? `${file.name}에서 ${state.clips.length}개를 불러왔습니다.`
@@ -142,6 +257,34 @@ async function loadCsv() {
     setFileStatus(error.message || "CSV를 읽지 못했습니다.");
   } finally {
     el.csvInput.value = "";
+  }
+}
+
+function loadCsvText(text) {
+  const rows = parseCsv(text);
+  state.clips = rows.map(rowToClip);
+  state.visible = [...state.clips].sort(sortNewest);
+  resetFilters();
+  applyFilters();
+}
+
+async function mergeCsv() {
+  const file = el.mergeCsvInput.files?.[0];
+  if (!file) return;
+  setFileStatus(`${file.name} 합치는 중...`);
+  try {
+    const text = await file.text();
+    const incoming = parseCsv(text).map(rowToClip);
+    const before = state.clips.length;
+    state.clips = mergeClips(state.clips, incoming);
+    resetFilters();
+    applyFilters();
+    scheduleAutoSave();
+    setFileStatus(`모바일 CSV ${incoming.length}개를 확인했고, 새 항목 ${state.clips.length - before}개를 합쳤습니다.`);
+  } catch (error) {
+    setFileStatus(error.message || "모바일 CSV를 합치지 못했습니다.");
+  } finally {
+    el.mergeCsvInput.value = "";
   }
 }
 
@@ -161,12 +304,32 @@ function loadImages() {
   el.imageInput.value = "";
 }
 
+async function collectImageFiles(directoryHandle, prefix = "") {
+  let count = 0;
+  for await (const [name, handle] of directoryHandle.entries()) {
+    const relativePath = prefix ? `${prefix}/${name}` : name;
+    if (handle.kind === "directory") {
+      count += await collectImageFiles(handle, relativePath);
+      continue;
+    }
+    const file = await handle.getFile();
+    if (file.type && !file.type.startsWith("image/")) continue;
+    const url = URL.createObjectURL(file);
+    state.imageUrls.set(name, url);
+    state.imageUrls.set(relativePath, url);
+    state.imageUrls.set(relativePath.split("/").slice(-2).join("/"), url);
+    count += 1;
+  }
+  return count;
+}
+
 function applyFilters() {
   const query = el.search.value.trim().toLowerCase();
   const contentType = el.typeFilter.value;
   const status = el.statusFilter.value;
   const useFor = el.useForFilter.value;
   const tag = el.tagFilter.value.trim();
+  const excludeDone = el.excludeDone.checked;
 
   state.visible = state.clips.filter((clip) => {
     const haystack = [
@@ -182,6 +345,7 @@ function applyFilters() {
     if (query && !haystack.includes(query)) return false;
     if (contentType && clip.contentType !== contentType) return false;
     if (status && clip.status !== status) return false;
+    if (excludeDone && clip.status === "정리 완료") return false;
     if (useFor && clip.useFor !== useFor) return false;
     if (tag && !clip.tags.includes(tag.startsWith("#") ? tag : `#${tag}`)) return false;
     if (state.activeDate && dateKey(clip.createdAt) !== state.activeDate) return false;
@@ -190,13 +354,6 @@ function applyFilters() {
     return true;
   }).sort(sortNewest);
   render();
-}
-
-function showRandom() {
-  clearTimeFilters();
-  state.visible = [...state.clips].sort(() => Math.random() - 0.5).slice(0, 5);
-  render();
-  setFileStatus(state.visible.length ? `랜덤으로 ${state.visible.length}개를 꺼냈습니다.` : "아직 꺼낼 스크랩이 없습니다.");
 }
 
 function showAll() {
@@ -274,6 +431,16 @@ function restoreOnboarding() {
   const hidden = localStorage.getItem("zzupzzup:onboardingHidden") === "1";
   el.onboarding.hidden = hidden;
   el.showOnboarding.hidden = !hidden;
+}
+
+function restoreExcludeDone() {
+  el.excludeDone.checked = localStorage.getItem(EXCLUDE_DONE_KEY) === "1";
+}
+
+function toggleExcludeDone() {
+  localStorage.setItem(EXCLUDE_DONE_KEY, el.excludeDone.checked ? "1" : "0");
+  applyFilters();
+  setFileStatus(el.excludeDone.checked ? "정리 완료 항목을 목록에서 숨깁니다." : "정리 완료 항목도 함께 보여줍니다.");
 }
 
 function toggleCalendar() {
@@ -563,7 +730,8 @@ function saveDetail(event) {
   clip.lastReviewed = new Date().toISOString();
   el.detailDialog.close();
   applyFilters();
-  setFileStatus("카드에 반영했습니다. 저장하려면 CSV 저장을 눌러 주세요.");
+  scheduleAutoSave();
+  setFileStatus(state.csvHandle ? "카드에 반영했습니다. 연결된 CSV에 자동 저장합니다." : "카드에 반영했습니다. 저장하려면 CSV 저장을 눌러 주세요.");
 }
 
 function deleteDetail(event) {
@@ -577,7 +745,8 @@ function deleteDetail(event) {
   state.editingId = "";
   el.detailDialog.close();
   applyFilters();
-  setFileStatus("항목을 삭제했습니다. 변경사항을 보존하려면 CSV 내보내기를 눌러 주세요.");
+  scheduleAutoSave();
+  setFileStatus(state.csvHandle ? "항목을 삭제했습니다. 연결된 CSV에 자동 저장합니다." : "항목을 삭제했습니다. 변경사항을 보존하려면 CSV 저장을 눌러 주세요.");
 }
 
 function anchorView(label, href) {
@@ -677,7 +846,12 @@ function toggleFavorite(id) {
   if (!clip) return;
   clip.favorite = !clip.favorite;
   applyFilters();
-  setFileStatus(clip.favorite ? "별표를 표시했습니다. 저장하려면 CSV 저장을 눌러 주세요." : "별표를 해제했습니다. 저장하려면 CSV 저장을 눌러 주세요.");
+  scheduleAutoSave();
+  setFileStatus(clip.favorite ? saveHint("별표를 표시했습니다.") : saveHint("별표를 해제했습니다."));
+}
+
+function saveHint(message) {
+  return state.csvHandle ? `${message} 연결된 CSV에 자동 저장합니다.` : `${message} 저장하려면 CSV 저장을 눌러 주세요.`;
 }
 
 function parseFavorite(value) {
@@ -814,8 +988,44 @@ function parseCsv(text) {
   });
 }
 
-function downloadCsv() {
+function mergeClips(current, incoming) {
+  const output = [...current];
+  const seen = new Set(output.map(clipKey));
+  for (const clip of incoming) {
+    const key = clipKey(clip);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(clip);
+  }
+  return output.sort(sortNewest);
+}
+
+function clipKey(clip) {
+  return [
+    clip.id,
+    clip.createdAt,
+    clip.source,
+    clip.title,
+    clip.sentence,
+    clip.imageUrl
+  ].filter(Boolean).join("|") || crypto.randomUUID();
+}
+
+async function downloadCsv() {
+  if (state.csvHandle) {
+    const saved = await saveConnectedCsv();
+    if (saved) return;
+  }
   downloadClipsCsv(state.clips, "줍줍노트.csv");
+}
+
+function downloadPendingCsv() {
+  const pending = state.clips.filter((clip) => clip.status !== "정리 완료");
+  if (!pending.length) {
+    setFileStatus("정리 완료 제외 후 내보낼 항목이 없습니다.");
+    return;
+  }
+  downloadClipsCsv(pending, "줍줍노트-정리대기.csv");
 }
 
 function downloadDoneCsv() {
@@ -828,6 +1038,18 @@ function downloadDoneCsv() {
 }
 
 function downloadClipsCsv(clips, filename) {
+  const csv = clipsToCsvText(clips);
+  const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+  setFileStatus(`${filename}을 내보냈습니다.`);
+}
+
+function clipsToCsvText(clips) {
   const rows = clips.map((clip) => [
     clip.id,
     clip.createdAt,
@@ -849,15 +1071,32 @@ function downloadClipsCsv(clips, filename) {
     clip.reviewCount,
     clip.lastReviewed
   ]);
-  const csv = [HEADERS, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
-  const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-  setFileStatus(`${filename}을 내보냈습니다.`);
+  return [HEADERS, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+function scheduleAutoSave() {
+  if (!state.csvHandle) return;
+  window.clearTimeout(state.autoSaveTimer);
+  state.autoSaveTimer = window.setTimeout(saveConnectedCsv, 500);
+}
+
+async function saveConnectedCsv() {
+  if (!state.csvHandle) return false;
+  const allowed = await verifyPermission(state.csvHandle, true);
+  if (!allowed) {
+    setFileStatus("연결된 CSV에 쓸 권한이 없습니다. CSV 연결을 다시 눌러 권한을 허용해 주세요.");
+    return false;
+  }
+  try {
+    const writable = await state.csvHandle.createWritable();
+    await writable.write(`\uFEFF${clipsToCsvText(state.clips)}`);
+    await writable.close();
+    setFileStatus(`${state.csvFilename || "줍줍노트.csv"}에 변경사항을 저장했습니다.`);
+    return true;
+  } catch (error) {
+    setFileStatus(error.message || "연결된 CSV에 저장하지 못했습니다. CSV 저장으로 파일을 내려받아 주세요.");
+    return false;
+  }
 }
 
 async function copyNotionMarkdown() {
@@ -901,6 +1140,66 @@ function downloadText(filename, text, type) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function verifyPermission(handle, write) {
+  const options = { mode: write ? "readwrite" : "read" };
+  if (!handle.queryPermission || !handle.requestPermission) return Promise.resolve(false);
+  return handle.queryPermission(options)
+    .then((status) => {
+      if (status === "granted") return true;
+      return handle.requestPermission(options).then((nextStatus) => nextStatus === "granted");
+    })
+    .catch(() => false);
+}
+
+function hasPermission(handle, write) {
+  const options = { mode: write ? "readwrite" : "read" };
+  if (!handle.queryPermission) return Promise.resolve(false);
+  return handle.queryPermission(options)
+    .then((status) => status === "granted")
+    .catch(() => false);
+}
+
+function openHandleDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore(DB_STORE);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function storeHandle(key, handle) {
+  const db = await openHandleDb();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(DB_STORE, "readwrite");
+    transaction.objectStore(DB_STORE).put(handle, key);
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      db.close();
+      reject(transaction.error);
+    };
+  });
+}
+
+async function getStoredHandle(key) {
+  const db = await openHandleDb();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(DB_STORE, "readonly");
+    const request = transaction.objectStore(DB_STORE).get(key);
+    request.onsuccess = () => resolve(request.result || null);
+    transaction.oncomplete = () => db.close();
+    transaction.onerror = () => {
+      db.close();
+      reject(transaction.error);
+    };
+  });
 }
 
 function csvCell(value) {

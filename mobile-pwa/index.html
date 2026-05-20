@@ -30,7 +30,10 @@
       <section class="editor">
         <div class="section-head">
           <h2>바로 줍기</h2>
-          <button id="clear" class="secondary">비우기</button>
+          <div class="section-actions">
+            <button id="quickSave" type="button">바로 저장</button>
+            <button id="clear" class="secondary" type="button">비우기</button>
+          </div>
         </div>
 
         <div class="grid">
@@ -82,6 +85,7 @@
             <input id="imageFile" type="file" accept="image/*">
             <span>이미지 추가</span>
           </label>
+          <p class="helper">선택한 이미지는 CSV 안에 함께 저장됩니다. 따로 images 폴더에 다시 저장하지 않아도 됩니다.</p>
           <img id="imagePreview" alt="선택한 이미지 미리보기" hidden>
           <label class="image-url-field">
             이미지 URL
@@ -136,8 +140,8 @@
           <h2>모바일 임시 수집함</h2>
           <div class="actions">
             <button id="exportCsv" class="secondary">CSV 내보내기</button>
-            <button id="exportImages" class="secondary">이미지 내보내기</button>
             <button id="copyCsv" class="secondary">CSV 복사</button>
+            <a class="button-link secondary" href="../web/">웹홈 열기</a>
           </div>
         </div>
         <div class="filters">

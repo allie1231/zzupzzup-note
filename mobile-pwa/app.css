@@ -17,6 +17,7 @@ body {
 
 .topbar,
 .section-head,
+.section-actions,
 .actions,
 .filters,
 .clip-actions {
@@ -114,9 +115,26 @@ button {
   cursor: pointer;
 }
 
-button.secondary {
+button.secondary,
+.button-link.secondary {
   color: #111;
   background: #fff;
+}
+
+.button-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #111;
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: #fff;
+  background: #111;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.1;
+  text-decoration: none;
 }
 
 button.danger {
@@ -154,6 +172,13 @@ button.danger {
   color: #111;
   background: #fff;
   font-size: 13px;
+}
+
+.helper {
+  margin: 0 0 10px;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 #imagePreview {

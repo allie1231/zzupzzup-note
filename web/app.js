@@ -91,6 +91,7 @@ const el = {
   historyList: document.querySelector("#historyList"),
   exportCsv: document.querySelector("#exportCsv"),
   copyNotion: document.querySelector("#copyNotion"),
+  exportSentenceCsv: document.querySelector("#exportSentenceCsv"),
   exportPendingCsv: document.querySelector("#exportPendingCsv"),
   exportDoneCsv: document.querySelector("#exportDoneCsv"),
   fileStatus: document.querySelector("#fileStatus"),
@@ -151,6 +152,7 @@ el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
 el.exportCsv.addEventListener("click", downloadCsv);
 el.copyNotion.addEventListener("click", copyNotionMarkdown);
+el.exportSentenceCsv.addEventListener("click", downloadSentenceCsv);
 el.exportPendingCsv.addEventListener("click", downloadPendingCsv);
 el.exportDoneCsv.addEventListener("click", downloadDoneCsv);
 el.hideOnboarding.addEventListener("click", hideOnboarding);
@@ -1111,6 +1113,15 @@ function downloadPendingCsv() {
     return;
   }
   downloadClipsCsv(pending, "줍줍노트-정리대기.csv");
+}
+
+function downloadSentenceCsv() {
+  const sentences = state.clips.filter((clip) => clip.contentType === "문장");
+  if (!sentences.length) {
+    setFileStatus("내보낼 문장 항목이 없습니다.");
+    return;
+  }
+  downloadClipsCsv(sentences, "줍줍노트-문장.csv");
 }
 
 function downloadDoneCsv() {

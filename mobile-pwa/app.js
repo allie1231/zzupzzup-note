@@ -22,6 +22,7 @@ const el = {
   favorite: document.querySelector("#favorite"),
   save: document.querySelector("#save"),
   statusText: document.querySelector("#statusText"),
+  exportMode: document.querySelector("#exportMode"),
   exportCsv: document.querySelector("#exportCsv"),
   copyCsv: document.querySelector("#copyCsv"),
   search: document.querySelector("#search"),
@@ -151,8 +152,13 @@ function exportCsv() {
     return;
   }
   const month = localDateParts().monthKey.replace("-", "");
+  if (el.exportMode.value === "replace") {
+    downloadText("줍줍노트.csv", clipsToCsv(clips), "text/csv;charset=utf-8");
+    setStatus("기존 CSV 덮어쓰기용 파일을 내보냈습니다. 파일 앱에서 기존 줍줍노트.csv를 대체해 주세요.");
+    return;
+  }
   downloadText(`줍줍노트-mobile-${month}.csv`, clipsToCsv(clips), "text/csv;charset=utf-8");
-  setStatus("CSV를 내보냈습니다.");
+  setStatus("모바일 CSV 파일을 따로 내보냈습니다.");
 }
 
 async function copyCsv() {

@@ -142,6 +142,10 @@
         <div class="section-head">
           <h2>모바일 임시 수집함</h2>
           <div class="actions">
+            <select id="exportMode" aria-label="CSV 내보내기 방식">
+              <option value="replace">기존 CSV 덮어쓰기용</option>
+              <option value="mobile">모바일 CSV로 만들기</option>
+            </select>
             <button id="exportCsv" class="secondary">CSV 내보내기</button>
             <button id="copyCsv" class="secondary">CSV 복사</button>
             <a class="button-link secondary" href="../web/">웹홈 열기</a>

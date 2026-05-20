@@ -749,6 +749,80 @@ select:focus {
   justify-content: flex-end;
 }
 
+.history-panel {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 34px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .9);
+}
+
+.history-head,
+.history-item,
+.history-item-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.history-head {
+  justify-content: space-between;
+}
+
+.history-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-item {
+  justify-content: space-between;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.history-item strong,
+.history-item span {
+  display: block;
+}
+
+.history-item strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.history-item span,
+.history-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.history-empty {
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
 @media (max-width: 760px) {
   .app {
     width: min(100% - 28px, 1080px);
@@ -788,6 +862,13 @@ select:focus {
     justify-content: flex-start;
   }
 
+  .history-head,
+  .history-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .history-actions,
   .paste-actions {
     justify-content: flex-start;
   }

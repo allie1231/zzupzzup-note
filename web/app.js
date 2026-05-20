@@ -21,7 +21,10 @@ const HEADERS = [
 ];
 
 const DB_NAME = "zzupzzup-web";
+const DB_VERSION = 2;
 const DB_STORE = "handles";
+const HISTORY_STORE = "history";
+const MAX_HISTORY_ITEMS = 30;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
@@ -38,7 +41,8 @@ const state = {
   activeRange: "",
   favoriteOnly: false,
   calendarOpen: false,
-  editingId: ""
+  editingId: "",
+  historyItems: []
 };
 
 const RANGE_LABELS = {
@@ -82,6 +86,9 @@ const el = {
   readClipboardCsv: document.querySelector("#readClipboardCsv"),
   mergePastedCsv: document.querySelector("#mergePastedCsv"),
   clearPastedCsv: document.querySelector("#clearPastedCsv"),
+  saveHistoryNow: document.querySelector("#saveHistoryNow"),
+  refreshHistory: document.querySelector("#refreshHistory"),
+  historyList: document.querySelector("#historyList"),
   exportCsv: document.querySelector("#exportCsv"),
   copyNotion: document.querySelector("#copyNotion"),
   exportPendingCsv: document.querySelector("#exportPendingCsv"),
@@ -137,6 +144,9 @@ el.connectCsvFromPaste.addEventListener("click", connectCsvFile);
 el.readClipboardCsv.addEventListener("click", readClipboardCsv);
 el.mergePastedCsv.addEventListener("click", mergePastedCsv);
 el.clearPastedCsv.addEventListener("click", clearPastedCsv);
+el.saveHistoryNow.addEventListener("click", saveCurrentHistorySnapshot);
+el.refreshHistory.addEventListener("click", refreshHistory);
+el.historyList.addEventListener("click", handleHistoryAction);
 el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
 el.exportCsv.addEventListener("click", downloadCsv);
@@ -153,6 +163,7 @@ setInterval(renderClock, 30 * 1000);
 render();
 restoreConnectedCsv();
 restoreConnectedImageFolder();
+refreshHistory();
 
 async function connectCsvFile() {
   if (!window.showOpenFilePicker) {
@@ -1162,8 +1173,17 @@ async function saveConnectedCsv() {
     return false;
   }
   try {
+    const nextText = clipsToCsvText(state.clips);
+    const previousFile = await state.csvHandle.getFile();
+    const previousText = await previousFile.text();
+    if (stripBom(previousText).trimEnd() !== nextText.trimEnd()) {
+      await saveHistorySnapshot(previousText, {
+        filename: state.csvFilename || previousFile.name || "줍줍노트.csv",
+        label: "자동 저장 전"
+      });
+    }
     const writable = await state.csvHandle.createWritable();
-    await writable.write(`\uFEFF${clipsToCsvText(state.clips)}`);
+    await writable.write(`\uFEFF${nextText}`);
     await writable.close();
     setFileStatus(`${state.csvFilename || "줍줍노트.csv"}에 변경사항을 저장했습니다.`);
     return true;
@@ -1171,6 +1191,100 @@ async function saveConnectedCsv() {
     setFileStatus(error.message || "연결된 CSV에 저장하지 못했습니다. CSV 저장으로 파일을 내려받아 주세요.");
     return false;
   }
+}
+
+async function saveCurrentHistorySnapshot() {
+  if (!state.clips.length) {
+    setFileStatus("히스토리에 저장할 항목이 없습니다.");
+    return;
+  }
+  await saveHistorySnapshot(clipsToCsvText(state.clips), {
+    filename: state.csvFilename || "줍줍노트.csv",
+    label: "수동 저장"
+  });
+  setFileStatus("현재 CSV 상태를 히스토리에 저장했습니다.");
+}
+
+async function refreshHistory() {
+  try {
+    state.historyItems = await getHistoryItems();
+    renderHistory();
+  } catch {
+    state.historyItems = [];
+    renderHistory();
+  }
+}
+
+function renderHistory() {
+  el.historyList.replaceChildren();
+  if (!state.historyItems.length) {
+    const empty = document.createElement("li");
+    empty.className = "history-empty";
+    empty.textContent = "아직 저장된 CSV 히스토리가 없습니다. 연결된 CSV에 저장하면 이전 기록이 자동으로 남습니다.";
+    el.historyList.append(empty);
+    return;
+  }
+
+  for (const item of state.historyItems) {
+    const row = document.createElement("li");
+    row.className = "history-item";
+    const meta = document.createElement("div");
+    meta.append(
+      textEl("strong", "", item.label || "CSV 기록"),
+      textEl("span", "", `${formatHistoryDate(item.createdAt)} · ${item.count || 0}개 · ${item.filename || "줍줍노트.csv"}`)
+    );
+    const actions = document.createElement("div");
+    actions.className = "history-item-actions";
+    const download = document.createElement("button");
+    download.type = "button";
+    download.className = "secondary";
+    download.dataset.historyAction = "download";
+    download.dataset.historyId = item.id;
+    download.textContent = "다운로드";
+    const restore = document.createElement("button");
+    restore.type = "button";
+    restore.dataset.historyAction = "restore";
+    restore.dataset.historyId = item.id;
+    restore.textContent = "복원";
+    actions.append(download, restore);
+    row.append(meta, actions);
+    el.historyList.append(row);
+  }
+}
+
+async function handleHistoryAction(event) {
+  const button = event.target.closest("[data-history-action]");
+  if (!button) return;
+  const item = state.historyItems.find((history) => history.id === button.dataset.historyId);
+  if (!item) return;
+
+  if (button.dataset.historyAction === "download") {
+    downloadText(historyFilename(item), item.text || "", "text/csv;charset=utf-8");
+    setFileStatus("CSV 히스토리를 파일로 내려받았습니다.");
+    return;
+  }
+
+  if (!confirm("이 히스토리로 현재 화면을 복원할까요? 연결된 CSV가 있으면 복원 내용으로 저장됩니다.")) return;
+  state.clips = parseCsv(item.text || "").map(rowToClip);
+  resetFilters();
+  applyFilters();
+  if (state.csvHandle) {
+    await saveConnectedCsv();
+  } else {
+    setFileStatus("히스토리 내용을 화면에 복원했습니다. CSV에 반영하려면 기존 CSV 연결 후 CSV 저장을 눌러 주세요.");
+  }
+}
+
+function historyFilename(item) {
+  const date = String(item.createdAt || "").replace(/[:.]/g, "-").slice(0, 19);
+  return `줍줍노트-history-${date || "snapshot"}.csv`;
+}
+
+function formatHistoryDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "날짜 없음";
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 async function copyNotionMarkdown() {
@@ -1237,13 +1351,95 @@ function hasPermission(handle, write) {
 
 function openHandleDb() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
-      request.result.createObjectStore(DB_STORE);
+      if (!request.result.objectStoreNames.contains(DB_STORE)) {
+        request.result.createObjectStore(DB_STORE);
+      }
+      if (!request.result.objectStoreNames.contains(HISTORY_STORE)) {
+        request.result.createObjectStore(HISTORY_STORE, { keyPath: "id" });
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
+}
+
+async function saveHistorySnapshot(text, options = {}) {
+  const cleanText = stripBom(String(text || "")).trimEnd();
+  if (!cleanText) return;
+  if (cleanText === clipsToCsvText([])) return;
+  const rows = parseCsv(cleanText);
+  if (!rows.length) return;
+  const latest = state.historyItems[0];
+  if (latest && stripBom(String(latest.text || "")).trimEnd() === cleanText) return;
+
+  const item = {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    filename: options.filename || "줍줍노트.csv",
+    label: options.label || "CSV 기록",
+    count: rows.length,
+    text: cleanText
+  };
+
+  const db = await openHandleDb();
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(HISTORY_STORE, "readwrite");
+    transaction.objectStore(HISTORY_STORE).put(item);
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+  await pruneHistory();
+  await refreshHistory();
+}
+
+async function getHistoryItems() {
+  const db = await openHandleDb();
+  const items = await new Promise((resolve, reject) => {
+    const transaction = db.transaction(HISTORY_STORE, "readonly");
+    const request = transaction.objectStore(HISTORY_STORE).getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+  return items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+async function getHistoryItemCount() {
+  const db = await openHandleDb();
+  const count = await new Promise((resolve, reject) => {
+    const transaction = db.transaction(HISTORY_STORE, "readonly");
+    const request = transaction.objectStore(HISTORY_STORE).count();
+    request.onsuccess = () => resolve(request.result || 0);
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+  return count;
+}
+
+async function deleteHistoryItem(id) {
+  const db = await openHandleDb();
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(HISTORY_STORE, "readwrite");
+    transaction.objectStore(HISTORY_STORE).delete(id);
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+}
+
+async function pruneHistory() {
+  const count = await getHistoryItemCount();
+  if (count <= MAX_HISTORY_ITEMS) return;
+  const items = await getHistoryItems();
+  const remove = items.slice(MAX_HISTORY_ITEMS);
+  await Promise.all(remove.map((item) => deleteHistoryItem(item.id)));
+}
+
+function stripBom(value) {
+  return value.charCodeAt(0) === 0xFEFF ? value.slice(1) : value;
 }
 
 async function storeHandle(key, handle) {

@@ -1,8 +1,10 @@
-export const DEFAULT_ACTIONS = ["확장", "고쳐쓰기", "연결", "인용", "참고", "조사", "보관"];
-export const DEFAULT_USE_FOR = ["에세이", "일기", "카피라이팅", "연설", "리서치", "레퍼런스", "아이디어"];
-export const DEFAULT_CONTENT_TYPES = ["링크", "이미지", "동영상", "자료"];
+export const DEFAULT_ACTIONS = ["정리필요", "확장", "고쳐쓰기", "연결", "인용", "참고", "조사", "보관"];
+export const DEFAULT_USE_FOR = ["정리필요", "에세이", "일기", "카피라이팅", "연설", "리서치", "레퍼런스", "아이디어"];
+export const DEFAULT_CONTENT_TYPES = ["문장", "링크", "이미지", "동영상", "자료"];
 
 const USE_FOR_LABELS = {
+  needs_sorting: "정리필요",
+  needsSorting: "정리필요",
   essay: "에세이",
   journal: "일기",
   copywriting: "카피라이팅",
@@ -13,6 +15,8 @@ const USE_FOR_LABELS = {
 };
 
 const ACTION_LABELS = {
+  needs_sorting: "정리필요",
+  needsSorting: "정리필요",
   expand: "확장",
   rewrite: "고쳐쓰기",
   connect: "연결",
@@ -31,6 +35,8 @@ const STATUS_LABELS = {
 };
 
 const CONTENT_TYPE_LABELS = {
+  sentence: "문장",
+  text: "문장",
   link: "링크",
   image: "이미지",
   video: "동영상",
@@ -45,8 +51,8 @@ export function createClip(input = {}) {
     sentence: normalizeSentence(input.sentence || ""),
     reason: normalizeText(input.reason || ""),
     connection: normalizeText(input.connection || ""),
-    useFor: normalizeUseFor(input.useFor || "에세이"),
-    action: normalizeAction(input.action || "확장"),
+    useFor: normalizeUseFor(input.useFor || "정리필요"),
+    action: normalizeAction(input.action || "정리필요"),
     source: normalizeText(input.source || ""),
     siteName: normalizeText(input.siteName || deriveSiteName(input.source || "")),
     iconUrl: normalizeText(input.iconUrl || ""),
@@ -76,12 +82,12 @@ export function normalizeSentence(value) {
 
 export function normalizeUseFor(value) {
   const text = normalizeText(value);
-  return USE_FOR_LABELS[text] || text || "에세이";
+  return USE_FOR_LABELS[text] || text || "정리필요";
 }
 
 export function normalizeAction(value) {
   const text = normalizeText(value);
-  return ACTION_LABELS[text] || text || "확장";
+  return ACTION_LABELS[text] || text || "정리필요";
 }
 
 export function normalizeStatus(value) {

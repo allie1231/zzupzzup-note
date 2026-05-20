@@ -75,6 +75,7 @@ const el = {
   showPending: document.querySelector("#showPending"),
   showDone: document.querySelector("#showDone"),
   showStarred: document.querySelector("#showStarred"),
+  showSentence: document.querySelector("#showSentence"),
   showCalendar: document.querySelector("#showCalendar"),
   exportCsv: document.querySelector("#exportCsv"),
   copyNotion: document.querySelector("#copyNotion"),
@@ -89,6 +90,9 @@ const el = {
   detailEmbed: document.querySelector("#detailEmbed"),
   detailText: document.querySelector("#detailText"),
   detailSource: document.querySelector("#detailSource"),
+  detailTitle: document.querySelector("#detailTitle"),
+  detailImageUrl: document.querySelector("#detailImageUrl"),
+  detailImagePath: document.querySelector("#detailImagePath"),
   detailType: document.querySelector("#detailType"),
   detailStatus: document.querySelector("#detailStatus"),
   detailDone: document.querySelector("#detailDone"),
@@ -122,6 +126,7 @@ el.showYear.addEventListener("click", showYear);
 el.showPending.addEventListener("click", showPending);
 el.showDone.addEventListener("click", showDone);
 el.showStarred.addEventListener("click", showStarred);
+el.showSentence.addEventListener("click", () => showType("문장"));
 el.showCalendar.addEventListener("click", toggleCalendar);
 el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
@@ -457,7 +462,7 @@ function render() {
   if (!clips.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "줍줍노트.csv를 열면 링크, 이미지, 동영상, 자료가 여기에 모입니다.";
+    empty.textContent = "줍줍노트.csv를 열면 문장, 링크, 이미지, 동영상, 자료가 여기에 모입니다.";
     el.cards.append(empty);
     return;
   }
@@ -480,6 +485,7 @@ function renderStats() {
     statView("정리 대기", countByStatus("새로 수집"), showPending),
     statView("정리 완료", countByStatus("정리 완료"), showDone),
     statView("별표", countFavorite(), showStarred),
+    statView("문장", countByType("문장"), () => showType("문장")),
     statView("링크", countByType("링크"), () => showType("링크")),
     statView("이미지", countByType("이미지"), () => showType("이미지")),
     statView("동영상", countByType("동영상"), () => showType("동영상")),
@@ -607,6 +613,7 @@ function linkView(clip) {
 }
 
 function sourceLinkLabel(clip) {
+  if (clip.contentType === "문장") return "출처 열기";
   if (clip.contentType === "동영상") return "동영상 열기";
   if (clip.contentType === "자료") return "자료 열기";
   return "링크 열기";
@@ -679,14 +686,17 @@ function openDetail(id) {
   el.detailHeading.textContent = clip.title || clip.sentence || clip.source || "수집 상세";
   el.detailText.value = clip.sentence || "";
   el.detailSource.value = clip.source || "";
+  el.detailTitle.value = clip.title || "";
+  el.detailImageUrl.value = clip.imageUrl || "";
+  el.detailImagePath.value = clip.imagePath || "";
   el.detailType.value = clip.contentType || "링크";
   el.detailStatus.value = clip.status || "새로 수집";
   el.detailDone.checked = clip.status === "정리 완료";
   el.detailFavorite.checked = Boolean(clip.favorite);
   el.detailReason.value = clip.reason || "";
   el.detailConnection.value = clip.connection || "";
-  el.detailUseFor.value = clip.useFor || "아이디어";
-  el.detailAction.value = clip.action || "보관";
+  el.detailUseFor.value = clip.useFor || "정리필요";
+  el.detailAction.value = clip.action || "정리필요";
   el.detailTags.value = clip.tags || "";
   renderDetailEmbed(clip);
   el.detailDialog.showModal();
@@ -709,6 +719,8 @@ function renderDetailEmbed(clip) {
     textEl("span", "", clip.source || "링크 없음")
   );
   if (clip.source) box.append(anchorView("원본 열기", clip.source));
+  if (clip.imageUrl) box.append(anchorView("이미지 원본 열기", clip.imageUrl));
+  if (clip.imagePath) box.append(textEl("span", "local-path", clip.imagePath));
   el.detailEmbed.append(box);
 }
 
@@ -718,6 +730,9 @@ function saveDetail(event) {
   if (!clip) return;
   clip.sentence = el.detailText.value;
   clip.source = el.detailSource.value;
+  clip.title = el.detailTitle.value;
+  clip.imageUrl = el.detailImageUrl.value;
+  clip.imagePath = el.detailImagePath.value;
   clip.contentType = el.detailType.value;
   clip.status = el.detailDone.checked ? "정리 완료" : el.detailStatus.value;
   clip.favorite = el.detailFavorite.checked;
@@ -861,6 +876,7 @@ function parseFavorite(value) {
 function normalizeContentType(value, row = {}) {
   if (value) return value;
   if (row["이미지 경로"] || row["이미지 URL"]) return "이미지";
+  if (row["문장"]) return "문장";
   if (row["출처"]) return "링크";
   return "자료";
 }

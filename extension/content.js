@@ -14,7 +14,7 @@ document.addEventListener("selectionchange", () => {
 function showButton() {
   if (!button) {
     button = document.createElement("button");
-    button.textContent = "줍기";
+    button.textContent = "줍줍하기";
     button.style.cssText = [
       "position:fixed",
       "right:18px",
@@ -35,7 +35,7 @@ function showButton() {
       await chrome.runtime.sendMessage({ type: "selection-captured", sentence: lastSelection });
       button.textContent = "줍줍 준비됨";
       setTimeout(() => {
-        button.textContent = "줍기";
+        button.textContent = "줍줍하기";
         hideButton();
       }, 1200);
     });

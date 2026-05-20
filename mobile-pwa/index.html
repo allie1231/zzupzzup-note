@@ -12,7 +12,7 @@
     <main class="app">
       <header class="topbar">
         <div>
-          <p class="eyebrow">모바일 줍기</p>
+          <p class="eyebrow">모바일 줍줍하기</p>
           <h1>줍줍노트</h1>
         </div>
         <button id="install" hidden>홈 화면에 추가</button>
@@ -29,7 +29,7 @@
 
       <section class="editor">
         <div class="section-head">
-          <h2>바로 줍기</h2>
+          <h2>바로 줍줍하기</h2>
           <div class="section-actions">
             <button id="quickSave" type="button">바로 저장</button>
             <button id="clear" class="secondary" type="button">비우기</button>
@@ -40,7 +40,8 @@
           <label>
             유형
             <select id="contentType">
-              <option value="링크">링크</option>
+              <option value="문장">문장</option>
+              <option value="링크" selected>링크</option>
               <option value="이미지">이미지</option>
               <option value="동영상">동영상</option>
               <option value="자료">자료</option>
@@ -59,18 +60,18 @@
         </div>
 
         <label>
-          링크
+          링크 URL
           <input id="source" placeholder="https://...">
         </label>
 
         <label>
-          제목
+          출처 제목
           <input id="title" placeholder="페이지 제목이나 자료명">
         </label>
 
         <label>
           주운 글 / 메모
-          <textarea id="sentence" rows="5" placeholder="왜 주웠는지 나중의 나에게 남길 짧은 메모"></textarea>
+          <textarea id="sentence" rows="5" placeholder="문장이나 나중의 나에게 남길 짧은 메모"></textarea>
         </label>
 
         <section class="image-box" aria-label="이미지 추가">
@@ -98,6 +99,7 @@
           <label>
             활용처
             <select id="useFor">
+              <option value="정리필요" selected>정리필요</option>
               <option value="레퍼런스">레퍼런스</option>
               <option value="아이디어">아이디어</option>
               <option value="리서치">리서치</option>
@@ -110,6 +112,7 @@
           <label>
             다음 액션
             <select id="action">
+              <option value="정리필요" selected>정리필요</option>
               <option value="참고">참고</option>
               <option value="연결">연결</option>
               <option value="조사">조사</option>
@@ -123,7 +126,7 @@
 
         <label>
           태그
-          <input id="tags" placeholder="#링크 #레퍼런스">
+          <input id="tags" placeholder="#문장 #레퍼런스">
         </label>
 
         <label class="check-row">

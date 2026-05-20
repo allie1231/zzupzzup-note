@@ -54,8 +54,8 @@
           </li>
           <li>
             <span>02</span>
-            <strong>줍기</strong>
-            <p>웹에서 링크, 이미지, 동영상, 자료를 CSV에 줍습니다.</p>
+            <strong>줍줍하기</strong>
+            <p>웹에서 문장, 링크, 이미지, 동영상, 자료를 CSV에 줍습니다.</p>
           </li>
           <li>
             <span>03</span>
@@ -70,6 +70,7 @@
         <input id="search" placeholder="주운 글, 제목, 출처, 태그 검색">
         <select id="typeFilter">
           <option value="">유형 전체</option>
+          <option value="문장">문장</option>
           <option value="링크">링크</option>
           <option value="이미지">이미지</option>
           <option value="동영상">동영상</option>
@@ -85,6 +86,7 @@
         </select>
         <select id="useForFilter">
           <option value="">활용처 전체</option>
+          <option value="정리필요">정리필요</option>
           <option value="에세이">에세이</option>
           <option value="일기">일기</option>
           <option value="카피라이팅">카피라이팅</option>
@@ -109,6 +111,7 @@
         <button id="showPending" class="secondary">정리 대기</button>
         <button id="showDone" class="secondary">정리 완료</button>
         <button id="showStarred" class="secondary">별표</button>
+        <button id="showSentence" class="secondary">문장</button>
         <button id="showCalendar" class="secondary">캘린더 보기</button>
       </section>
 
@@ -147,14 +150,31 @@
         </label>
 
         <label class="detail-field">
-          <span>링크</span>
+          <span>링크 URL</span>
           <input id="detailSource">
         </label>
+
+        <label class="detail-field">
+          <span>출처 제목</span>
+          <input id="detailTitle">
+        </label>
+
+        <div class="detail-grid">
+          <label class="detail-field">
+            <span>이미지 URL</span>
+            <input id="detailImageUrl">
+          </label>
+          <label class="detail-field">
+            <span>이미지 경로</span>
+            <input id="detailImagePath">
+          </label>
+        </div>
 
         <div class="detail-grid">
           <label class="detail-field">
             <span>유형</span>
             <select id="detailType">
+              <option value="문장">문장</option>
               <option value="링크">링크</option>
               <option value="이미지">이미지</option>
               <option value="동영상">동영상</option>
@@ -197,6 +217,7 @@
           <label class="detail-field">
             <span>활용처</span>
             <select id="detailUseFor">
+              <option value="정리필요">정리필요</option>
               <option value="에세이">에세이</option>
               <option value="일기">일기</option>
               <option value="카피라이팅">카피라이팅</option>
@@ -209,6 +230,7 @@
           <label class="detail-field">
             <span>다음 액션</span>
             <select id="detailAction">
+              <option value="정리필요">정리필요</option>
               <option value="확장">확장</option>
               <option value="고쳐쓰기">고쳐쓰기</option>
               <option value="연결">연결</option>

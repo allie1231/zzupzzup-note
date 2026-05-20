@@ -76,16 +76,16 @@ if ("serviceWorker" in navigator) {
 function prefillFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const source = params.get("url") || params.get("source") || "";
-  const title = params.get("title") || "";
+  const title = params.get("title") || params.get("pageTitle") || params.get("name") || "";
   const text = params.get("text") || params.get("memo") || params.get("sentence") || "";
   const imageUrl = params.get("imageUrl") || "";
-  const type = params.get("type") || inferType(source, imageUrl);
+  const type = params.get("type") || inferType(source, imageUrl, text);
 
   if (!source && !title && !text && !imageUrl) return;
   el.contentType.value = type;
   el.source.value = source || imageUrl;
   el.title.value = title;
-  el.sentence.value = text || title || source || imageUrl;
+  el.sentence.value = text;
   el.imageUrl.value = imageUrl;
   syncImageUrlPreview();
   el.tags.value = `#${type} #모바일`;
@@ -109,7 +109,6 @@ async function handleImageFile() {
     el.imagePreview.src = imageDataUrl;
     el.imagePreview.hidden = false;
     el.removeImage.hidden = false;
-    if (!el.title.value) el.title.value = "모바일에서 주운 이미지";
     if (!el.tags.value) el.tags.value = "#이미지 #모바일";
     setStatus("이미지를 추가했습니다. CSV에 함께 담기므로 별도 폴더 저장은 필요 없습니다.");
   } catch (error) {
@@ -122,7 +121,7 @@ function saveClip() {
   const imageUrl = imageDataUrl || el.imageUrl.value;
   const clip = createClip({
     contentType: el.contentType.value,
-    sentence: el.sentence.value || el.title.value || source || (imageUrl ? "모바일에서 주운 이미지" : ""),
+    sentence: el.sentence.value || "",
     reason: "",
     connection: "",
     useFor: el.useFor.value,
@@ -274,8 +273,8 @@ function clearEditor() {
   el.sentence.value = "";
   el.imageUrl.value = "";
   el.imagePath.value = "";
-  el.useFor.value = "레퍼런스";
-  el.action.value = "참고";
+  el.useFor.value = "정리필요";
+  el.action.value = "정리필요";
   el.tags.value = "";
   el.favorite.checked = false;
   clearImage();
@@ -302,11 +301,12 @@ function syncImageUrlPreview() {
   el.removeImage.hidden = false;
 }
 
-function inferType(source, imageUrl) {
+function inferType(source, imageUrl, textValue = "") {
   const text = `${source} ${imageUrl}`.toLowerCase();
   if (imageUrl || /\.(png|jpe?g|webp|gif|svg)(\?|$)/.test(text)) return "이미지";
   if (/youtube\.com|youtu\.be|vimeo\.com|\.mp4(\?|$)/.test(text)) return "동영상";
   if (/\.(pdf|docx?|pptx?|xlsx?|zip)(\?|$)/.test(text)) return "자료";
+  if (textValue && !source) return "문장";
   return "링크";
 }
 

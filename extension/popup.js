@@ -5,6 +5,7 @@ import { saveImageFromUrl } from "./image-store.js";
 const el = {
   contentType: document.querySelector("#contentType"),
   source: document.querySelector("#source"),
+  title: document.querySelector("#title"),
   sentence: document.querySelector("#sentence"),
   imageSection: document.querySelector("#imageSection"),
   imagePreview: document.querySelector("#imagePreview"),
@@ -32,20 +33,21 @@ el.save.addEventListener("click", async () => {
     }
 
     const source = el.source.value.trim() || pending.source || imageUrl || "";
+    const title = el.title.value.trim() || pending.title || "";
     const contentType = el.contentType.value || pending.contentType || "링크";
     const clip = createClip({
       contentType,
-      sentence: el.sentence.value || pending.title || source || "",
+      sentence: el.sentence.value || "",
       reason: "",
       connection: "",
-      useFor: "레퍼런스",
-      action: "참고",
+      useFor: "정리필요",
+      action: "정리필요",
       source,
       siteName: pending.siteName || "",
       iconUrl: pending.iconUrl || "",
       imagePath,
       imageUrl,
-      title: pending.title || "",
+      title,
       tags: `#${contentType}`,
       status: "새로 수집"
     });
@@ -64,6 +66,7 @@ async function hydrateFromPendingClip() {
   if (!pendingClip) return;
   el.contentType.value = pendingClip.contentType || pendingClip.type || (pendingClip.imageUrl ? "이미지" : "링크");
   el.source.value = pendingClip.source || pendingClip.imageUrl || "";
+  el.title.value = pendingClip.title || "";
   el.sentence.value = pendingClip.sentence || "";
 
   if (pendingClip.imageUrl) {

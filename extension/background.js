@@ -1,27 +1,27 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "collect-sentence",
-    title: "주운 글 줍기",
+    title: "문장/링크 줍줍하기",
     contexts: ["selection"]
   });
   chrome.contextMenus.create({
     id: "collect-page",
-    title: "현재 페이지 링크 줍기",
+    title: "현재 페이지 링크 줍줍하기",
     contexts: ["page"]
   });
   chrome.contextMenus.create({
     id: "collect-link",
-    title: "링크 줍기",
+    title: "링크 줍줍하기",
     contexts: ["link"]
   });
   chrome.contextMenus.create({
     id: "collect-image",
-    title: "이미지 줍기",
+    title: "이미지 줍줍하기",
     contexts: ["image"]
   });
   chrome.contextMenus.create({
     id: "collect-video",
-    title: "동영상 줍기",
+    title: "동영상 줍줍하기",
     contexts: ["video"]
   });
 });
@@ -29,7 +29,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "collect-sentence") {
     await setPendingClip({
-      contentType: "자료",
+      contentType: "문장",
       sentence: info.selectionText || "",
       source: info.pageUrl || tab?.url || "",
       title: tab?.title || "",
@@ -104,7 +104,7 @@ chrome.commands.onCommand.addListener(async (command) => {
   });
 
   await setPendingClip({
-    contentType: "자료",
+    contentType: "문장",
     sentence: result || "",
     source: tab.url || "",
     title: tab.title || "",
@@ -116,7 +116,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type !== "selection-captured") return false;
   setPendingClip({
-    contentType: "자료",
+    contentType: "문장",
     sentence: message.sentence || "",
     source: sender.tab?.url || "",
     title: sender.tab?.title || "",
@@ -146,8 +146,8 @@ async function setPendingImage({ imageUrl, source, title, iconUrl }) {
       contentType: "이미지",
       reason: "이미지 스크랩",
       connection: "",
-      useFor: "아이디어",
-      action: "연결",
+      useFor: "정리필요",
+      action: "정리필요",
       source,
       title,
       siteName: deriveSiteName(source),

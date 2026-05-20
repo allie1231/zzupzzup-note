@@ -91,6 +91,7 @@ function migrateCsv(currentText) {
 function inferContentType(row) {
   if (row["유형"]) return row["유형"];
   if (row["이미지 경로"] || row["이미지 URL"]) return "이미지";
+  if (row["문장"] && !row["출처"]) return "문장";
   if (row["출처"]) return "링크";
   return "자료";
 }

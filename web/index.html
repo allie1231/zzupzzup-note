@@ -115,6 +115,19 @@
         <button id="showCalendar" class="secondary">캘린더 보기</button>
       </section>
 
+      <section class="paste-panel">
+        <div>
+          <p class="eyebrow">모바일에서 가져오기</p>
+          <h2>모바일 CSV 복사 내용을 바로 붙여넣어 합치기</h2>
+        </div>
+        <textarea id="pasteCsvText" rows="4" placeholder="모바일에서 CSV 복사를 누른 뒤 여기에 붙여넣으세요."></textarea>
+        <div class="paste-actions">
+          <button id="readClipboardCsv" class="secondary">클립보드 붙여넣기</button>
+          <button id="mergePastedCsv">붙여넣은 CSV 합치기</button>
+          <button id="clearPastedCsv" class="secondary">비우기</button>
+        </div>
+      </section>
+
       <section class="stats" id="stats"></section>
       <section class="calendar-board" id="calendar" hidden></section>
       <section class="cards" id="cards"></section>

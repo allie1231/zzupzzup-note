@@ -77,6 +77,10 @@ const el = {
   showStarred: document.querySelector("#showStarred"),
   showSentence: document.querySelector("#showSentence"),
   showCalendar: document.querySelector("#showCalendar"),
+  pasteCsvText: document.querySelector("#pasteCsvText"),
+  readClipboardCsv: document.querySelector("#readClipboardCsv"),
+  mergePastedCsv: document.querySelector("#mergePastedCsv"),
+  clearPastedCsv: document.querySelector("#clearPastedCsv"),
   exportCsv: document.querySelector("#exportCsv"),
   copyNotion: document.querySelector("#copyNotion"),
   exportPendingCsv: document.querySelector("#exportPendingCsv"),
@@ -128,6 +132,9 @@ el.showDone.addEventListener("click", showDone);
 el.showStarred.addEventListener("click", showStarred);
 el.showSentence.addEventListener("click", () => showType("문장"));
 el.showCalendar.addEventListener("click", toggleCalendar);
+el.readClipboardCsv.addEventListener("click", readClipboardCsv);
+el.mergePastedCsv.addEventListener("click", mergePastedCsv);
+el.clearPastedCsv.addEventListener("click", clearPastedCsv);
 el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
 el.exportCsv.addEventListener("click", downloadCsv);
@@ -279,18 +286,62 @@ async function mergeCsv() {
   setFileStatus(`${file.name} 합치는 중...`);
   try {
     const text = await file.text();
-    const incoming = parseCsv(text).map(rowToClip);
-    const before = state.clips.length;
-    state.clips = mergeClips(state.clips, incoming);
-    resetFilters();
-    applyFilters();
-    scheduleAutoSave();
-    setFileStatus(`모바일 CSV ${incoming.length}개를 확인했고, 새 항목 ${state.clips.length - before}개를 합쳤습니다.`);
+    mergeCsvText(text, "모바일 CSV");
   } catch (error) {
     setFileStatus(error.message || "모바일 CSV를 합치지 못했습니다.");
   } finally {
     el.mergeCsvInput.value = "";
   }
+}
+
+async function readClipboardCsv() {
+  if (!navigator.clipboard?.readText) {
+    setFileStatus("이 브라우저에서는 클립보드 읽기를 지원하지 않습니다. 직접 붙여넣어 주세요.");
+    el.pasteCsvText.focus();
+    return;
+  }
+  try {
+    const text = await navigator.clipboard.readText();
+    el.pasteCsvText.value = text;
+    setFileStatus(text.trim() ? "클립보드의 CSV 내용을 붙여넣었습니다." : "클립보드가 비어 있습니다.");
+  } catch {
+    setFileStatus("클립보드 접근이 막혔습니다. 모바일에서 복사한 내용을 직접 붙여넣어 주세요.");
+    el.pasteCsvText.focus();
+  }
+}
+
+function mergePastedCsv() {
+  const text = el.pasteCsvText.value.trim();
+  if (!text) {
+    setFileStatus("붙여넣은 CSV 내용이 없습니다.");
+    el.pasteCsvText.focus();
+    return;
+  }
+  try {
+    mergeCsvText(text, "붙여넣은 CSV");
+    el.pasteCsvText.value = "";
+  } catch (error) {
+    setFileStatus(error.message || "붙여넣은 CSV를 합치지 못했습니다.");
+  }
+}
+
+function clearPastedCsv() {
+  el.pasteCsvText.value = "";
+  setFileStatus("붙여넣기 칸을 비웠습니다.");
+}
+
+function mergeCsvText(text, label) {
+  const incoming = parseCsv(text).map(rowToClip);
+  if (!incoming.length) {
+    setFileStatus(`${label}에서 합칠 항목을 찾지 못했습니다.`);
+    return;
+  }
+  const before = state.clips.length;
+  state.clips = mergeClips(state.clips, incoming);
+  resetFilters();
+  applyFilters();
+  scheduleAutoSave();
+  setFileStatus(`${label} ${incoming.length}개를 확인했고, 새 항목 ${state.clips.length - before}개를 합쳤습니다.`);
 }
 
 function loadImages() {

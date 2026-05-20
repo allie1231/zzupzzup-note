@@ -719,6 +719,36 @@ select:focus {
   justify-content: flex-end;
 }
 
+.paste-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(260px, 1.4fr) auto;
+  gap: 16px;
+  align-items: start;
+  margin: 0 0 34px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .9);
+}
+
+.paste-panel h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.paste-panel textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.paste-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 @media (max-width: 760px) {
   .app {
     width: min(100% - 28px, 1080px);
@@ -729,6 +759,7 @@ select:focus {
   .onboarding,
   .detail-embed,
   .detail-grid,
+  .paste-panel,
   .export-panel {
     grid-template-columns: 1fr;
   }
@@ -754,6 +785,10 @@ select:focus {
   }
 
   .export-actions {
+    justify-content: flex-start;
+  }
+
+  .paste-actions {
     justify-content: flex-start;
   }
 }

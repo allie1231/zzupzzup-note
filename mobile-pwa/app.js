@@ -10,6 +10,9 @@ const el = {
   source: document.querySelector("#source"),
   title: document.querySelector("#title"),
   sentence: document.querySelector("#sentence"),
+  imageFile: document.querySelector("#imageFile"),
+  imagePreview: document.querySelector("#imagePreview"),
+  removeImage: document.querySelector("#removeImage"),
   imageUrl: document.querySelector("#imageUrl"),
   imagePath: document.querySelector("#imagePath"),
   useFor: document.querySelector("#useFor"),
@@ -28,6 +31,7 @@ const el = {
 
 let installPrompt = null;
 let favoriteOnly = false;
+let imageDataUrl = "";
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
@@ -43,6 +47,9 @@ el.install.addEventListener("click", async () => {
 });
 
 el.clear.addEventListener("click", clearEditor);
+el.imageFile.addEventListener("change", handleImageFile);
+el.imageUrl.addEventListener("input", syncImageUrlPreview);
+el.removeImage.addEventListener("click", clearImage);
 el.save.addEventListener("click", saveClip);
 el.exportCsv.addEventListener("click", exportCsv);
 el.copyCsv.addEventListener("click", copyCsv);
@@ -78,15 +85,42 @@ function prefillFromUrl() {
   el.title.value = title;
   el.sentence.value = text || title || source || imageUrl;
   el.imageUrl.value = imageUrl;
+  syncImageUrlPreview();
   el.tags.value = `#${type} #모바일`;
   setStatus("공유된 내용을 불러왔습니다. 확인 후 저장해 주세요.");
 }
 
+async function handleImageFile() {
+  const file = el.imageFile.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    setStatus("이미지 파일만 추가할 수 있습니다.");
+    return;
+  }
+
+  setStatus("이미지를 준비하는 중...");
+  try {
+    imageDataUrl = await imageFileToDataUrl(file);
+    el.contentType.value = "이미지";
+    el.imageUrl.value = imageDataUrl;
+    el.imagePath.value = `mobile/${safeFilename(file.name)}`;
+    el.imagePreview.src = imageDataUrl;
+    el.imagePreview.hidden = false;
+    el.removeImage.hidden = false;
+    if (!el.title.value) el.title.value = "모바일에서 주운 이미지";
+    if (!el.tags.value) el.tags.value = "#이미지 #모바일";
+    setStatus("이미지를 추가했습니다. 메모를 적고 저장해 주세요.");
+  } catch (error) {
+    setStatus(error.message || "이미지를 추가하지 못했습니다.");
+  }
+}
+
 function saveClip() {
   const source = el.source.value.trim();
+  const imageUrl = imageDataUrl || el.imageUrl.value;
   const clip = createClip({
     contentType: el.contentType.value,
-    sentence: el.sentence.value || el.title.value || source,
+    sentence: el.sentence.value || el.title.value || source || (imageUrl ? "모바일에서 주운 이미지" : ""),
     reason: "",
     connection: "",
     useFor: el.useFor.value,
@@ -94,7 +128,7 @@ function saveClip() {
     source,
     siteName: deriveSiteName(source),
     imagePath: el.imagePath.value,
-    imageUrl: el.imageUrl.value,
+    imageUrl,
     title: el.title.value,
     tags: el.tags.value || `#${el.contentType.value} #모바일`,
     status: el.status.value,
@@ -173,6 +207,13 @@ function cardView(clip) {
   remove.addEventListener("click", () => deleteClip(clip.id));
   actions.append(star, remove);
 
+  if (clip.imageUrl) {
+    const image = document.createElement("img");
+    image.className = "clip-thumb";
+    image.src = clip.imageUrl;
+    image.alt = clip.title || "주운 이미지";
+    item.append(image);
+  }
   item.append(title, memo, meta, sourceLink(clip), actions);
   return item;
 }
@@ -235,6 +276,28 @@ function clearEditor() {
   el.action.value = "참고";
   el.tags.value = "";
   el.favorite.checked = false;
+  clearImage();
+}
+
+function clearImage() {
+  imageDataUrl = "";
+  el.imageFile.value = "";
+  el.imageUrl.value = "";
+  el.imagePath.value = "";
+  el.imagePreview.removeAttribute("src");
+  el.imagePreview.hidden = true;
+  el.removeImage.hidden = true;
+}
+
+function syncImageUrlPreview() {
+  const url = el.imageUrl.value.trim();
+  if (!url) {
+    if (!imageDataUrl) clearImage();
+    return;
+  }
+  el.imagePreview.src = url;
+  el.imagePreview.hidden = false;
+  el.removeImage.hidden = false;
 }
 
 function inferType(source, imageUrl) {
@@ -257,4 +320,44 @@ function downloadText(filename, text, type) {
 
 function setStatus(message) {
   el.statusText.textContent = message;
+}
+
+function imageFileToDataUrl(file) {
+  if (file.type.includes("gif") || file.type.includes("svg")) {
+    return readFileAsDataUrl(file);
+  }
+
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const maxSide = 1400;
+      const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * ratio));
+      canvas.height = Math.max(1, Math.round(image.height * ratio));
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(image.src);
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
+    };
+    image.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+    image.src = URL.createObjectURL(file);
+  });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("파일을 읽지 못했습니다."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function safeFilename(name) {
+  const base = String(name || "mobile-image.jpg")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replace(/^-+/, "");
+  return base || "mobile-image.jpg";
 }

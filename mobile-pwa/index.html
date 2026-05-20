@@ -70,16 +70,25 @@
           <textarea id="sentence" rows="5" placeholder="왜 주웠는지 나중의 나에게 남길 짧은 메모"></textarea>
         </label>
 
-        <div class="grid">
-          <label>
+        <section class="image-box" aria-label="이미지 추가">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">이미지</p>
+              <h2>사진함이나 파일에서 추가</h2>
+            </div>
+            <button id="removeImage" class="secondary" type="button" hidden>이미지 제거</button>
+          </div>
+          <label class="image-picker">
+            <input id="imageFile" type="file" accept="image/*">
+            <span>이미지 추가</span>
+          </label>
+          <img id="imagePreview" alt="선택한 이미지 미리보기" hidden>
+          <label class="image-url-field">
             이미지 URL
             <input id="imageUrl" placeholder="https://...jpg">
           </label>
-          <label>
-            이미지 경로
-            <input id="imagePath" placeholder="images/파일명.jpg">
-          </label>
-        </div>
+          <input id="imagePath" type="hidden">
+        </section>
 
         <div class="grid">
           <label>

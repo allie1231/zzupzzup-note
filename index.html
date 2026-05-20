@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍노트</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: #151515;
+        background: #fafaf8;
+        font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(920px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 56px 0 72px;
+      }
+
+      header {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 42px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid #dfdfdc;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: #777;
+        font-size: 13px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(44px, 8vw, 86px);
+        line-height: 1;
+        font-weight: 650;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 560px;
+        margin: 0;
+        color: #555;
+        font-size: 17px;
+      }
+
+      .links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      a.card {
+        display: grid;
+        min-height: 210px;
+        align-content: space-between;
+        border: 1px solid #dfdfdc;
+        border-radius: 18px;
+        padding: 24px;
+        color: #151515;
+        background: #fff;
+        text-decoration: none;
+        transition: border-color .16s ease, transform .16s ease;
+      }
+
+      a.card:hover,
+      a.card:focus {
+        border-color: #151515;
+        outline: none;
+        transform: translateY(-1px);
+      }
+
+      .card span {
+        color: #888;
+        font-size: 13px;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 24px;
+      }
+
+      .card p {
+        margin: 0;
+        color: #666;
+      }
+
+      .note {
+        margin-top: 30px;
+        padding: 18px;
+        border: 1px solid #dfdfdc;
+        border-radius: 16px;
+        color: #666;
+        background: #fff;
+      }
+
+      @media (max-width: 680px) {
+        main {
+          width: min(100% - 28px, 920px);
+          padding-top: 38px;
+        }
+
+        .links {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">개인용 정보 수집 보드</p>
+        <h1>줍줍노트</h1>
+        <p class="lead">링크, 이미지, 동영상, 자료를 각자의 CSV로 모으고 나중에 카드뷰에서 정리합니다.</p>
+      </header>
+
+      <section class="links" aria-label="줍줍노트 열기">
+        <a class="card" href="./web/">
+          <span>Desktop</span>
+          <div>
+            <strong>웹홈 열기</strong>
+            <p>CSV와 images 폴더를 열어 카드뷰, 캘린더, 별표, 정리 상태를 관리합니다.</p>
+          </div>
+        </a>
+        <a class="card" href="./mobile-pwa/">
+          <span>Mobile</span>
+          <div>
+            <strong>모바일 줍기</strong>
+            <p>아이폰/아이패드에서 공유 버튼과 단축어로 링크와 메모를 임시 수집합니다.</p>
+          </div>
+        </a>
+      </section>
+
+      <p class="note">GitHub Pages에는 앱 화면만 올라갑니다. 개인 CSV, 이미지, 수집 데이터는 사용자가 직접 열거나 내보낼 때만 각자의 기기에 남습니다.</p>
+    </main>
+  </body>
+</html>

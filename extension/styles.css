@@ -1,0 +1,442 @@
+@font-face {
+  font-family: "Griun Mongtori";
+  src: url("./fonts/Griun_Mongtori-Rg.ttf") format("truetype");
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 420px;
+  color: #141414;
+  background: #f4f4f2;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+.panel {
+  width: 420px;
+  padding: 18px;
+}
+
+.wide {
+  width: min(640px, 100vw);
+}
+
+.app-header,
+.section-title,
+.actions,
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.app-header {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.app-header > div:first-child {
+  min-width: 0;
+}
+
+.header-actions {
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+h2 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0;
+  color: #3f443e;
+}
+
+.eyebrow {
+  margin: 0 0 3px;
+  color: #666;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.section {
+  margin: 12px 0;
+  padding: 13px;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 0 rgba(35, 37, 34, .04);
+}
+
+.primary-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.section-title {
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+}
+
+.field:first-child {
+  margin-top: 0;
+}
+
+.field span {
+  color: #3f443e;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: #232522;
+  background: #fff;
+  font: inherit;
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(20, 20, 20, .08);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #84877f;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.sentence-field {
+  margin: 0;
+}
+
+.sentence-field span {
+  padding: 13px 13px 0;
+}
+
+.sentence-field textarea {
+  min-height: 150px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.sentence-field textarea:focus {
+  box-shadow: inset 0 0 0 2px rgba(20, 20, 20, .12);
+}
+
+.image-section {
+  border-color: #111;
+  background: #fff;
+}
+
+.image-section[hidden] {
+  display: none;
+}
+
+.image-section img {
+  display: block;
+  width: 100%;
+  max-height: 230px;
+  border: 2px solid #111;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eee;
+}
+
+.image-chip {
+  border: 1px solid #111;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #111;
+  background: #e1e1df;
+  font-size: 12px;
+}
+
+.image-url {
+  overflow: hidden;
+  margin: 8px 0 0;
+  color: #667065;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button {
+  border: 1px solid #111;
+  border-radius: 999px;
+  padding: 11px 13px;
+  color: white;
+  background: #111;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .12s ease, background .16s ease, box-shadow .16s ease;
+}
+
+button:hover {
+  color: #111;
+  background: #fff;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.secondary,
+.icon-button {
+  color: #232522;
+  background: #e1e1df;
+  border-color: #e1e1df;
+}
+
+button.secondary:hover,
+.icon-button:hover {
+  border-color: #111;
+  background: #fff;
+}
+
+.icon-button {
+  min-width: 58px;
+  min-height: 44px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions {
+  align-items: center;
+  margin-top: 14px;
+}
+
+.save-button {
+  min-height: 44px;
+  padding-inline: 18px;
+  background: #111;
+}
+
+#status,
+#vaultStatus,
+#exportStatus,
+.muted {
+  margin: 0;
+  color: #667065;
+  font-size: 12px;
+}
+
+#status {
+  flex: 1;
+}
+
+.settings-section {
+  margin-top: 18px;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+
+.options-page {
+  min-width: 0;
+  color: #151515;
+  background: #fafaf8;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+.options-page .panel {
+  width: min(920px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 52px 0 68px;
+}
+
+.settings-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 28px;
+  align-items: end;
+  margin: 0 0 34px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid #dfdfdc;
+}
+
+.options-page .eyebrow {
+  margin: 0 0 8px;
+  color: #777;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.options-page h1 {
+  margin: 0;
+  font-size: clamp(38px, 6vw, 68px);
+  font-weight: 600;
+  line-height: 1.02;
+}
+
+.settings-lead {
+  margin: 0;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.options-page .section {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 20px;
+  margin: 18px 0 0;
+  padding: 24px;
+  border: 1px solid #dfdfdc;
+  border-radius: 16px;
+  color: #151515;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: none;
+}
+
+.options-page .section.setup-guide {
+  background: #fff;
+}
+
+.section-number {
+  margin: 0;
+  color: #9b9b96;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.options-page h2 {
+  margin: 0 0 10px;
+  color: #151515;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.options-page .muted,
+.options-page #vaultStatus,
+.options-page #exportStatus {
+  margin: 0;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.options-page .muted strong {
+  color: #151515;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.settings-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: #555;
+  font-size: 15px;
+}
+
+.options-page button {
+  min-height: 40px;
+  margin-top: 16px;
+  border: 1px solid #151515;
+  border-radius: 999px;
+  padding: 9px 15px;
+  color: #fff;
+  background: #151515;
+  font: inherit;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.options-page button:hover {
+  color: #151515;
+  background: #fff;
+}
+
+.options-page button.secondary {
+  color: #151515;
+  background: #fff;
+}
+
+.options-page button.secondary:hover {
+  color: #fff;
+  background: #151515;
+}
+
+.options-page .settings-actions {
+  margin: 0;
+}
+
+.options-page #vaultStatus,
+.options-page #exportStatus {
+  grid-column: 2;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eeeeeb;
+}
+
+@media (max-width: 560px) {
+  .options-page .panel {
+    width: min(100% - 28px, 680px);
+    padding-top: 34px;
+  }
+
+  .settings-hero,
+  .options-page .section {
+    grid-template-columns: 1fr;
+  }
+
+  .options-page h1 {
+    font-size: 42px;
+  }
+
+  .options-page .section {
+    padding: 18px;
+  }
+
+  .options-page #vaultStatus,
+  .options-page #exportStatus {
+    grid-column: 1;
+  }
+}

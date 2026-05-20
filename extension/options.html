@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍노트 설정</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="options-page">
+    <main class="panel wide">
+      <header class="settings-hero">
+        <div>
+          <p class="eyebrow">보관함 연결</p>
+          <h1>줍줍노트 설정</h1>
+        </div>
+        <p class="settings-lead">각자 자기 컴퓨터의 CSV와 images 폴더에 수집물을 보관합니다.</p>
+      </header>
+
+      <section class="section settings-section setup-guide">
+        <p class="section-number">00</p>
+        <div>
+          <h2>처음 설정</h2>
+          <ol class="settings-steps">
+            <li>저장 폴더를 선택합니다.</li>
+            <li>웹에서 링크, 이미지, 동영상, 자료를 줍습니다.</li>
+            <li>웹홈에서 CSV와 images 폴더를 열어 정리합니다.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section settings-section">
+        <p class="section-number">01</p>
+        <div>
+          <h2>CSV 보관함</h2>
+          <p class="muted">저장 폴더를 선택하면 <strong>줍줍노트.csv</strong>가 자동으로 만들어지고, 이후 수집한 링크, 이미지, 동영상, 자료 기록이 여기에 쌓입니다.</p>
+          <button id="chooseVault" class="save-button">저장 폴더 선택</button>
+        </div>
+        <p id="vaultStatus" role="status"></p>
+      </section>
+
+      <section class="section settings-section">
+        <p class="section-number">02</p>
+        <div>
+          <h2>내보내기</h2>
+          <p class="muted">저장 폴더의 <strong>줍줍노트.csv</strong> 파일을 내려받습니다.</p>
+          <div class="settings-actions">
+            <button id="exportAll" class="secondary">CSV 내려받기</button>
+          </div>
+        </div>
+        <p id="exportStatus" role="status"></p>
+      </section>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

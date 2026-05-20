@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111111">
+    <title>줍줍노트 Mobile</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="app.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">모바일 줍기</p>
+          <h1>줍줍노트</h1>
+        </div>
+        <button id="install" hidden>홈 화면에 추가</button>
+      </header>
+
+      <section class="guide">
+        <p class="eyebrow">아이폰/아이패드 사용법</p>
+        <ol>
+          <li>공유 버튼을 누르고 줍줍노트 단축어를 실행합니다.</li>
+          <li>열린 화면에서 메모와 유형을 확인한 뒤 저장합니다.</li>
+          <li>CSV 내보내기로 데스크톱 웹홈에서 이어서 정리합니다.</li>
+        </ol>
+      </section>
+
+      <section class="editor">
+        <div class="section-head">
+          <h2>바로 줍기</h2>
+          <button id="clear" class="secondary">비우기</button>
+        </div>
+
+        <div class="grid">
+          <label>
+            유형
+            <select id="contentType">
+              <option value="링크">링크</option>
+              <option value="이미지">이미지</option>
+              <option value="동영상">동영상</option>
+              <option value="자료">자료</option>
+            </select>
+          </label>
+          <label>
+            상태
+            <select id="status">
+              <option value="새로 수집">새로 수집</option>
+              <option value="정리 완료">정리 완료</option>
+              <option value="확인함">확인함</option>
+              <option value="활용함">활용함</option>
+              <option value="보관함">보관함</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          링크
+          <input id="source" placeholder="https://...">
+        </label>
+
+        <label>
+          제목
+          <input id="title" placeholder="페이지 제목이나 자료명">
+        </label>
+
+        <label>
+          주운 글 / 메모
+          <textarea id="sentence" rows="5" placeholder="왜 주웠는지 나중의 나에게 남길 짧은 메모"></textarea>
+        </label>
+
+        <div class="grid">
+          <label>
+            이미지 URL
+            <input id="imageUrl" placeholder="https://...jpg">
+          </label>
+          <label>
+            이미지 경로
+            <input id="imagePath" placeholder="images/파일명.jpg">
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>
+            활용처
+            <select id="useFor">
+              <option value="레퍼런스">레퍼런스</option>
+              <option value="아이디어">아이디어</option>
+              <option value="리서치">리서치</option>
+              <option value="에세이">에세이</option>
+              <option value="일기">일기</option>
+              <option value="카피라이팅">카피라이팅</option>
+              <option value="연설">연설</option>
+            </select>
+          </label>
+          <label>
+            다음 액션
+            <select id="action">
+              <option value="참고">참고</option>
+              <option value="연결">연결</option>
+              <option value="조사">조사</option>
+              <option value="보관">보관</option>
+              <option value="확장">확장</option>
+              <option value="고쳐쓰기">고쳐쓰기</option>
+              <option value="인용">인용</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          태그
+          <input id="tags" placeholder="#링크 #레퍼런스">
+        </label>
+
+        <label class="check-row">
+          <input id="favorite" type="checkbox">
+          <span>별표 표시</span>
+        </label>
+
+        <button id="save">이 기기에 저장</button>
+        <p id="statusText" role="status"></p>
+      </section>
+
+      <section class="library">
+        <div class="section-head">
+          <h2>모바일 임시 수집함</h2>
+          <div class="actions">
+            <button id="exportCsv" class="secondary">CSV 내보내기</button>
+            <button id="copyCsv" class="secondary">CSV 복사</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input id="search" placeholder="제목, 링크, 메모 검색">
+          <button id="showStarred" class="secondary">별표만</button>
+          <button id="showAll" class="secondary">전체</button>
+        </div>
+        <ol id="clips"></ol>
+      </section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

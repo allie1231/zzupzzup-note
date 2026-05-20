@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍노트</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">정보 줍는 중</p>
+          <h1>줍줍노트</h1>
+        </div>
+        <div class="header-actions">
+          <button id="openOptions" class="icon-button" title="설정" aria-label="설정">설정</button>
+          <button id="save" class="save-button">CSV에 줍기</button>
+        </div>
+      </header>
+
+      <section class="section">
+        <label class="field">
+          <span>유형</span>
+          <select id="contentType">
+            <option value="링크">링크</option>
+            <option value="이미지">이미지</option>
+            <option value="동영상">동영상</option>
+            <option value="자료">자료</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>링크</span>
+          <input id="source" placeholder="https://...">
+        </label>
+      </section>
+
+      <section class="section primary-section">
+        <label class="field sentence-field">
+          <span>주운 글 / 메모</span>
+        <textarea id="sentence" rows="5" placeholder="링크, 이미지, 동영상, 자료에 대해 남길 메모를 적어두세요."></textarea>
+      </label>
+      </section>
+
+      <section id="imageSection" class="section image-section" hidden>
+        <div class="section-title">
+          <h2>주운 이미지</h2>
+          <span class="image-chip">images 폴더에 저장</span>
+        </div>
+        <img id="imagePreview" alt="주운 이미지 미리보기">
+        <p id="imageUrlText" class="image-url"></p>
+      </section>
+
+      <footer class="actions">
+        <p id="status" role="status"></p>
+      </footer>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="줍줍노트 자음 로고">
+  <rect width="128" height="128" fill="#000"/>
+  <text
+    x="64"
+    y="58"
+    fill="#fff"
+    font-family="AppleSDGothicNeo-Heavy, Apple SD Gothic Neo, Arial Unicode MS, sans-serif"
+    font-size="56"
+    font-weight="900"
+    text-anchor="middle">ㅈㅈ</text>
+  <text
+    x="64"
+    y="116"
+    fill="#fff"
+    font-family="AppleSDGothicNeo-Heavy, Apple SD Gothic Neo, Arial Unicode MS, sans-serif"
+    font-size="56"
+    font-weight="900"
+    text-anchor="middle">ㄴㅌ</text>
+</svg>

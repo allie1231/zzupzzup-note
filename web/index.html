@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍노트 웹</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="hero-board">
+          <div class="brand-note">
+            <h1>줍줍노트</h1>
+          </div>
+        </div>
+        <div class="top-meta">
+          <time class="clock-panel" id="clockPanel">
+            <span id="todayText">----.--.--</span>
+            <strong id="clockText">--:--</strong>
+          </time>
+          <div class="actions">
+            <label class="file-button">
+              CSV 열기
+              <input id="csvInput" type="file" accept=".csv,text/csv">
+            </label>
+            <label class="file-button secondary">
+              이미지 폴더 열기
+              <input id="imageInput" type="file" accept="image/*" webkitdirectory directory multiple>
+            </label>
+            <button id="downloadCsv">CSV 저장</button>
+          </div>
+        </div>
+      </header>
+      <p class="file-status" id="fileStatus" role="status">CSV를 열면 오늘의 스크랩 보드가 채워집니다.</p>
+      <button id="showOnboarding" class="help-toggle secondary" hidden>안내 열기</button>
+
+      <section class="onboarding" id="onboarding">
+        <div class="onboarding-copy">
+          <p class="eyebrow">처음 쓰는 방법</p>
+          <h2>내 CSV와 이미지 폴더를 열면 개인 웹홈이 됩니다.</h2>
+        </div>
+        <ol class="onboarding-steps">
+          <li>
+            <span>01</span>
+            <strong>확장 설정</strong>
+            <p>크롬 확장 설정에서 저장 폴더를 선택해 주세요.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>줍기</strong>
+            <p>웹에서 링크, 이미지, 동영상, 자료를 CSV에 줍습니다.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>정리</strong>
+            <p>웹홈에서 CSV와 images 폴더를 열고 카드별로 분류합니다.</p>
+          </li>
+        </ol>
+        <button id="hideOnboarding" class="secondary">안내 접기</button>
+      </section>
+
+      <section class="toolbar">
+        <input id="search" placeholder="주운 글, 제목, 출처, 태그 검색">
+        <select id="typeFilter">
+          <option value="">유형 전체</option>
+          <option value="링크">링크</option>
+          <option value="이미지">이미지</option>
+          <option value="동영상">동영상</option>
+          <option value="자료">자료</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">상태 전체</option>
+          <option value="새로 수집">새로 수집</option>
+          <option value="정리 완료">정리 완료</option>
+          <option value="확인함">확인함</option>
+          <option value="활용함">활용함</option>
+          <option value="보관함">보관함</option>
+        </select>
+        <select id="useForFilter">
+          <option value="">활용처 전체</option>
+          <option value="에세이">에세이</option>
+          <option value="일기">일기</option>
+          <option value="카피라이팅">카피라이팅</option>
+          <option value="연설">연설</option>
+          <option value="리서치">리서치</option>
+          <option value="레퍼런스">레퍼런스</option>
+          <option value="아이디어">아이디어</option>
+        </select>
+        <input id="tagFilter" placeholder="#태그">
+        <button id="randomFive" class="secondary">랜덤 5개</button>
+        <button id="showAll" class="secondary">전체 보기</button>
+      </section>
+
+      <section class="viewbar">
+        <button id="showToday" class="secondary">오늘 수집</button>
+        <button id="showWeek" class="secondary">이번 주</button>
+        <button id="showMonth" class="secondary">이번 달</button>
+        <button id="showYear" class="secondary">올해</button>
+        <button id="showPending" class="secondary">정리 대기</button>
+        <button id="showDone" class="secondary">정리 완료</button>
+        <button id="showStarred" class="secondary">별표</button>
+        <button id="showCalendar" class="secondary">캘린더 보기</button>
+      </section>
+
+      <section class="stats" id="stats"></section>
+      <section class="calendar-board" id="calendar" hidden></section>
+      <section class="cards" id="cards"></section>
+      <section class="export-panel">
+        <div>
+          <p class="eyebrow">정리 후 내보내기</p>
+          <h2>변경사항을 저장하거나 다음 보관함으로 넘기기</h2>
+        </div>
+        <div class="export-actions">
+          <button id="exportCsv">변경사항 CSV 내보내기</button>
+          <button id="copyNotion" class="secondary">Notion용 Markdown 복사</button>
+          <button id="exportDoneCsv" class="secondary">정리 완료만 CSV</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="detail-dialog" id="detailDialog">
+      <form method="dialog" class="detail-panel">
+        <header class="detail-header">
+          <div>
+            <p class="eyebrow">오늘 정리하기</p>
+            <h2 id="detailHeading">수집 상세</h2>
+          </div>
+          <button id="detailClose" class="secondary" value="close">닫기</button>
+        </header>
+
+        <div id="detailEmbed" class="detail-embed"></div>
+
+        <label class="detail-field">
+          <span>주운 글 / 메모</span>
+          <textarea id="detailText" rows="4"></textarea>
+        </label>
+
+        <label class="detail-field">
+          <span>링크</span>
+          <input id="detailSource">
+        </label>
+
+        <div class="detail-grid">
+          <label class="detail-field">
+            <span>유형</span>
+            <select id="detailType">
+              <option value="링크">링크</option>
+              <option value="이미지">이미지</option>
+              <option value="동영상">동영상</option>
+              <option value="자료">자료</option>
+            </select>
+          </label>
+          <label class="detail-field">
+            <span>상태</span>
+            <select id="detailStatus">
+              <option value="새로 수집">새로 수집</option>
+              <option value="정리 완료">정리 완료</option>
+              <option value="확인함">확인함</option>
+              <option value="활용함">활용함</option>
+              <option value="보관함">보관함</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="check-row">
+          <input id="detailDone" type="checkbox">
+          <span>이 항목의 이유와 분류 정리 완료</span>
+        </label>
+
+        <label class="check-row">
+          <input id="detailFavorite" type="checkbox">
+          <span>별표 표시해서 자주 보기</span>
+        </label>
+
+        <label class="detail-field">
+          <span>수집한 이유</span>
+          <input id="detailReason">
+        </label>
+
+        <label class="detail-field">
+          <span>연결/확장</span>
+          <input id="detailConnection">
+        </label>
+
+        <div class="detail-grid">
+          <label class="detail-field">
+            <span>활용처</span>
+            <select id="detailUseFor">
+              <option value="에세이">에세이</option>
+              <option value="일기">일기</option>
+              <option value="카피라이팅">카피라이팅</option>
+              <option value="연설">연설</option>
+              <option value="리서치">리서치</option>
+              <option value="레퍼런스">레퍼런스</option>
+              <option value="아이디어">아이디어</option>
+            </select>
+          </label>
+          <label class="detail-field">
+            <span>다음 액션</span>
+            <select id="detailAction">
+              <option value="확장">확장</option>
+              <option value="고쳐쓰기">고쳐쓰기</option>
+              <option value="연결">연결</option>
+              <option value="인용">인용</option>
+              <option value="참고">참고</option>
+              <option value="조사">조사</option>
+              <option value="보관">보관</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="detail-field">
+          <span>태그</span>
+          <input id="detailTags">
+        </label>
+
+        <footer class="detail-actions">
+          <button id="detailDelete" class="danger" value="delete">삭제</button>
+          <button id="detailSave" value="default">카드에 반영</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

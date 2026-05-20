@@ -78,6 +78,7 @@ const el = {
   showSentence: document.querySelector("#showSentence"),
   showCalendar: document.querySelector("#showCalendar"),
   pasteCsvText: document.querySelector("#pasteCsvText"),
+  connectCsvFromPaste: document.querySelector("#connectCsvFromPaste"),
   readClipboardCsv: document.querySelector("#readClipboardCsv"),
   mergePastedCsv: document.querySelector("#mergePastedCsv"),
   clearPastedCsv: document.querySelector("#clearPastedCsv"),
@@ -132,6 +133,7 @@ el.showDone.addEventListener("click", showDone);
 el.showStarred.addEventListener("click", showStarred);
 el.showSentence.addEventListener("click", () => showType("문장"));
 el.showCalendar.addEventListener("click", toggleCalendar);
+el.connectCsvFromPaste.addEventListener("click", connectCsvFile);
 el.readClipboardCsv.addEventListener("click", readClipboardCsv);
 el.mergePastedCsv.addEventListener("click", mergePastedCsv);
 el.clearPastedCsv.addEventListener("click", clearPastedCsv);
@@ -341,7 +343,12 @@ function mergeCsvText(text, label) {
   resetFilters();
   applyFilters();
   scheduleAutoSave();
-  setFileStatus(`${label} ${incoming.length}개를 확인했고, 새 항목 ${state.clips.length - before}개를 합쳤습니다.`);
+  const added = state.clips.length - before;
+  if (state.csvHandle) {
+    setFileStatus(`${label} ${incoming.length}개를 확인했고, 새 항목 ${added}개를 기존 CSV에 합쳤습니다. 자동 저장합니다.`);
+  } else {
+    setFileStatus(`${label} ${incoming.length}개를 확인했고, 새 항목 ${added}개를 화면에 합쳤습니다. 기존 CSV에 반영하려면 먼저 기존 CSV 연결을 눌러 주세요.`);
+  }
 }
 
 function loadImages() {

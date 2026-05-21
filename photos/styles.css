@@ -811,31 +811,33 @@ button:hover,
 /* Keep image preview/cards stable regardless of image ratio */
 .feature {
   min-height: auto;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 260px;
 }
 
 .feature img {
   width: 100%;
-  height: 420px;
+  height: 260px;
   min-height: 0;
   object-fit: contain;
   background: #fff;
 }
 
 .feature-copy {
-  min-height: 420px;
+  min-height: 260px;
+  align-content: start;
 }
 
 .photo-card,
 .photo-card:nth-child(5n + 1),
 .photo-card:nth-child(7n + 4) {
-  min-height: 360px;
+  grid-column: span 3;
+  min-height: 300px;
 }
 
 .photo-card img,
 .photo-card:nth-child(5n + 1) img,
 .photo-card:nth-child(7n + 4) img {
-  height: 300px;
+  height: 220px;
   object-fit: contain;
   background: #fff;
 }
@@ -845,9 +847,18 @@ button:hover,
     grid-template-columns: 1fr;
   }
 
-  .feature img,
+  .feature img {
+    height: 240px;
+    min-height: 0;
+  }
+
   .feature-copy {
-    height: auto;
-    min-height: 300px;
+    min-height: 0;
+  }
+
+  .photo-card,
+  .photo-card:nth-child(5n + 1),
+  .photo-card:nth-child(7n + 4) {
+    grid-column: auto;
   }
 }

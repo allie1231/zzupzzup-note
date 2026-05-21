@@ -1,3 +1,15 @@
+import {
+  clearCloudSession,
+  deleteCloudClip,
+  fetchCloudClips,
+  getCloudSettings,
+  hasCloudSession,
+  saveCloudSettings,
+  signInToCloud,
+  updateCloudClip,
+  upsertCloudClips
+} from "../shared/supabase-store.js";
+
 const HEADERS = [
   "id",
   "수집 일시",
@@ -43,7 +55,8 @@ const state = {
   calendarOpen: false,
   editingId: "",
   historyItems: [],
-  toastTimer: 0
+  toastTimer: 0,
+  cloudReady: false
 };
 
 const RANGE_LABELS = {
@@ -66,6 +79,16 @@ const el = {
   onboarding: document.querySelector("#onboarding"),
   hideOnboarding: document.querySelector("#hideOnboarding"),
   showOnboarding: document.querySelector("#showOnboarding"),
+  cloudUrl: document.querySelector("#cloudUrl"),
+  cloudAnonKey: document.querySelector("#cloudAnonKey"),
+  cloudEmail: document.querySelector("#cloudEmail"),
+  cloudPassword: document.querySelector("#cloudPassword"),
+  cloudSave: document.querySelector("#cloudSave"),
+  cloudLogin: document.querySelector("#cloudLogin"),
+  cloudLogout: document.querySelector("#cloudLogout"),
+  cloudPull: document.querySelector("#cloudPull"),
+  cloudPush: document.querySelector("#cloudPush"),
+  cloudStatus: document.querySelector("#cloudStatus"),
   search: document.querySelector("#search"),
   typeFilter: document.querySelector("#typeFilter"),
   statusFilter: document.querySelector("#statusFilter"),
@@ -159,8 +182,14 @@ el.exportPendingCsv.addEventListener("click", downloadPendingCsv);
 el.exportDoneCsv.addEventListener("click", downloadDoneCsv);
 el.hideOnboarding.addEventListener("click", hideOnboarding);
 el.showOnboarding.addEventListener("click", showOnboarding);
+el.cloudSave.addEventListener("click", saveCloudConfig);
+el.cloudLogin.addEventListener("click", loginCloud);
+el.cloudLogout.addEventListener("click", logoutCloud);
+el.cloudPull.addEventListener("click", pullCloud);
+el.cloudPush.addEventListener("click", pushCloud);
 
 restoreOnboarding();
+restoreCloudConfig();
 restoreExcludeDone();
 renderClock();
 setInterval(renderClock, 30 * 1000);
@@ -168,6 +197,95 @@ render();
 restoreConnectedCsv();
 restoreConnectedImageFolder();
 refreshHistory();
+autoPullCloud();
+
+function restoreCloudConfig() {
+  const settings = getCloudSettings();
+  el.cloudUrl.value = settings.url || "";
+  el.cloudAnonKey.value = settings.anonKey || "";
+  el.cloudEmail.value = settings.email || "";
+  state.cloudReady = hasCloudSession(settings);
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 웹홈을 열면 클라우드 데이터를 불러옵니다." : "Supabase 프로젝트를 연결하면 CSV 없이도 계속 저장하고 확인할 수 있습니다.");
+}
+
+function saveCloudConfig() {
+  saveCloudSettings({
+    url: el.cloudUrl.value,
+    anonKey: el.cloudAnonKey.value,
+    email: el.cloudEmail.value
+  });
+  setCloudStatus("Supabase 설정을 저장했습니다. 이메일/비밀번호로 로그인해 주세요.");
+}
+
+async function loginCloud() {
+  setCloudStatus("Supabase 로그인 중...");
+  try {
+    await signInToCloud({
+      url: el.cloudUrl.value,
+      anonKey: el.cloudAnonKey.value,
+      email: el.cloudEmail.value,
+      password: el.cloudPassword.value
+    });
+    el.cloudPassword.value = "";
+    state.cloudReady = true;
+    setCloudStatus("Supabase에 로그인했습니다. 클라우드 데이터를 불러옵니다.");
+    await pullCloud();
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
+  }
+}
+
+function logoutCloud() {
+  clearCloudSession();
+  state.cloudReady = false;
+  setCloudStatus("이 브라우저에서 Supabase 로그아웃했습니다.");
+}
+
+async function autoPullCloud() {
+  if (!hasCloudSession()) return;
+  try {
+    await pullCloud({ quiet: true });
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 데이터를 자동으로 불러오지 못했습니다.");
+  }
+}
+
+async function pullCloud(options = {}) {
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  if (!options.quiet) setCloudStatus("Supabase에서 불러오는 중...");
+  try {
+    const cloudClips = await fetchCloudClips();
+    state.clips = mergeClips(state.clips, cloudClips);
+    resetFilters();
+    applyFilters();
+    state.cloudReady = true;
+    setCloudStatus(`Supabase에서 ${cloudClips.length}개를 불러왔습니다.`);
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에서 불러오지 못했습니다.");
+  }
+}
+
+async function pushCloud() {
+  if (!state.clips.length) {
+    setCloudStatus("올릴 항목이 없습니다.");
+    return;
+  }
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  setCloudStatus("현재 웹홈 데이터를 Supabase에 저장 중...");
+  try {
+    await upsertCloudClips(state.clips);
+    state.cloudReady = true;
+    setCloudStatus(`Supabase에 ${state.clips.length}개를 저장했습니다.`);
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 저장하지 못했습니다.");
+  }
+}
 
 async function connectCsvFile() {
   if (!window.showOpenFilePicker) {
@@ -819,6 +937,7 @@ function saveDetail(event) {
   el.detailDialog.close();
   applyFilters();
   scheduleAutoSave();
+  saveCloudClip(clip);
   setFileStatus(state.csvHandle ? "카드에 반영했습니다. 연결된 CSV에 자동 저장합니다." : "카드에 반영했습니다. 저장하려면 CSV 저장을 눌러 주세요.");
 }
 
@@ -834,6 +953,7 @@ function deleteDetail(event) {
   el.detailDialog.close();
   applyFilters();
   scheduleAutoSave();
+  removeCloudClip(clip.id);
   setFileStatus(state.csvHandle ? "항목을 삭제했습니다. 연결된 CSV에 자동 저장합니다." : "항목을 삭제했습니다. 변경사항을 보존하려면 CSV 저장을 눌러 주세요.");
 }
 
@@ -935,7 +1055,28 @@ function toggleFavorite(id) {
   clip.favorite = !clip.favorite;
   applyFilters();
   scheduleAutoSave();
+  saveCloudClip(clip);
   setFileStatus(clip.favorite ? saveHint("별표를 표시했습니다.") : saveHint("별표를 해제했습니다."));
+}
+
+async function saveCloudClip(clip) {
+  if (!hasCloudSession()) return;
+  try {
+    await updateCloudClip(clip);
+    setCloudStatus("Supabase에도 변경사항을 저장했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 변경 저장에 실패했습니다.");
+  }
+}
+
+async function removeCloudClip(id) {
+  if (!hasCloudSession()) return;
+  try {
+    await deleteCloudClip(id);
+    setCloudStatus("Supabase에서도 항목을 삭제했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 항목 삭제에 실패했습니다.");
+  }
 }
 
 function saveHint(message) {
@@ -956,6 +1097,10 @@ function normalizeContentType(value, row = {}) {
 
 function setFileStatus(message) {
   el.fileStatus.textContent = message;
+}
+
+function setCloudStatus(message) {
+  el.cloudStatus.textContent = message;
 }
 
 function notifyAction(message) {

@@ -47,6 +47,40 @@
       <p class="file-status" id="fileStatus" role="status">CSV를 열면 오늘의 스크랩 보드가 채워집니다.</p>
       <button id="showOnboarding" class="help-toggle secondary" hidden>안내 열기</button>
 
+      <section class="cloud-panel">
+        <div>
+          <p class="eyebrow">무료 클라우드 저장소</p>
+          <h2>Supabase로 계속 저장하고 불러오기</h2>
+          <p>CSV는 백업으로 남겨두고, 실제 보관함은 Supabase에 동기화합니다.</p>
+        </div>
+        <div class="cloud-grid">
+          <label>
+            Supabase URL
+            <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+          </label>
+          <label>
+            anon public key
+            <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+          </label>
+          <label>
+            이메일
+            <input id="cloudEmail" type="email" placeholder="me@example.com">
+          </label>
+          <label>
+            비밀번호
+            <input id="cloudPassword" type="password" placeholder="Supabase Auth 비밀번호">
+          </label>
+        </div>
+        <div class="cloud-actions">
+          <button id="cloudSave" class="secondary">설정 저장</button>
+          <button id="cloudLogin">로그인</button>
+          <button id="cloudPull" class="secondary">클라우드 불러오기</button>
+          <button id="cloudPush" class="secondary">현재 항목 올리기</button>
+          <button id="cloudLogout" class="secondary">로그아웃</button>
+        </div>
+        <p id="cloudStatus" class="cloud-status" role="status"></p>
+      </section>
+
       <section class="onboarding" id="onboarding">
         <div class="onboarding-copy">
           <p class="eyebrow">처음 쓰는 방법</p>
@@ -292,6 +326,6 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

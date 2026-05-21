@@ -168,6 +168,55 @@ button:hover,
   display: none;
 }
 
+.cloud-panel {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 28px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .94);
+}
+
+.cloud-panel h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.cloud-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.cloud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cloud-grid label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cloud-grid input {
+  width: 100%;
+}
+
+.cloud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cloud-status {
+  min-height: 22px;
+  font-size: 13px;
+}
+
 .onboarding {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;

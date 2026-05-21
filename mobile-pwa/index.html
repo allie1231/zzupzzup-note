@@ -31,8 +31,42 @@
         <ol>
           <li>공유 버튼을 누르고 줍줍노트 단축어를 실행합니다.</li>
           <li>열린 화면에서 메모와 유형을 확인한 뒤 저장합니다.</li>
-          <li>CSV 내보내기로 데스크톱 웹홈에서 이어서 정리합니다.</li>
+          <li>Supabase를 연결하면 데스크톱 웹홈에서도 같은 항목을 바로 정리합니다.</li>
         </ol>
+      </section>
+
+      <section class="cloud-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">무료 클라우드 저장소</p>
+            <h2>Supabase 연결</h2>
+          </div>
+          <button id="cloudPull" class="secondary" type="button">불러오기</button>
+        </div>
+        <label>
+          Supabase URL
+          <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+        </label>
+        <label>
+          anon public key
+          <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+        </label>
+        <div class="grid">
+          <label>
+            이메일
+            <input id="cloudEmail" type="email" placeholder="me@example.com">
+          </label>
+          <label>
+            비밀번호
+            <input id="cloudPassword" type="password" placeholder="비밀번호">
+          </label>
+        </div>
+        <div class="section-actions">
+          <button id="cloudSave" class="secondary" type="button">설정 저장</button>
+          <button id="cloudLogin" type="button">로그인</button>
+          <button id="cloudLogout" class="secondary" type="button">로그아웃</button>
+        </div>
+        <p id="cloudStatus" role="status"></p>
       </section>
 
       <section class="editor">
@@ -94,7 +128,7 @@
             <input id="imageFile" type="file" accept="image/*">
             <span>이미지 추가</span>
           </label>
-          <p class="helper">선택한 이미지는 CSV 안에 함께 저장됩니다. 따로 images 폴더에 다시 저장하지 않아도 됩니다.</p>
+          <p class="helper">Supabase에 로그인한 상태라면 선택한 이미지는 Storage에 올라가고, 미리보기 URL이 함께 저장됩니다.</p>
           <img id="imagePreview" alt="선택한 이미지 미리보기" hidden>
           <label class="image-url-field">
             이미지 URL
@@ -142,7 +176,7 @@
           <span>별표 표시</span>
         </label>
 
-        <button id="save">이 기기에 저장</button>
+        <button id="save">저장하기</button>
         <p id="statusText" role="status"></p>
       </section>
 

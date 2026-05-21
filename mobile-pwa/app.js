@@ -1,9 +1,30 @@
 import { clipsToCsv } from "./shared/csv.js";
 import { createClip, deriveSiteName, localDateParts } from "./shared/schema.js";
+import {
+  clearCloudSession,
+  deleteCloudClip,
+  fetchCloudClips,
+  getCloudSettings,
+  hasCloudSession,
+  saveCloudSettings,
+  signInToCloud,
+  updateCloudClip,
+  uploadCloudImage,
+  upsertCloudClips
+} from "../shared/supabase-store.js";
 
 const STORAGE_KEY = "zzupzzup-mobile-clips";
 const el = {
   install: document.querySelector("#install"),
+  cloudUrl: document.querySelector("#cloudUrl"),
+  cloudAnonKey: document.querySelector("#cloudAnonKey"),
+  cloudEmail: document.querySelector("#cloudEmail"),
+  cloudPassword: document.querySelector("#cloudPassword"),
+  cloudSave: document.querySelector("#cloudSave"),
+  cloudLogin: document.querySelector("#cloudLogin"),
+  cloudLogout: document.querySelector("#cloudLogout"),
+  cloudPull: document.querySelector("#cloudPull"),
+  cloudStatus: document.querySelector("#cloudStatus"),
   quickSave: document.querySelector("#quickSave"),
   clear: document.querySelector("#clear"),
   contentType: document.querySelector("#contentType"),
@@ -34,6 +55,7 @@ const el = {
 let installPrompt = null;
 let favoriteOnly = false;
 let imageDataUrl = "";
+let selectedImageFile = null;
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
@@ -48,6 +70,10 @@ el.install.addEventListener("click", async () => {
   el.install.hidden = true;
 });
 
+el.cloudSave.addEventListener("click", saveCloudConfig);
+el.cloudLogin.addEventListener("click", loginCloud);
+el.cloudLogout.addEventListener("click", logoutCloud);
+el.cloudPull.addEventListener("click", pullCloud);
 el.clear.addEventListener("click", clearEditor);
 el.quickSave.addEventListener("click", saveClip);
 el.imageFile.addEventListener("change", handleImageFile);
@@ -67,8 +93,10 @@ el.showAll.addEventListener("click", () => {
   render();
 });
 
+restoreCloudConfig();
 prefillFromUrl();
 render();
+autoPullCloud();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js");
@@ -93,6 +121,72 @@ function prefillFromUrl() {
   setStatus("공유된 내용을 불러왔습니다. 확인 후 저장해 주세요.");
 }
 
+function restoreCloudConfig() {
+  const settings = getCloudSettings();
+  el.cloudUrl.value = settings.url || "";
+  el.cloudAnonKey.value = settings.anonKey || "";
+  el.cloudEmail.value = settings.email || "";
+  setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다." : "Supabase를 연결하면 모바일에서 저장한 내용이 웹홈에도 바로 보입니다.");
+}
+
+function saveCloudConfig() {
+  saveCloudSettings({
+    url: el.cloudUrl.value,
+    anonKey: el.cloudAnonKey.value,
+    email: el.cloudEmail.value
+  });
+  setCloudStatus("Supabase 설정을 저장했습니다. 로그인해 주세요.");
+}
+
+async function loginCloud() {
+  setCloudStatus("Supabase 로그인 중...");
+  try {
+    await signInToCloud({
+      url: el.cloudUrl.value,
+      anonKey: el.cloudAnonKey.value,
+      email: el.cloudEmail.value,
+      password: el.cloudPassword.value
+    });
+    el.cloudPassword.value = "";
+    setCloudStatus("Supabase에 로그인했습니다.");
+    await pushLocalThenPullCloud();
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
+  }
+}
+
+function logoutCloud() {
+  clearCloudSession();
+  setCloudStatus("이 기기에서 Supabase 로그아웃했습니다.");
+}
+
+async function autoPullCloud() {
+  if (!hasCloudSession()) return;
+  try {
+    await pullCloud({ quiet: true });
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 데이터를 자동으로 불러오지 못했습니다.");
+  }
+}
+
+async function pullCloud(options = {}) {
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  if (!options.quiet) setCloudStatus("Supabase에서 불러오는 중...");
+  const cloudClips = await fetchCloudClips();
+  setClips(mergeClips(getClips(), cloudClips));
+  render();
+  setCloudStatus(`Supabase에서 ${cloudClips.length}개를 불러왔습니다.`);
+}
+
+async function pushLocalThenPullCloud() {
+  const localClips = getClips();
+  if (localClips.length) await upsertCloudClips(localClips);
+  await pullCloud({ quiet: true });
+}
+
 async function handleImageFile() {
   const file = el.imageFile.files?.[0];
   if (!file) return;
@@ -103,6 +197,7 @@ async function handleImageFile() {
 
   setStatus("이미지를 준비하는 중...");
   try {
+    selectedImageFile = file;
     imageDataUrl = await imageFileToDataUrl(file);
     el.contentType.value = "이미지";
     el.imageUrl.value = imageDataUrl;
@@ -117,9 +212,20 @@ async function handleImageFile() {
   }
 }
 
-function saveClip() {
+async function saveClip() {
   const source = el.source.value.trim();
-  const imageUrl = imageDataUrl || el.imageUrl.value;
+  let imageUrl = imageDataUrl || el.imageUrl.value;
+  let imagePath = el.imagePath.value;
+  if (selectedImageFile && hasCloudSession()) {
+    setStatus("이미지를 Supabase에 올리는 중...");
+    try {
+      const uploaded = await uploadCloudImage(selectedImageFile);
+      imageUrl = uploaded.imageUrl;
+      imagePath = uploaded.imagePath;
+    } catch (error) {
+      setCloudStatus(error.message || "이미지를 Supabase에 올리지 못했습니다.");
+    }
+  }
   const clip = createClip({
     contentType: el.contentType.value,
     sentence: el.sentence.value || "",
@@ -129,7 +235,7 @@ function saveClip() {
     action: el.action.value,
     source,
     siteName: deriveSiteName(source),
-    imagePath: el.imagePath.value,
+    imagePath,
     imageUrl,
     title: el.title.value,
     tags: el.tags.value || `#${el.contentType.value} #모바일`,
@@ -140,9 +246,17 @@ function saveClip() {
   const clips = getClips();
   clips.unshift(clip);
   setClips(clips);
+  if (hasCloudSession()) {
+    try {
+      await upsertCloudClips([clip]);
+      setCloudStatus("Supabase에도 바로 저장했습니다.");
+    } catch (error) {
+      setCloudStatus(error.message || "Supabase 저장에 실패했습니다. 이 기기에는 저장되어 있습니다.");
+    }
+  }
   clearEditor();
   render();
-  setStatus("모바일 임시 수집함에 저장했습니다.");
+  setStatus(hasCloudSession() ? "모바일과 Supabase에 저장했습니다." : "모바일 임시 수집함에 저장했습니다.");
 }
 
 function exportCsv() {
@@ -260,12 +374,34 @@ function toggleFavorite(id) {
   if (!clip) return;
   clip.favorite = !clip.favorite;
   setClips(clips);
+  syncCloudClip(clip);
   render();
 }
 
 function deleteClip(id) {
   setClips(getClips().filter((clip) => clip.id !== id));
+  removeCloudClip(id);
   render();
+}
+
+async function syncCloudClip(clip) {
+  if (!hasCloudSession()) return;
+  try {
+    await updateCloudClip(clip);
+    setCloudStatus("Supabase에도 변경사항을 저장했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 변경 저장에 실패했습니다.");
+  }
+}
+
+async function removeCloudClip(id) {
+  if (!hasCloudSession()) return;
+  try {
+    await deleteCloudClip(id);
+    setCloudStatus("Supabase에서도 삭제했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 삭제에 실패했습니다.");
+  }
 }
 
 function getClips() {
@@ -293,6 +429,7 @@ function clearEditor() {
 
 function clearImage() {
   imageDataUrl = "";
+  selectedImageFile = null;
   el.imageFile.value = "";
   el.imageUrl.value = "";
   el.imagePath.value = "";
@@ -333,6 +470,33 @@ function downloadText(filename, text, type) {
 
 function setStatus(message) {
   el.statusText.textContent = message;
+}
+
+function setCloudStatus(message) {
+  el.cloudStatus.textContent = message;
+}
+
+function mergeClips(current, incoming) {
+  const output = [...current];
+  const seen = new Set(output.map(clipKey));
+  for (const clip of incoming) {
+    const key = clipKey(clip);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(clip);
+  }
+  return output.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function clipKey(clip) {
+  return [
+    clip.id,
+    clip.createdAt,
+    clip.source,
+    clip.title,
+    clip.sentence,
+    clip.imageUrl
+  ].filter(Boolean).join("|") || crypto.randomUUID();
 }
 
 function imageFileToDataUrl(file) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "zzupzzup-mobile-v13";
+const CACHE_NAME = "zzupzzup-mobile-v14";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,7 +11,8 @@ const ASSETS = [
   "./shared/analyzer.js",
   "./shared/csv.js",
   "./shared/markdown.js",
-  "./shared/schema.js"
+  "./shared/schema.js",
+  "../shared/supabase-store.js"
 ];
 
 self.addEventListener("install", (event) => {

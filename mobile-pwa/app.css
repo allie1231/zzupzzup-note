@@ -70,6 +70,26 @@ section {
   color: #5f5f5c;
 }
 
+.cloud-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.cloud-panel label {
+  margin: 0;
+}
+
+.cloud-panel .section-actions {
+  flex-wrap: wrap;
+}
+
+#cloudStatus {
+  min-height: 22px;
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}
+
 label {
   display: grid;
   gap: 6px;

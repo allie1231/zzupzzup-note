@@ -144,6 +144,88 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* Classic Macintosh reference pass */
+      body {
+        padding-top: 28px;
+        color: #000;
+        background-color: #bdbdbd;
+        background-image: radial-gradient(#777 0.8px, transparent 0.8px);
+        background-size: 3px 3px;
+        font: 13px/1.45 Monaco, "Courier New", monospace;
+      }
+
+      body::before {
+        content: "●  File  Edit  View  Special";
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 50;
+        height: 24px;
+        border-bottom: 2px solid #000;
+        padding: 3px 10px;
+        color: #000;
+        background: #fff;
+        font: 13px/1.2 Monaco, "Courier New", monospace;
+      }
+
+      main {
+        padding-top: 40px;
+      }
+
+      header,
+      a.card,
+      .note {
+        border: 2px solid #000;
+        border-radius: 0;
+        color: #000;
+        background: #fff;
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+      }
+
+      header {
+        padding-top: 44px;
+      }
+
+      header::before {
+        content: "□ 줍줍노트";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 24px;
+        border-bottom: 2px solid #000;
+        background:
+          linear-gradient(#fff, #fff) center / 120px 100% no-repeat,
+          repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px);
+        text-align: center;
+        font: 13px/24px Monaco, "Courier New", monospace;
+      }
+
+      header::after {
+        content: "# command";
+        border: 2px solid #000;
+        border-radius: 0;
+        background: #fff;
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+        font: 13px/1 Monaco, "Courier New", monospace;
+      }
+
+      h1 {
+        font: 700 clamp(32px, 6vw, 52px)/.95 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      }
+
+      .eyebrow,
+      .lead,
+      .card p,
+      .note {
+        color: #000;
+      }
+
+      .card span {
+        border: 2px solid #000;
+        border-radius: 0;
+        background: #000;
+        color: #fff;
+        font: 12px/1 Monaco, "Courier New", monospace;
+      }
     </style>
   </head>
   <body>

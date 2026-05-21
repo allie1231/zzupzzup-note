@@ -560,3 +560,155 @@ select {
   border-radius: 999px;
   box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
 }
+
+/* Classic Macintosh reference pass */
+:root {
+  --ink: #000;
+  --text: #000;
+  --muted: #222;
+  --line: #000;
+  --line-strong: #000;
+  --paper: #fff;
+  --panel: #fff;
+  --panel-soft: #eee;
+  --ground: #bdbdbd;
+  --stamp-shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+  --pixel-font: Monaco, "Courier New", monospace;
+}
+
+body {
+  padding-top: 28px;
+  color: #000;
+  background-color: #bdbdbd;
+  background-image: radial-gradient(#777 0.8px, transparent 0.8px);
+  background-size: 3px 3px;
+  font: 13px/1.45 var(--pixel-font);
+}
+
+body::before {
+  content: "●  File  Edit  View  Special       줍줍문장";
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  padding: 3px 10px;
+  color: #000;
+  background: #fff;
+  font: 13px/1.2 var(--pixel-font);
+}
+
+.app {
+  padding-top: 40px;
+}
+
+.topbar,
+.control-panel,
+.add-panel,
+.notion-panel,
+.reader-tools,
+.sentence-card,
+.empty {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar,
+.control-panel,
+.add-panel,
+.notion-panel,
+.reader-tools {
+  position: relative;
+  padding-top: 42px;
+}
+
+.topbar::before,
+.control-panel::before,
+.add-panel::before,
+.notion-panel::before,
+.reader-tools::before {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  color: #000;
+  background:
+    linear-gradient(#fff, #fff) center / 130px 100% no-repeat,
+    repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px);
+  text-align: center;
+  font: 13px/24px var(--pixel-font);
+}
+
+.topbar::before {
+  content: "□ 줍줍문장";
+}
+
+.control-panel::before {
+  content: "□ CSV";
+}
+
+.add-panel::before {
+  content: "□ Add";
+}
+
+.notion-panel::before {
+  content: "□ Notion";
+}
+
+.reader-tools::before {
+  content: "□ Reader";
+}
+
+.topbar::after {
+  content: "# sentence";
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+  font: 13px/1 var(--pixel-font);
+}
+
+h1 {
+  font: 700 clamp(30px, 7vw, 48px)/.98 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+button,
+.file-button,
+.nav-actions a,
+input,
+textarea,
+select,
+.tag {
+  border: 2px solid #000;
+  border-radius: 0;
+  font-family: var(--pixel-font);
+}
+
+button,
+.file-button,
+.nav-actions a,
+.tag {
+  color: #000;
+  background: #fff;
+}
+
+button:hover,
+.file-button:hover,
+.nav-actions a:hover {
+  color: #fff;
+  background: #000;
+}
+
+.sentence-card blockquote {
+  font-size: clamp(18px, 2.5vw, 25px);
+}
+
+.toast {
+  border: 2px solid #000;
+  border-radius: 0;
+  color: #000;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}

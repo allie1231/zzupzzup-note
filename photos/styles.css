@@ -608,3 +608,135 @@ input,
 #detailImage {
   border-radius: 10px;
 }
+
+/* Classic Macintosh reference pass */
+:root {
+  --ink: #000;
+  --text: #000;
+  --muted: #222;
+  --line: #000;
+  --line-strong: #000;
+  --paper: #fff;
+  --panel: #fff;
+  --white: #fff;
+  --black: #000;
+  --shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+  --pixel-font: Monaco, "Courier New", monospace;
+}
+
+body {
+  padding-top: 28px;
+  color: #000;
+  background-color: #bdbdbd;
+  background-image: radial-gradient(#777 0.8px, transparent 0.8px);
+  background-size: 3px 3px;
+  font: 13px/1.45 var(--pixel-font);
+}
+
+body::before {
+  content: "●  File  Edit  View  Special       줍줍사진";
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  padding: 3px 10px;
+  color: #000;
+  background: #fff;
+  font: 13px/1.2 var(--pixel-font);
+}
+
+.app {
+  padding-top: 40px;
+}
+
+.topbar,
+.control-strip,
+.stats article,
+.feature,
+.photo-card,
+.empty,
+.detail-panel {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.topbar,
+.control-strip,
+.feature {
+  position: relative;
+  padding-top: 42px;
+}
+
+.topbar::before,
+.control-strip::before,
+.feature::before {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  color: #000;
+  background:
+    linear-gradient(#fff, #fff) center / 130px 100% no-repeat,
+    repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px);
+  text-align: center;
+  font: 13px/24px var(--pixel-font);
+}
+
+.topbar::before {
+  content: "□ 줍줍사진";
+}
+
+.control-strip::before {
+  content: "□ Open";
+}
+
+.feature::before {
+  content: "□ Preview";
+}
+
+.topbar::after {
+  content: "# image";
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+  font: 13px/1 var(--pixel-font);
+}
+
+h1 {
+  font: 700 clamp(30px, 7vw, 48px)/.98 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+button,
+.file-button,
+input,
+.photo-card img,
+#detailImage,
+.photo-card small,
+.detail-links a {
+  border: 2px solid #000;
+  border-radius: 0;
+  font-family: var(--pixel-font);
+}
+
+button,
+.file-button,
+.photo-card small,
+.detail-links a {
+  color: #000;
+  background: #fff;
+}
+
+button:hover,
+.file-button:hover,
+.detail-links a:hover {
+  color: #fff;
+  background: #000;
+}
+
+.stats strong {
+  font-family: var(--pixel-font);
+}

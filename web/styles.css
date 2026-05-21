@@ -1426,3 +1426,188 @@ select,
   border-radius: 999px;
   box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
 }
+
+/* Classic Macintosh reference pass */
+:root {
+  --ink: #000;
+  --text: #000;
+  --muted: #222;
+  --line: #000;
+  --paper: #fff;
+  --soft: #bdbdbd;
+  --soft-2: #eee;
+  --stamp-shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+  --pixel-font: Monaco, "Courier New", monospace;
+}
+
+body {
+  padding-top: 28px;
+  color: #000;
+  background-color: #bdbdbd;
+  background-image: radial-gradient(#777 0.8px, transparent 0.8px);
+  background-size: 3px 3px;
+  font: 13px/1.45 var(--pixel-font);
+}
+
+body::before {
+  content: "●  File  Edit  View  Special       줍줍노트";
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  padding: 3px 10px;
+  color: #000;
+  background: #fff;
+  font: 13px/1.2 var(--pixel-font);
+}
+
+.app {
+  padding-top: 40px;
+}
+
+.topbar,
+.onboarding,
+.toolbar,
+.paste-panel,
+.history-panel,
+.export-panel,
+.calendar-board,
+.detail-dialog,
+.onboarding-steps li,
+.stat,
+.card,
+.history-item,
+.history-empty,
+.embed-card,
+.card-embed {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar,
+.onboarding,
+.paste-panel,
+.history-panel,
+.export-panel,
+.calendar-board {
+  position: relative;
+  padding-top: 42px;
+}
+
+.topbar::before,
+.onboarding::before,
+.paste-panel::before,
+.history-panel::before,
+.export-panel::before,
+.calendar-board::before {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  color: #000;
+  background:
+    linear-gradient(#fff, #fff) center / 132px 100% no-repeat,
+    repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px);
+  text-align: center;
+  font: 13px/24px var(--pixel-font);
+}
+
+.topbar::before {
+  content: "□ 줍줍노트";
+}
+
+.onboarding::before {
+  content: "□ Help";
+}
+
+.paste-panel::before {
+  content: "□ Import";
+}
+
+.history-panel::before {
+  content: "□ History";
+}
+
+.export-panel::before {
+  content: "□ Export";
+}
+
+.calendar-board::before {
+  content: "□ Calendar";
+}
+
+.topbar::after {
+  content: "# archive";
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+  font: 13px/1 var(--pixel-font);
+}
+
+h1 {
+  font: 700 clamp(30px, 4vw, 46px)/.98 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+button,
+.file-button,
+.button-link,
+input,
+textarea,
+select,
+.badge,
+.card-links a,
+.local-path,
+.tag,
+.thumb,
+.detail-embed img,
+.calendar-day,
+.star-toggle {
+  border: 2px solid #000;
+  border-radius: 0;
+  font-family: var(--pixel-font);
+}
+
+button,
+.file-button,
+.button-link,
+.badge,
+.card-links a,
+.local-path,
+.tag {
+  color: #000;
+  background: #fff;
+}
+
+button:hover,
+.file-button:hover,
+.button-link:hover,
+.card-links a:hover {
+  color: #fff;
+  background: #000;
+}
+
+.badge.done,
+.star-toggle.is-on {
+  color: #fff;
+  background: #000;
+}
+
+.card {
+  overflow: hidden;
+}
+
+.stat strong {
+  font-family: var(--pixel-font);
+}
+
+.toast {
+  border: 2px solid #000;
+  border-radius: 0;
+  color: #000;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}

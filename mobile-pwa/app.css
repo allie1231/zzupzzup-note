@@ -745,3 +745,44 @@ button:hover,
 .clip.is-favorite {
   background: #fff;
 }
+
+.top-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.page-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.page-switcher a {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid #000;
+  padding: 4px 8px;
+  color: #000;
+  background: #fff;
+  font: 12px/1 Monaco, "Courier New", monospace;
+  text-decoration: none;
+}
+
+.page-switcher a:hover,
+.page-switcher a[aria-current="page"] {
+  color: #fff;
+  background: #000;
+}
+
+@media (max-width: 560px) {
+  .top-actions {
+    justify-items: start;
+  }
+
+  .page-switcher {
+    justify-content: flex-start;
+  }
+}

@@ -712,3 +712,8 @@ button:hover,
   background: #fff;
   box-shadow: var(--stamp-shadow);
 }
+
+.nav-actions a[aria-current="page"] {
+  color: #fff;
+  background: #000;
+}

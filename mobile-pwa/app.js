@@ -1,5 +1,5 @@
 import { clipsToCsv } from "./shared/csv.js";
-import { createClip, deriveSiteName, localDateParts } from "./shared/schema.js";
+import { createClip, deriveSiteName } from "./shared/schema.js";
 import {
   clearCloudSession,
   deleteCloudClip,
@@ -13,7 +13,7 @@ import {
   upsertCloudClips
 } from "../shared/supabase-store.js";
 
-const STORAGE_KEY = "zzupzzup-mobile-clips";
+const STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
 const el = {
   install: document.querySelector("#install"),
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -126,7 +126,7 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
-  setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다." : "Supabase를 연결하면 모바일에서 저장한 내용이 웹홈에도 바로 보입니다.");
+  setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다. 저장하면 서버에 바로 들어갑니다." : "Supabase에 로그인해야 모바일 줍기가 서버에 바로 저장됩니다.");
 }
 
 function saveCloudConfig() {
@@ -148,8 +148,8 @@ async function loginCloud() {
       password: el.cloudPassword.value
     });
     el.cloudPassword.value = "";
-    setCloudStatus("Supabase에 로그인했습니다.");
-    await pushLocalThenPullCloud();
+    setCloudStatus("Supabase에 로그인했습니다. 서버 저장함을 불러옵니다.");
+    await pullCloud({ quiet: true });
   } catch (error) {
     setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
   }
@@ -181,12 +181,6 @@ async function pullCloud(options = {}) {
   setCloudStatus(`Supabase에서 ${cloudClips.length}개를 불러왔습니다.`);
 }
 
-async function pushLocalThenPullCloud() {
-  const localClips = getClips();
-  if (localClips.length) await upsertCloudClips(localClips);
-  await pullCloud({ quiet: true });
-}
-
 async function handleImageFile() {
   const file = el.imageFile.files?.[0];
   if (!file) return;
@@ -206,17 +200,23 @@ async function handleImageFile() {
     el.imagePreview.hidden = false;
     el.removeImage.hidden = false;
     if (!el.tags.value) el.tags.value = "#이미지 #모바일";
-    setStatus("이미지를 추가했습니다. CSV에 함께 담기므로 별도 폴더 저장은 필요 없습니다.");
+    setStatus("이미지를 추가했습니다. 저장하면 Supabase Storage에 올라갑니다.");
   } catch (error) {
     setStatus(error.message || "이미지를 추가하지 못했습니다.");
   }
 }
 
 async function saveClip() {
+  if (!hasCloudSession()) {
+    setStatus("먼저 Supabase에 로그인해 주세요. 이제 모바일 줍기는 서버에 바로 저장됩니다.");
+    setCloudStatus("Supabase 로그인 후 다시 저장하면 서버 보관함에 들어갑니다.");
+    return;
+  }
+
   const source = el.source.value.trim();
   let imageUrl = imageDataUrl || el.imageUrl.value;
   let imagePath = el.imagePath.value;
-  if (selectedImageFile && hasCloudSession()) {
+  if (selectedImageFile) {
     setStatus("이미지를 Supabase에 올리는 중...");
     try {
       const uploaded = await uploadCloudImage(selectedImageFile);
@@ -224,8 +224,11 @@ async function saveClip() {
       imagePath = uploaded.imagePath;
     } catch (error) {
       setCloudStatus(error.message || "이미지를 Supabase에 올리지 못했습니다.");
+      setStatus("이미지 업로드에 실패해서 저장을 멈췄습니다.");
+      return;
     }
   }
+
   const clip = createClip({
     contentType: el.contentType.value,
     sentence: el.sentence.value || "",
@@ -243,20 +246,19 @@ async function saveClip() {
     favorite: el.favorite.checked
   });
 
-  const clips = getClips();
-  clips.unshift(clip);
-  setClips(clips);
-  if (hasCloudSession()) {
-    try {
-      await upsertCloudClips([clip]);
-      setCloudStatus("Supabase에도 바로 저장했습니다.");
-    } catch (error) {
-      setCloudStatus(error.message || "Supabase 저장에 실패했습니다. 이 기기에는 저장되어 있습니다.");
-    }
+  setStatus("Supabase에 저장 중...");
+  try {
+    const saved = await upsertCloudClips([clip]);
+    const savedClip = saved[0] || clip;
+    setClips(mergeClips([savedClip], getClips()));
+    clearEditor();
+    render();
+    setStatus("서버에 바로 저장했습니다.");
+    setCloudStatus("Supabase 저장함에 저장했습니다. 웹홈에서도 바로 불러올 수 있습니다.");
+  } catch (error) {
+    setStatus("서버 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    setCloudStatus(error.message || "Supabase 저장에 실패했습니다.");
   }
-  clearEditor();
-  render();
-  setStatus(hasCloudSession() ? "모바일과 Supabase에 저장했습니다." : "모바일 임시 수집함에 저장했습니다.");
 }
 
 function exportCsv() {
@@ -265,14 +267,13 @@ function exportCsv() {
     setStatus("내보낼 항목이 없습니다.");
     return;
   }
-  const month = localDateParts().monthKey.replace("-", "");
   if (el.exportMode.value === "replace") {
     downloadText("줍줍노트.csv", clipsToCsv(clips), "text/csv;charset=utf-8");
-    setStatus("기존 CSV 덮어쓰기용 파일을 내보냈습니다. 파일 앱에서 기존 줍줍노트.csv를 대체해 주세요.");
+    setStatus("백업용 CSV 파일을 내보냈습니다.");
     return;
   }
-  downloadText(`줍줍노트-mobile-${month}.csv`, clipsToCsv(clips), "text/csv;charset=utf-8");
-  setStatus("모바일 CSV 파일을 따로 내보냈습니다.");
+  downloadText("줍줍노트-mobile-backup.csv", clipsToCsv(clips), "text/csv;charset=utf-8");
+  setStatus("모바일 서버 저장함의 백업 CSV를 내보냈습니다.");
 }
 
 async function copyCsv() {
@@ -283,9 +284,9 @@ async function copyCsv() {
   }
   try {
     await navigator.clipboard.writeText(clipsToCsv(clips));
-    setStatus("CSV 내용을 복사했습니다.");
+    setStatus("백업용 CSV 내용을 복사했습니다.");
   } catch {
-    setStatus("클립보드 복사가 막혔습니다. CSV 내보내기를 사용해 주세요.");
+    setStatus("클립보드 복사가 막혔습니다. 백업 내보내기를 사용해 주세요.");
   }
 }
 
@@ -295,7 +296,7 @@ function render() {
   if (!clips.length) {
     const empty = document.createElement("li");
     empty.className = "empty";
-    empty.textContent = "공유 메뉴나 직접 입력으로 줍줍하면 여기에 쌓입니다.";
+    empty.textContent = hasCloudSession() ? "서버 저장함이 비어 있습니다. 저장하면 여기에 표시됩니다." : "Supabase에 로그인하면 서버 저장함을 불러옵니다.";
     el.clips.append(empty);
   }
 }

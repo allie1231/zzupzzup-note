@@ -98,7 +98,8 @@ h1 {
 }
 
 button,
-.file-button {
+.file-button,
+.button-link {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
@@ -112,16 +113,19 @@ button,
   font-size: 13px;
   line-height: 1.1;
   cursor: pointer;
+  text-decoration: none;
 }
 
 button.secondary,
-.file-button.secondary {
+.file-button.secondary,
+.button-link.secondary {
   color: var(--ink);
   background: var(--paper);
 }
 
 button:hover,
-.file-button:hover {
+.file-button:hover,
+.button-link:hover {
   background: var(--soft-2);
   color: var(--ink);
 }

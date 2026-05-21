@@ -13,7 +13,7 @@
           <p class="eyebrow">보관함 연결</p>
           <h1>줍줍노트 설정</h1>
         </div>
-        <p class="settings-lead">각자 자기 컴퓨터의 CSV와 images 폴더에 수집물을 보관합니다.</p>
+        <p class="settings-lead">Supabase 서버 보관함에 바로 저장하고, CSV는 필요할 때 백업용으로만 내려받습니다.</p>
       </header>
 
       <section class="section settings-section setup-guide">
@@ -21,9 +21,9 @@
         <div>
           <h2>처음 설정</h2>
           <ol class="settings-steps">
-            <li>저장 폴더를 선택합니다.</li>
-            <li>웹에서 문장, 링크, 이미지, 동영상, 자료를 줍습니다.</li>
-            <li>웹홈에서 CSV와 images 폴더를 열어 정리합니다.</li>
+            <li>Supabase URL과 anon public key를 입력합니다.</li>
+            <li>Supabase Auth 계정으로 로그인합니다.</li>
+            <li>웹에서 문장, 링크, 이미지, 동영상, 자료를 서버에 바로 줍습니다.</li>
           </ol>
         </div>
       </section>
@@ -31,22 +31,46 @@
       <section class="section settings-section">
         <p class="section-number">01</p>
         <div>
-          <h2>CSV 보관함</h2>
-          <p class="muted">저장 폴더를 선택하면 <strong>줍줍노트.csv</strong>가 자동으로 만들어지고, 이후 수집한 문장, 링크, 이미지, 동영상, 자료 기록이 여기에 쌓입니다.</p>
-          <button id="chooseVault" class="save-button">저장 폴더 선택</button>
+          <h2>서버 보관함</h2>
+          <p class="muted">확장프로그램에서 줍줍한 항목은 Supabase의 <strong>zzup_clips</strong> 테이블과 <strong>zzup-images</strong> Storage에 바로 저장됩니다.</p>
+          <div class="settings-form">
+            <label>
+              Supabase URL
+              <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+            </label>
+            <label>
+              anon public key
+              <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+            </label>
+            <label>
+              이메일
+              <input id="cloudEmail" type="email" placeholder="me@example.com">
+            </label>
+            <label>
+              비밀번호
+              <input id="cloudPassword" type="password" placeholder="비밀번호">
+            </label>
+          </div>
+          <div class="settings-actions">
+            <button id="cloudSave" class="secondary">설정 저장</button>
+            <button id="cloudLogin" class="save-button">로그인</button>
+            <button id="cloudLogout" class="secondary">로그아웃</button>
+          </div>
         </div>
-        <p id="vaultStatus" role="status"></p>
+        <p id="cloudStatus" role="status"></p>
       </section>
 
       <section class="section settings-section">
         <p class="section-number">02</p>
         <div>
-          <h2>내보내기</h2>
-          <p class="muted">저장 폴더의 <strong>줍줍노트.csv</strong> 파일을 내려받습니다.</p>
+          <h2>CSV 백업</h2>
+          <p class="muted">예전 CSV 보관함을 계속 쓰는 경우에만 저장 폴더를 선택하거나 CSV를 내려받습니다.</p>
           <div class="settings-actions">
+            <button id="chooseVault" class="secondary">백업 폴더 선택</button>
             <button id="exportAll" class="secondary">CSV 내려받기</button>
           </div>
         </div>
+        <p id="vaultStatus" role="status"></p>
         <p id="exportStatus" role="status"></p>
       </section>
     </main>

@@ -1,6 +1,6 @@
 import { createClip } from "./shared/schema.js";
 import { saveClip } from "./data-writer.js";
-import { saveImageFromUrl } from "./image-store.js";
+import { uploadImageFromUrl } from "./supabase-writer.js";
 
 const el = {
   contentType: document.querySelector("#contentType"),
@@ -26,8 +26,8 @@ el.save.addEventListener("click", async () => {
     let imagePath = pending.imagePath || "";
     let imageUrl = pending.imageUrl || "";
     if (imageUrl && !imagePath) {
-      setStatus("이미지 저장 중...");
-      const image = await saveImageFromUrl(imageUrl, pending.source || "");
+      setStatus("이미지를 서버에 올리는 중...");
+      const image = await uploadImageFromUrl(imageUrl);
       imagePath = image.imagePath;
       imageUrl = image.imageUrl;
     }

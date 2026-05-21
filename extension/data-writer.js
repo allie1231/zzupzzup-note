@@ -1,5 +1,6 @@
-import { saveClipToCsv } from "./csv-writer.js";
+import { saveClipToCloud } from "./supabase-writer.js";
 
 export async function saveClip(clip) {
-  return saveClipToCsv(clip);
+  await saveClipToCloud(clip);
+  return "Supabase 서버 보관함";
 }

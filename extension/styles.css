@@ -252,6 +252,7 @@ button.secondary:hover,
 
 #status,
 #vaultStatus,
+#cloudStatus,
 #exportStatus,
 .muted {
   margin: 0;
@@ -269,8 +270,23 @@ button.secondary:hover,
 
 .settings-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin: 12px 0 8px;
+}
+
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
 }
 
 .options-page {
@@ -351,6 +367,7 @@ button.secondary:hover,
 }
 
 .options-page .muted,
+.options-page #cloudStatus,
 .options-page #vaultStatus,
 .options-page #exportStatus {
   margin: 0;
@@ -409,6 +426,7 @@ button.secondary:hover,
 }
 
 .options-page #vaultStatus,
+.options-page #cloudStatus,
 .options-page #exportStatus {
   grid-column: 2;
   margin-top: 12px;
@@ -436,7 +454,12 @@ button.secondary:hover,
   }
 
   .options-page #vaultStatus,
+  .options-page #cloudStatus,
   .options-page #exportStatus {
     grid-column: 1;
+  }
+
+  .settings-form {
+    grid-template-columns: 1fr;
   }
 }

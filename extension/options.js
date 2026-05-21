@@ -1,12 +1,28 @@
 import { CSV_FILENAME, ensureClipsCsvFile, readClipsCsv } from "./shared/csv-store.js";
 import { setVaultHandle, getVaultHandle, verifyPermission } from "./fs-store.js";
+import {
+  clearCloudSession,
+  getCloudSettings,
+  hasCloudSession,
+  saveCloudConfig,
+  signInToCloud
+} from "./supabase-writer.js";
 
 const chooseVault = document.querySelector("#chooseVault");
 const vaultStatus = document.querySelector("#vaultStatus");
 const exportAll = document.querySelector("#exportAll");
 const exportStatus = document.querySelector("#exportStatus");
+const cloudUrl = document.querySelector("#cloudUrl");
+const cloudAnonKey = document.querySelector("#cloudAnonKey");
+const cloudEmail = document.querySelector("#cloudEmail");
+const cloudPassword = document.querySelector("#cloudPassword");
+const cloudSave = document.querySelector("#cloudSave");
+const cloudLogin = document.querySelector("#cloudLogin");
+const cloudLogout = document.querySelector("#cloudLogout");
+const cloudStatus = document.querySelector("#cloudStatus");
 
 refreshStatus();
+refreshCloudStatus();
 
 chooseVault.addEventListener("click", async () => {
   await chooseVaultFolder();
@@ -16,11 +32,59 @@ exportAll.addEventListener("click", async () => {
   await exportCsv();
 });
 
+cloudSave.addEventListener("click", async () => {
+  await saveCloudSettingsOnly();
+});
+
+cloudLogin.addEventListener("click", async () => {
+  await loginCloud();
+});
+
+cloudLogout.addEventListener("click", async () => {
+  await clearCloudSession();
+  await refreshCloudStatus("이 브라우저 확장에서 Supabase 로그아웃했습니다.");
+});
+
 async function refreshStatus() {
   const handle = await getVaultHandle();
   vaultStatus.textContent = handle
     ? `현재 저장 폴더: ${handle.name} · ${CSV_FILENAME} 사용 중`
     : "아직 저장 폴더를 선택하지 않았습니다.";
+}
+
+async function refreshCloudStatus(message = "") {
+  const settings = await getCloudSettings();
+  cloudUrl.value = settings.url || "";
+  cloudAnonKey.value = settings.anonKey || "";
+  cloudEmail.value = settings.email || "";
+  cloudStatus.textContent = message || (hasCloudSession(settings)
+    ? "Supabase에 로그인되어 있습니다. 확장에서 줍줍하면 서버에 바로 저장됩니다."
+    : "Supabase 설정을 저장하고 로그인해 주세요.");
+}
+
+async function saveCloudSettingsOnly() {
+  await saveCloudConfig({
+    url: cloudUrl.value,
+    anonKey: cloudAnonKey.value,
+    email: cloudEmail.value
+  });
+  await refreshCloudStatus("Supabase 설정을 저장했습니다. 이제 로그인해 주세요.");
+}
+
+async function loginCloud() {
+  cloudStatus.textContent = "Supabase 로그인 중...";
+  try {
+    await signInToCloud({
+      url: cloudUrl.value,
+      anonKey: cloudAnonKey.value,
+      email: cloudEmail.value,
+      password: cloudPassword.value
+    });
+    cloudPassword.value = "";
+    await refreshCloudStatus("Supabase 로그인 완료. 이제 확장프로그램 저장은 서버로 바로 들어갑니다.");
+  } catch (error) {
+    cloudStatus.textContent = error.message || "Supabase에 로그인하지 못했습니다.";
+  }
 }
 
 async function chooseVaultFolder() {

@@ -145,6 +145,7 @@ a:hover,
 }
 
 .control-panel,
+.cloud-panel,
 .add-panel,
 .notion-panel,
 .reader-tools {
@@ -161,6 +162,29 @@ a:hover,
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
+}
+
+.cloud-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.cloud-panel p:not(.eyebrow) {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.cloud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cloud-status {
+  min-height: 22px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .add-panel {

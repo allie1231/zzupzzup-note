@@ -104,6 +104,7 @@ h1 {
 }
 
 .control-strip,
+.cloud-panel,
 .stats,
 .feature,
 .gallery {
@@ -120,6 +121,55 @@ h1 {
   border-radius: 8px;
   background: var(--paper);
   box-shadow: var(--shadow);
+}
+
+.cloud-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.cloud-panel h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.cloud-panel p:not(.eyebrow) {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.cloud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cloud-grid label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.cloud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cloud-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
 button,

@@ -1,11 +1,30 @@
+import {
+  clearCloudSession,
+  fetchCloudClips,
+  getCloudSettings,
+  hasCloudSession,
+  saveCloudSettings,
+  signInToCloud
+} from "../shared/supabase-store.js";
+
 const state = {
   images: [],
   rows: [],
   visible: [],
-  urls: new Map()
+  urls: new Map(),
+  cloudReady: false
 };
 
 const el = {
+  cloudUrl: document.querySelector("#cloudUrl"),
+  cloudAnonKey: document.querySelector("#cloudAnonKey"),
+  cloudEmail: document.querySelector("#cloudEmail"),
+  cloudPassword: document.querySelector("#cloudPassword"),
+  cloudSave: document.querySelector("#cloudSave"),
+  cloudLogin: document.querySelector("#cloudLogin"),
+  cloudLogout: document.querySelector("#cloudLogout"),
+  cloudPull: document.querySelector("#cloudPull"),
+  cloudStatus: document.querySelector("#cloudStatus"),
   imageInput: document.querySelector("#imageInput"),
   csvInput: document.querySelector("#csvInput"),
   search: document.querySelector("#search"),
@@ -29,8 +48,84 @@ el.csvInput.addEventListener("change", loadCsv);
 el.search.addEventListener("input", applyFilters);
 el.showAll.addEventListener("click", showAll);
 el.gallery.addEventListener("click", openCard);
+el.cloudSave.addEventListener("click", saveCloudConfig);
+el.cloudLogin.addEventListener("click", loginCloud);
+el.cloudLogout.addEventListener("click", logoutCloud);
+el.cloudPull.addEventListener("click", pullCloud);
 
+restoreCloudConfig();
 render();
+autoPullCloud();
+
+function restoreCloudConfig() {
+  const settings = getCloudSettings();
+  el.cloudUrl.value = settings.url || "";
+  el.cloudAnonKey.value = settings.anonKey || "";
+  el.cloudEmail.value = settings.email || "";
+  state.cloudReady = hasCloudSession(settings);
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 이미지 DB를 불러올 수 있습니다." : "Supabase를 연결하면 Storage URL이 있는 이미지를 바로 볼 수 있습니다.");
+}
+
+function saveCloudConfig() {
+  saveCloudSettings({
+    url: el.cloudUrl.value,
+    anonKey: el.cloudAnonKey.value,
+    email: el.cloudEmail.value
+  });
+  setCloudStatus("Supabase 설정을 저장했습니다. 이메일/비밀번호로 로그인해 주세요.");
+}
+
+async function loginCloud() {
+  setCloudStatus("Supabase 로그인 중...");
+  try {
+    await signInToCloud({
+      url: el.cloudUrl.value,
+      anonKey: el.cloudAnonKey.value,
+      email: el.cloudEmail.value,
+      password: el.cloudPassword.value
+    });
+    el.cloudPassword.value = "";
+    state.cloudReady = true;
+    setCloudStatus("Supabase에 로그인했습니다. 이미지를 불러옵니다.");
+    await pullCloud();
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
+  }
+}
+
+function logoutCloud() {
+  clearCloudSession();
+  state.cloudReady = false;
+  setCloudStatus("이 브라우저에서 Supabase 로그아웃했습니다.");
+}
+
+async function autoPullCloud() {
+  if (!hasCloudSession()) return;
+  try {
+    await pullCloud({ quiet: true });
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 이미지를 자동으로 불러오지 못했습니다.");
+  }
+}
+
+async function pullCloud(options = {}) {
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  if (!options.quiet) setCloudStatus("Supabase에서 이미지를 불러오는 중...");
+  try {
+    const rows = (await fetchCloudClips())
+      .filter((clip) => clip.contentType === "이미지" || clip.imagePath || clip.imageUrl);
+    state.rows = mergeRows(state.rows, rows);
+    matchRows();
+    applyFilters();
+    state.cloudReady = true;
+    setCloudStatus(`Supabase에서 이미지 기록 ${rows.length}개를 불러왔습니다.`);
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에서 이미지를 불러오지 못했습니다.");
+  }
+}
 
 function loadImages() {
   revokeUrls();
@@ -221,25 +316,25 @@ function openCard(event) {
 function rowToItem(row) {
   return {
     id: row.id || "",
-    createdAt: row["수집 일시"] || "",
-    contentType: normalizeContentType(row["유형"], row),
-    sentence: row["주운 글"] || row["문장"] || "",
-    reason: row["수집한 이유"] || "",
-    source: row["출처"] || "",
-    siteName: row["사이트명"] || "",
-    iconUrl: row["아이콘 URL"] || "",
-    imagePath: row["이미지 경로"] || "",
-    imageUrl: row["이미지 URL"] || "",
-    title: row["제목"] || "",
-    tags: row["태그"] || "",
-    status: row["상태"] || ""
+    createdAt: row.createdAt || row["수집 일시"] || "",
+    contentType: normalizeContentType(row.contentType || row["유형"], row),
+    sentence: row.sentence || row["주운 글"] || row["문장"] || "",
+    reason: row.reason || row["수집한 이유"] || "",
+    source: row.source || row["출처"] || "",
+    siteName: row.siteName || row["사이트명"] || "",
+    iconUrl: row.iconUrl || row["아이콘 URL"] || "",
+    imagePath: row.imagePath || row["이미지 경로"] || "",
+    imageUrl: row.imageUrl || row["이미지 URL"] || "",
+    title: row.title || row["제목"] || "",
+    tags: row.tags || row["태그"] || "",
+    status: row.status || row["상태"] || ""
   };
 }
 
 function normalizeContentType(value, row) {
   const type = String(value || "").trim();
   if (type) return type;
-  if (row["이미지 경로"] || row["이미지 URL"]) return "이미지";
+  if (row.imagePath || row.imageUrl || row["이미지 경로"] || row["이미지 URL"]) return "이미지";
   return "자료";
 }
 
@@ -326,6 +421,33 @@ function anchorView(label, href) {
 
 function notify(message) {
   el.status.textContent = message;
+}
+
+function setCloudStatus(message) {
+  el.cloudStatus.textContent = message;
+}
+
+function mergeRows(current, incoming) {
+  const output = [...current];
+  const seen = new Set(output.map(rowKey));
+  for (const row of incoming) {
+    const key = rowKey(row);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(rowToItem(row));
+  }
+  return output.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function rowKey(row) {
+  return [
+    row.id,
+    row.createdAt,
+    row.imagePath,
+    row.imageUrl,
+    row.source,
+    row.title
+  ].filter(Boolean).join("|") || crypto.randomUUID();
 }
 
 function revokeUrls() {

@@ -37,6 +37,40 @@
         </div>
       </section>
 
+      <section class="cloud-panel">
+        <div>
+          <p class="eyebrow">Supabase</p>
+          <h2>문장 DB 연결</h2>
+          <p>웹홈/모바일에서 저장한 문장만 불러오고, 새 문장과 이유도 Supabase에 저장합니다.</p>
+        </div>
+        <div class="cloud-grid">
+          <label>
+            Supabase URL
+            <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+          </label>
+          <label>
+            anon public key
+            <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+          </label>
+          <label>
+            이메일
+            <input id="cloudEmail" type="email" placeholder="me@example.com">
+          </label>
+          <label>
+            비밀번호
+            <input id="cloudPassword" type="password" placeholder="비밀번호">
+          </label>
+        </div>
+        <div class="actions">
+          <button id="cloudSave" class="secondary">설정 저장</button>
+          <button id="cloudLogin">로그인</button>
+          <button id="cloudPull" class="secondary">DB 불러오기</button>
+          <button id="cloudPush" class="secondary">현재 문장 올리기</button>
+          <button id="cloudLogout" class="secondary">로그아웃</button>
+        </div>
+        <p id="cloudStatus" class="cloud-status" role="status"></p>
+      </section>
+
       <p id="status" class="status" role="status">줍줍노트-문장.csv를 열면 문장들이 여기에 나타납니다.</p>
 
       <section class="add-panel">
@@ -115,6 +149,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

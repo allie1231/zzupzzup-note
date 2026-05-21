@@ -35,6 +35,39 @@
         <button id="showAll" class="secondary">전체</button>
       </section>
 
+      <section class="cloud-panel">
+        <div>
+          <p class="eyebrow">Supabase</p>
+          <h2>이미지 DB 연결</h2>
+          <p>모바일/웹홈에서 Supabase Storage에 저장된 이미지 URL을 불러와 사진 보드로 보여줍니다.</p>
+        </div>
+        <div class="cloud-grid">
+          <label>
+            Supabase URL
+            <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+          </label>
+          <label>
+            anon public key
+            <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+          </label>
+          <label>
+            이메일
+            <input id="cloudEmail" type="email" placeholder="me@example.com">
+          </label>
+          <label>
+            비밀번호
+            <input id="cloudPassword" type="password" placeholder="비밀번호">
+          </label>
+        </div>
+        <div class="cloud-actions">
+          <button id="cloudSave" class="secondary">설정 저장</button>
+          <button id="cloudLogin">로그인</button>
+          <button id="cloudPull" class="secondary">DB 불러오기</button>
+          <button id="cloudLogout" class="secondary">로그아웃</button>
+        </div>
+        <p id="cloudStatus" class="cloud-status" role="status"></p>
+      </section>
+
       <section class="stats" aria-label="이미지 통계">
         <article>
           <strong id="imageCount">0</strong>
@@ -70,6 +103,6 @@
       </form>
     </dialog>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

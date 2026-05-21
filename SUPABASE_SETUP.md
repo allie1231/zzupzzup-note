@@ -96,6 +96,8 @@ using (bucket_id = 'zzup-images');
 
 - 모바일에서 저장하면 Supabase에도 바로 저장됩니다.
 - 웹홈을 열면 Supabase 데이터를 불러와서 카드뷰에 합칩니다.
+- 줍줍문장은 Supabase에서 `문장` 유형만 불러오고, 새 문장/이유 수정도 DB에 저장합니다.
+- 줍줍사진은 Supabase에서 이미지 기록과 Storage URL을 불러와 사진 보드로 보여줍니다.
 - CSV 저장/문장만 CSV/정리 완료 제외 CSV는 백업과 외부 이동용으로 계속 쓸 수 있습니다.
 
 ## 참고

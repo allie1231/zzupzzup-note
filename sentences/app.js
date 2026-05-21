@@ -1,3 +1,14 @@
+import {
+  clearCloudSession,
+  deleteCloudClip,
+  fetchCloudClips,
+  getCloudSettings,
+  hasCloudSession,
+  saveCloudSettings,
+  signInToCloud,
+  upsertCloudClips
+} from "../shared/supabase-store.js";
+
 const HEADERS = [
   "id",
   "수집 일시",
@@ -32,10 +43,21 @@ const state = {
   csvFilename: "",
   notionRows: [],
   notionHeaders: [],
-  toastTimer: 0
+  toastTimer: 0,
+  cloudReady: false
 };
 
 const el = {
+  cloudUrl: document.querySelector("#cloudUrl"),
+  cloudAnonKey: document.querySelector("#cloudAnonKey"),
+  cloudEmail: document.querySelector("#cloudEmail"),
+  cloudPassword: document.querySelector("#cloudPassword"),
+  cloudSave: document.querySelector("#cloudSave"),
+  cloudLogin: document.querySelector("#cloudLogin"),
+  cloudLogout: document.querySelector("#cloudLogout"),
+  cloudPull: document.querySelector("#cloudPull"),
+  cloudPush: document.querySelector("#cloudPush"),
+  cloudStatus: document.querySelector("#cloudStatus"),
   connectCsv: document.querySelector("#connectCsv"),
   csvInput: document.querySelector("#csvInput"),
   saveCsv: document.querySelector("#saveCsv"),
@@ -72,9 +94,103 @@ el.search.addEventListener("input", applyFilters);
 el.showAll.addEventListener("click", showAll);
 el.shuffleOne.addEventListener("click", shuffleOne);
 el.sentences.addEventListener("click", handleCardClick);
+el.cloudSave.addEventListener("click", saveCloudConfig);
+el.cloudLogin.addEventListener("click", loginCloud);
+el.cloudLogout.addEventListener("click", logoutCloud);
+el.cloudPull.addEventListener("click", pullCloud);
+el.cloudPush.addEventListener("click", pushCloud);
 
+restoreCloudConfig();
 render();
 restoreConnectedCsv();
+autoPullCloud();
+
+function restoreCloudConfig() {
+  const settings = getCloudSettings();
+  el.cloudUrl.value = settings.url || "";
+  el.cloudAnonKey.value = settings.anonKey || "";
+  el.cloudEmail.value = settings.email || "";
+  state.cloudReady = hasCloudSession(settings);
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 문장 DB를 불러올 수 있습니다." : "Supabase를 연결하면 저장된 문장을 계속 불러올 수 있습니다.");
+}
+
+function saveCloudConfig() {
+  saveCloudSettings({
+    url: el.cloudUrl.value,
+    anonKey: el.cloudAnonKey.value,
+    email: el.cloudEmail.value
+  });
+  setCloudStatus("Supabase 설정을 저장했습니다. 이메일/비밀번호로 로그인해 주세요.");
+}
+
+async function loginCloud() {
+  setCloudStatus("Supabase 로그인 중...");
+  try {
+    await signInToCloud({
+      url: el.cloudUrl.value,
+      anonKey: el.cloudAnonKey.value,
+      email: el.cloudEmail.value,
+      password: el.cloudPassword.value
+    });
+    el.cloudPassword.value = "";
+    state.cloudReady = true;
+    setCloudStatus("Supabase에 로그인했습니다. 문장을 불러옵니다.");
+    await pullCloud();
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
+  }
+}
+
+function logoutCloud() {
+  clearCloudSession();
+  state.cloudReady = false;
+  setCloudStatus("이 브라우저에서 Supabase 로그아웃했습니다.");
+}
+
+async function autoPullCloud() {
+  if (!hasCloudSession()) return;
+  try {
+    await pullCloud({ quiet: true });
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 문장을 자동으로 불러오지 못했습니다.");
+  }
+}
+
+async function pullCloud(options = {}) {
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  if (!options.quiet) setCloudStatus("Supabase에서 문장을 불러오는 중...");
+  try {
+    const clips = (await fetchCloudClips()).filter((clip) => clip.contentType === "문장");
+    state.clips = mergeClips(state.clips, clips);
+    applyFilters();
+    state.cloudReady = true;
+    setCloudStatus(`Supabase에서 문장 ${clips.length}개를 불러왔습니다.`);
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에서 문장을 불러오지 못했습니다.");
+  }
+}
+
+async function pushCloud() {
+  if (!state.clips.length) {
+    setCloudStatus("올릴 문장이 없습니다.");
+    return;
+  }
+  if (!hasCloudSession()) {
+    setCloudStatus("먼저 Supabase에 로그인해 주세요.");
+    return;
+  }
+  setCloudStatus("현재 문장들을 Supabase에 저장 중...");
+  try {
+    await upsertCloudClips(state.clips);
+    state.cloudReady = true;
+    setCloudStatus(`Supabase에 문장 ${state.clips.length}개를 저장했습니다.`);
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase에 문장을 저장하지 못했습니다.");
+  }
+}
 
 async function connectCsvFile() {
   if (!window.showOpenFilePicker) {
@@ -156,13 +272,15 @@ function addSentence() {
     return;
   }
 
-  state.clips.unshift(createSentenceClip({
+  const clip = createSentenceClip({
     sentence,
     reason: el.reasonInput.value,
     source: el.sourceInput.value,
     title: el.titleInput.value,
     tags: el.tagsInput.value
-  }));
+  });
+  state.clips.unshift(clip);
+  saveCloudClip(clip);
   clearForm();
   applyFilters();
   notify("문장을 추가했습니다.");
@@ -249,6 +367,7 @@ function importNotionRows() {
 
   state.clips = [...imported, ...state.clips];
   applyFilters();
+  if (hasCloudSession()) upsertCloudClips(imported).catch((error) => setCloudStatus(error.message || "가져온 문장을 Supabase에 저장하지 못했습니다."));
   notify(`노션 문장 ${imported.length}개를 줍줍문장에 합쳤습니다.`);
 }
 
@@ -349,7 +468,10 @@ function handleCardClick(event) {
 
   if (button.dataset.action === "save-reason") {
     clip.reason = card.querySelector("[data-role='reason']").value.trim();
+    clip.reviewCount = Number(clip.reviewCount || 0) + 1;
+    clip.lastReviewed = new Date().toISOString();
     applyFilters();
+    saveCloudClip(clip);
     notify("이유를 저장했습니다.");
     return;
   }
@@ -358,6 +480,7 @@ function handleCardClick(event) {
     if (!confirm("이 문장을 삭제할까요?")) return;
     state.clips = state.clips.filter((item) => item.id !== clip.id);
     applyFilters();
+    removeCloudClip(clip.id);
     notify("문장을 삭제했습니다.");
   }
 }
@@ -430,6 +553,48 @@ function rowToClip(row) {
     reviewCount: row["확인 횟수"] || "",
     lastReviewed: row["마지막 확인"] || ""
   };
+}
+
+async function saveCloudClip(clip) {
+  if (!hasCloudSession()) return;
+  try {
+    await upsertCloudClips([clip]);
+    setCloudStatus("Supabase에도 문장을 저장했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 문장 저장에 실패했습니다.");
+  }
+}
+
+async function removeCloudClip(id) {
+  if (!hasCloudSession()) return;
+  try {
+    await deleteCloudClip(id);
+    setCloudStatus("Supabase에서도 문장을 삭제했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "Supabase 문장 삭제에 실패했습니다.");
+  }
+}
+
+function mergeClips(current, incoming) {
+  const output = [...current];
+  const seen = new Set(output.map(clipKey));
+  for (const clip of incoming) {
+    const key = clipKey(clip);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(clip);
+  }
+  return output.sort(sortNewest);
+}
+
+function clipKey(clip) {
+  return [
+    clip.id,
+    clip.createdAt,
+    clip.source,
+    clip.title,
+    clip.sentence
+  ].filter(Boolean).join("|") || crypto.randomUUID();
 }
 
 function clipsToCsvText(clips) {
@@ -610,6 +775,10 @@ function downloadText(filename, text, type) {
 function notify(message) {
   el.status.textContent = message;
   showToast(message);
+}
+
+function setCloudStatus(message) {
+  el.cloudStatus.textContent = message;
 }
 
 function showToast(message) {

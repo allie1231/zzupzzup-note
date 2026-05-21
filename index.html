@@ -11,8 +11,8 @@
 
       body {
         margin: 0;
-        color: #151515;
-        background: #fafaf8;
+        color: #111;
+        background: #8f8f8a;
         font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
       }
 
@@ -23,24 +23,46 @@
       }
 
       header {
+        position: relative;
         display: grid;
         gap: 18px;
-        margin-bottom: 42px;
-        padding-bottom: 28px;
-        border-bottom: 1px solid #dfdfdc;
+        margin-bottom: 28px;
+        padding: 18px;
+        border: 1px solid #111;
+        border-radius: 14px;
+        background: #f7f7f1;
+        box-shadow: 16px 16px 0 rgba(0, 0, 0, .2);
+      }
+
+      header::after {
+        content: "# command";
+        position: absolute;
+        right: 18px;
+        top: -14px;
+        border: 1px solid #111;
+        border-radius: 8px;
+        padding: 6px 10px;
+        color: #111;
+        background: #f7f7f1;
+        box-shadow: 6px 6px 0 rgba(0, 0, 0, .2);
+        font: 18px/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+        transform: rotate(4deg);
       }
 
       .eyebrow {
         margin: 0;
-        color: #777;
-        font-size: 13px;
+        color: #555;
+        font-size: 11px;
+        letter-spacing: .08em;
+        font-family: "Courier New", Monaco, monospace;
+        text-transform: uppercase;
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(44px, 8vw, 86px);
-        line-height: 1;
-        font-weight: 650;
+        font-size: clamp(34px, 6vw, 58px);
+        line-height: .95;
+        font-weight: 620;
         letter-spacing: 0;
       }
 
@@ -48,25 +70,26 @@
         max-width: 560px;
         margin: 0;
         color: #555;
-        font-size: 17px;
+        font-size: 14px;
       }
 
       .links {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        gap: 14px;
       }
 
       a.card {
         display: grid;
-        min-height: 210px;
+        min-height: 184px;
         align-content: space-between;
-        border: 1px solid #dfdfdc;
-        border-radius: 18px;
-        padding: 24px;
+        border: 1px solid #111;
+        border-radius: 14px;
+        padding: 18px;
         color: #151515;
-        background: #fff;
+        background: #f7f7f1;
         text-decoration: none;
+        box-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
         transition: border-color .16s ease, transform .16s ease;
       }
 
@@ -79,13 +102,21 @@
 
       .card span {
         color: #888;
-        font-size: 13px;
+        width: fit-content;
+        border: 1px solid #111;
+        border-radius: 999px;
+        padding: 4px 8px;
+        color: #fff;
+        background: #111;
+        font: 12px/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+        line-height: 1;
+        text-transform: uppercase;
       }
 
       .card strong {
         display: block;
         margin-bottom: 10px;
-        font-size: 24px;
+        font-size: 20px;
       }
 
       .card p {
@@ -95,11 +126,12 @@
 
       .note {
         margin-top: 30px;
-        padding: 18px;
-        border: 1px solid #dfdfdc;
-        border-radius: 16px;
+        padding: 14px 16px;
+        border: 1px solid #111;
+        border-radius: 14px;
         color: #666;
-        background: #fff;
+        background: #f7f7f1;
+        box-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
       }
 
       @media (max-width: 680px) {

@@ -190,7 +190,7 @@ function cardView(clip) {
   const item = document.createElement("li");
   item.className = clip.favorite ? "clip is-favorite" : "clip";
   const title = document.createElement("strong");
-  const meta = document.createElement("p");
+  const meta = document.createElement("div");
   const memo = document.createElement("blockquote");
   const actions = document.createElement("div");
   const star = document.createElement("button");
@@ -198,12 +198,17 @@ function cardView(clip) {
 
   title.textContent = clip.title || clip.source || clip.sentence || "주운 정보";
   memo.textContent = clip.sentence || "";
-  meta.textContent = [
+  meta.className = "clip-tags";
+  [
     clip.contentType || "링크",
     clip.status || "새로 수집",
     clip.favorite ? "별표" : "",
     clip.tags?.join ? clip.tags.join(" ") : clip.tags
-  ].filter(Boolean).join(" · ");
+  ].filter(Boolean).join(" ").split(/\s+/).filter(Boolean).forEach((tag) => {
+    const item = document.createElement("span");
+    item.textContent = tag;
+    meta.append(item);
+  });
 
   actions.className = "clip-actions";
   star.className = "secondary";

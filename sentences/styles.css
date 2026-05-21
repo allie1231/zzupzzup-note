@@ -1,13 +1,14 @@
 :root {
-  --ink: #f7f7f4;
-  --text: #e7e7e2;
-  --muted: #aaa9a3;
-  --line: rgba(255, 255, 255, .18);
-  --line-strong: rgba(255, 255, 255, .38);
-  --paper: #171717;
-  --panel: #202020;
-  --panel-soft: #2a2a2a;
-  --ground: #0d0d0d;
+  --ink: #111;
+  --text: #151515;
+  --muted: #5d5d5a;
+  --line: #111;
+  --line-strong: #111;
+  --paper: #f7f7f1;
+  --panel: #fff;
+  --panel-soft: #e7e7e0;
+  --ground: #8f8f8a;
+  --stamp-shadow: 8px 8px 0 rgba(0, 0, 0, .18);
 }
 
 * {
@@ -17,32 +18,50 @@
 body {
   margin: 0;
   color: var(--text);
-  background:
-    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, .08), transparent 28rem),
-    linear-gradient(135deg, #090909 0%, #1c1c1c 48%, #303030 100%);
-  font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+  background: var(--ground);
+  font: 14px/1.65 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
 }
 
 .app {
   width: min(980px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 54px 0 76px;
+  padding: 44px 0 72px;
 }
 
 .topbar {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 32px;
+  gap: 24px;
   align-items: start;
-  margin-bottom: 30px;
-  padding-bottom: 30px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "# sentence";
+  position: absolute;
+  right: 18px;
+  top: -14px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .18);
+  font-size: 11px;
+  line-height: 1;
+  transform: rotate(4deg);
 }
 
 .eyebrow {
   margin: 0 0 8px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -56,8 +75,8 @@ h2 {
 
 h1 {
   color: var(--ink);
-  font-size: clamp(46px, 8vw, 88px);
-  font-weight: 560;
+  font-size: clamp(34px, 7vw, 62px);
+  font-weight: 620;
 }
 
 h2 {
@@ -95,9 +114,8 @@ button,
   border: 1px solid var(--ink);
   border-radius: 999px;
   padding: 8px 14px;
-  color: var(--ground);
+  color: var(--paper);
   background: var(--ink);
-  font: inherit;
   font-size: 13px;
   line-height: 1.1;
   text-decoration: none;
@@ -108,7 +126,7 @@ button.secondary,
 .nav-actions a,
 .file-button {
   color: var(--ink);
-  background: transparent;
+  background: var(--paper);
 }
 
 button:hover,
@@ -116,7 +134,7 @@ a:hover,
 .file-button:hover {
   border-color: var(--ink);
   color: var(--ink);
-  background: rgba(255, 255, 255, .12);
+  background: var(--panel-soft);
 }
 
 .file-button input {
@@ -133,10 +151,9 @@ a:hover,
   margin-bottom: 24px;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(24, 24, 24, .82);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, .24);
-  backdrop-filter: blur(14px);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
 }
 
 .control-panel {
@@ -195,7 +212,7 @@ select {
   border-radius: 10px;
   padding: 9px 12px;
   color: var(--ink);
-  background: rgba(255, 255, 255, .06);
+  background: var(--panel);
   font: inherit;
   outline: none;
 }
@@ -213,7 +230,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--ink);
-  background: rgba(255, 255, 255, .1);
+  background: var(--panel);
 }
 
 .status {
@@ -244,15 +261,16 @@ select:focus {
   gap: 14px;
   padding: 24px;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
 }
 
 .sentence-card blockquote {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(22px, 3vw, 34px);
-  font-weight: 430;
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 520;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -277,7 +295,10 @@ select:focus {
   border-radius: 999px;
   padding: 3px 8px;
   color: var(--ink);
-  background: rgba(255, 255, 255, .08);
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 10px;
+  text-transform: uppercase;
 }
 
 .card-actions {
@@ -289,10 +310,10 @@ select:focus {
 .empty {
   padding: 40px 18px;
   border: 1px dashed var(--line-strong);
-  border-radius: 16px;
+  border-radius: 8px;
   color: var(--muted);
   text-align: center;
-  background: rgba(255, 255, 255, .04);
+  background: var(--paper);
 }
 
 .toast {
@@ -304,9 +325,9 @@ select:focus {
   padding: 12px 14px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  color: var(--ground);
+  color: var(--paper);
   background: var(--ink);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .34);
+  box-shadow: var(--stamp-shadow);
   font-size: 13px;
   opacity: 0;
   transform: translateY(10px);
@@ -340,4 +361,202 @@ select:focus {
   .actions {
     justify-content: flex-start;
   }
+}
+
+/* White label system: black lines, square cards, pixel-like accents */
+:root {
+  --ink: #111;
+  --text: #111;
+  --muted: #555;
+  --line: #111;
+  --line-strong: #111;
+  --paper: #fff;
+  --panel: #fff;
+  --panel-soft: #efefef;
+  --ground: #fff;
+  --stamp-shadow: 5px 5px 0 #111;
+  --pixel-font: "Courier New", Monaco, "SFMono-Regular", monospace;
+}
+
+body {
+  background: #fff;
+}
+
+.topbar,
+.control-panel,
+.add-panel,
+.notion-panel,
+.reader-tools,
+.sentence-card,
+.empty {
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "▣ SENTENCE";
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 #111;
+  font-family: var(--pixel-font);
+}
+
+h1 {
+  font-size: clamp(30px, 6vw, 50px);
+}
+
+.eyebrow,
+label,
+button,
+.file-button,
+.nav-actions a,
+.tag,
+.sentence-card .meta,
+.sentence-card .reason {
+  font-family: var(--pixel-font);
+}
+
+.eyebrow::before {
+  content: "▣ ";
+}
+
+button,
+.file-button,
+.nav-actions a,
+input,
+textarea,
+select,
+.tag {
+  border-radius: 0;
+}
+
+button::before,
+.file-button::before,
+.nav-actions a::before {
+  content: "◆";
+  margin-right: 6px;
+  font-size: 10px;
+}
+
+#connectCsv::before {
+  content: "▤";
+}
+
+.file-button:has(#csvInput)::before,
+.file-button:has(#notionCsvInput)::before {
+  content: "▥";
+}
+
+#saveCsv::before {
+  content: "▣";
+}
+
+#addSentence::before,
+.nav-actions a[href="../sentences/"]::before {
+  content: "¶";
+}
+
+#importNotion::before {
+  content: "✚";
+}
+
+#showAll::before,
+.nav-actions a[href="../web/"]::before {
+  content: "▦";
+}
+
+#shuffleOne::before {
+  content: "※";
+}
+
+.nav-actions a[href="../mobile-pwa/"]::before {
+  content: "▣";
+}
+
+.sentence-card blockquote {
+  font-size: clamp(18px, 2.7vw, 26px);
+}
+
+.toast {
+  border-radius: 0;
+  box-shadow: var(--stamp-shadow);
+}
+
+/* Final unified style: gray field, ivory cards, black pill tags */
+:root {
+  --ink: #111;
+  --text: #151515;
+  --muted: #666;
+  --line: #111;
+  --line-strong: #111;
+  --paper: #f7f7f1;
+  --panel: #fff;
+  --panel-soft: #e7e7df;
+  --ground: #8f8f8a;
+  --stamp-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
+  --pixel-font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--ground);
+}
+
+.topbar,
+.control-panel,
+.add-panel,
+.notion-panel,
+.reader-tools,
+.sentence-card,
+.empty {
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "# sentence";
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .2);
+  font-family: var(--pixel-font);
+  font-size: 18px;
+}
+
+.eyebrow::before,
+button::before,
+.file-button::before,
+.nav-actions a::before {
+  content: "";
+  display: none;
+}
+
+h1 {
+  font-size: clamp(34px, 7vw, 58px);
+}
+
+button,
+.file-button,
+.nav-actions a,
+.tag {
+  border-radius: 999px;
+  font-family: var(--pixel-font);
+}
+
+input,
+textarea,
+select {
+  border-radius: 10px;
+}
+
+.tag {
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 12px;
+  text-transform: none;
+}
+
+.toast {
+  border-radius: 999px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
 }

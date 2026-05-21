@@ -905,3 +905,524 @@ select:focus {
     justify-content: flex-start;
   }
 }
+
+/* Monochrome card-and-tag refresh */
+:root {
+  --ink: #111;
+  --text: #151515;
+  --muted: #5d5d5a;
+  --line: #111;
+  --paper: #f7f7f1;
+  --soft: #8f8f8a;
+  --soft-2: #e7e7e0;
+  --stamp-shadow: 8px 8px 0 rgba(0, 0, 0, .18);
+}
+
+body {
+  color: var(--text);
+  background: var(--soft);
+  font-size: 14px;
+}
+
+.app {
+  width: min(1120px, calc(100% - 36px));
+}
+
+.topbar {
+  position: relative;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "# archive";
+  position: absolute;
+  right: 18px;
+  top: -14px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .18);
+  font-size: 11px;
+  line-height: 1;
+  transform: rotate(4deg);
+}
+
+h1 {
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 620;
+}
+
+.eyebrow,
+.clock-panel span,
+.file-status,
+.stat span,
+.meta,
+.source,
+.reason,
+.history-item span,
+.history-empty {
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.clock-panel strong {
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+button,
+.file-button,
+.button-link {
+  min-height: 32px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 7px 12px;
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 12px;
+}
+
+button.secondary,
+.file-button.secondary,
+.button-link.secondary {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+button:hover,
+.file-button:hover,
+.button-link:hover {
+  color: var(--ink);
+  background: var(--soft-2);
+}
+
+input,
+textarea,
+select {
+  border-color: var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fff;
+  font-size: 13px;
+}
+
+.onboarding,
+.toolbar,
+.paste-panel,
+.history-panel,
+.export-panel,
+.calendar-board,
+.detail-dialog {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
+}
+
+.onboarding-steps li,
+.stat,
+.card,
+.history-item,
+.history-empty,
+.embed-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .14);
+}
+
+.stat {
+  min-height: 112px;
+}
+
+.stat strong {
+  font-size: clamp(26px, 4vw, 40px);
+}
+
+.cards {
+  gap: 18px;
+}
+
+.card {
+  overflow: visible;
+}
+
+.card:hover,
+.card:focus,
+.stat:hover,
+.stat:focus {
+  transform: translate(-1px, -1px);
+}
+
+.thumb,
+.detail-embed img,
+.card-embed {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.card-embed {
+  background: #fff;
+}
+
+.star-toggle {
+  top: -10px;
+  right: -10px;
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .2);
+}
+
+.sentence {
+  font-size: 15px;
+}
+
+.badge,
+.card-links a,
+.local-path,
+.tag {
+  border-color: var(--ink);
+  border-radius: 999px;
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 10px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.badge.done,
+.star-toggle.is-on {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.calendar-day {
+  border-color: var(--ink);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.toast {
+  border-color: var(--ink);
+  color: var(--paper);
+  background: var(--ink);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .22);
+}
+
+@media (max-width: 760px) {
+  .app {
+    width: min(100% - 24px, 1080px);
+  }
+}
+
+/* White label system: black lines, square cards, pixel-like accents */
+:root {
+  --ink: #111;
+  --text: #111;
+  --muted: #555;
+  --line: #111;
+  --paper: #fff;
+  --soft: #fff;
+  --soft-2: #efefef;
+  --stamp-shadow: 5px 5px 0 #111;
+  --pixel-font: "Courier New", Monaco, "SFMono-Regular", monospace;
+}
+
+body {
+  background: #fff;
+}
+
+.topbar,
+.onboarding,
+.toolbar,
+.paste-panel,
+.history-panel,
+.export-panel,
+.calendar-board,
+.detail-dialog,
+.onboarding-steps li,
+.stat,
+.card,
+.history-item,
+.history-empty,
+.embed-card,
+.card-embed {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "▣ ARCHIVE";
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 #111;
+  font-family: var(--pixel-font);
+}
+
+h1 {
+  font-size: clamp(30px, 4vw, 48px);
+}
+
+.eyebrow,
+.clock-panel span,
+.file-status,
+.stat span,
+.meta,
+.source,
+.reason,
+.history-item span,
+.history-empty,
+.badge,
+.tag,
+.card-links a,
+.local-path,
+button,
+.file-button,
+.button-link {
+  font-family: var(--pixel-font);
+}
+
+.eyebrow::before {
+  content: "▣ ";
+}
+
+button,
+.file-button,
+.button-link,
+input,
+textarea,
+select,
+.thumb,
+.detail-embed img,
+.calendar-day {
+  border-radius: 0;
+}
+
+button:not(.star-toggle)::before,
+.file-button::before,
+.button-link::before {
+  content: "◆";
+  margin-right: 6px;
+  font-family: var(--pixel-font);
+  font-size: 10px;
+}
+
+#connectCsv::before,
+#connectCsvFromPaste::before,
+#copyNotion::before,
+#readClipboardCsv::before {
+  content: "▤";
+}
+
+.file-button:has(#csvInput)::before,
+.file-button:has(#mergeCsvInput)::before {
+  content: "▥";
+}
+
+#downloadCsv::before,
+#exportCsv::before,
+#saveHistoryNow::before,
+#refreshHistory::before {
+  content: "▣";
+}
+
+#connectImageFolder::before,
+.file-button:has(#imageInput)::before,
+.button-link[href="../photos/"]::before {
+  content: "▧";
+}
+
+#showToday::before {
+  content: "☉";
+}
+
+#showWeek::before,
+#showMonth::before,
+#showYear::before,
+#showAll::before,
+#showCalendar::before,
+.button-link[href="../web/"]::before {
+  content: "▦";
+}
+
+#showPending::before,
+#exportPendingCsv::before {
+  content: "□";
+}
+
+#showDone::before,
+#exportDoneCsv::before {
+  content: "■";
+}
+
+#showStarred::before {
+  content: "✦";
+}
+
+#showSentence::before,
+#exportSentenceCsv::before,
+.button-link[href="../sentences/"]::before {
+  content: "¶";
+}
+
+#mergePastedCsv::before {
+  content: "✚";
+}
+
+#clearPastedCsv::before,
+#detailDelete::before {
+  content: "×";
+}
+
+.badge,
+.card-links a,
+.local-path,
+.tag {
+  border-radius: 0;
+}
+
+.card,
+.stat {
+  transform: none;
+}
+
+.card:hover,
+.card:focus,
+.stat:hover,
+.stat:focus {
+  transform: translate(-2px, -2px);
+}
+
+.star-toggle {
+  border-radius: 0;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.toast {
+  border-radius: 0;
+  box-shadow: 5px 5px 0 #111;
+}
+
+/* Final unified style: gray field, ivory cards, black pill tags */
+:root {
+  --ink: #111;
+  --text: #151515;
+  --muted: #666;
+  --line: #111;
+  --paper: #f7f7f1;
+  --soft: #8f8f8a;
+  --soft-2: #e7e7df;
+  --stamp-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
+  --pixel-font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--soft);
+}
+
+.topbar,
+.onboarding,
+.toolbar,
+.paste-panel,
+.history-panel,
+.export-panel,
+.calendar-board,
+.detail-dialog,
+.onboarding-steps li,
+.stat,
+.card,
+.history-item,
+.history-empty,
+.embed-card,
+.card-embed {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: var(--stamp-shadow);
+}
+
+.topbar::after {
+  content: "# archive";
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .2);
+  font-family: var(--pixel-font);
+  font-size: 18px;
+  text-transform: none;
+}
+
+.eyebrow::before,
+button:not(.star-toggle)::before,
+.file-button::before,
+.button-link::before {
+  content: "";
+  display: none;
+}
+
+h1 {
+  font-size: clamp(34px, 5vw, 58px);
+}
+
+button,
+.file-button,
+.button-link,
+.badge,
+.card-links a,
+.local-path,
+.tag {
+  border-radius: 999px;
+}
+
+button,
+.file-button,
+.button-link {
+  font-family: var(--pixel-font);
+}
+
+input,
+textarea,
+select,
+.thumb,
+.detail-embed img,
+.calendar-day {
+  border-radius: 10px;
+}
+
+.badge,
+.card-links a,
+.local-path,
+.tag {
+  color: var(--paper);
+  background: var(--ink);
+  font-family: var(--pixel-font);
+  font-size: 12px;
+  text-transform: none;
+}
+
+.badge.done,
+.star-toggle.is-on {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.star-toggle {
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .2);
+}
+
+.toast {
+  border-radius: 999px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
+}

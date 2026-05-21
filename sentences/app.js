@@ -30,6 +30,8 @@ const state = {
   visible: [],
   csvHandle: null,
   csvFilename: "",
+  notionRows: [],
+  notionHeaders: [],
   toastTimer: 0
 };
 
@@ -44,6 +46,14 @@ const el = {
   titleInput: document.querySelector("#titleInput"),
   tagsInput: document.querySelector("#tagsInput"),
   addSentence: document.querySelector("#addSentence"),
+  notionCsvInput: document.querySelector("#notionCsvInput"),
+  notionMapper: document.querySelector("#notionMapper"),
+  mapSentence: document.querySelector("#mapSentence"),
+  mapReason: document.querySelector("#mapReason"),
+  mapSource: document.querySelector("#mapSource"),
+  mapTitle: document.querySelector("#mapTitle"),
+  mapTags: document.querySelector("#mapTags"),
+  importNotion: document.querySelector("#importNotion"),
   search: document.querySelector("#search"),
   showAll: document.querySelector("#showAll"),
   shuffleOne: document.querySelector("#shuffleOne"),
@@ -56,6 +66,8 @@ el.connectCsv.addEventListener("click", connectCsvFile);
 el.csvInput.addEventListener("change", loadCsv);
 el.saveCsv.addEventListener("click", saveCsv);
 el.addSentence.addEventListener("click", addSentence);
+el.notionCsvInput.addEventListener("change", loadNotionCsv);
+el.importNotion.addEventListener("click", importNotionRows);
 el.search.addEventListener("input", applyFilters);
 el.showAll.addEventListener("click", showAll);
 el.shuffleOne.addEventListener("click", shuffleOne);
@@ -162,6 +174,82 @@ function clearForm() {
   el.sourceInput.value = "";
   el.titleInput.value = "";
   el.tagsInput.value = "";
+}
+
+async function loadNotionCsv() {
+  const file = el.notionCsvInput.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    state.notionRows = parseCsv(text);
+    state.notionHeaders = Object.keys(state.notionRows[0] || {});
+    if (!state.notionRows.length || !state.notionHeaders.length) {
+      notify("노션 CSV에서 읽을 행을 찾지 못했습니다.");
+      return;
+    }
+    renderMapper();
+    notify(`${file.name}에서 ${state.notionRows.length}개 행을 읽었습니다. 컬럼을 맞춰 주세요.`);
+  } catch (error) {
+    notify(error.message || "노션 CSV를 읽지 못했습니다.");
+  } finally {
+    el.notionCsvInput.value = "";
+  }
+}
+
+function renderMapper() {
+  const fields = [
+    [el.mapSentence, ["문장", "quote", "sentence", "text", "content", "name", "이름", "제목"]],
+    [el.mapReason, ["수집한 이유", "이유", "why", "reason", "memo", "메모", "note"]],
+    [el.mapSource, ["출처", "source", "url", "link", "링크"]],
+    [el.mapTitle, ["제목", "title", "name", "이름"]],
+    [el.mapTags, ["태그", "tags", "tag", "분류"]]
+  ];
+
+  for (const [select, guesses] of fields) {
+    select.replaceChildren(optionView("", "선택 안 함"));
+    for (const header of state.notionHeaders) {
+      select.append(optionView(header, header));
+    }
+    select.value = guessHeader(guesses);
+  }
+
+  if (!el.mapSentence.value && state.notionHeaders[0]) {
+    el.mapSentence.value = state.notionHeaders[0];
+  }
+  el.notionMapper.hidden = false;
+}
+
+function importNotionRows() {
+  if (!state.notionRows.length) {
+    notify("먼저 노션 CSV를 열어 주세요.");
+    return;
+  }
+  const sentenceKey = el.mapSentence.value;
+  if (!sentenceKey) {
+    notify("문장 컬럼을 선택해 주세요.");
+    el.mapSentence.focus();
+    return;
+  }
+
+  const imported = state.notionRows
+    .map((row) => createSentenceClip({
+      sentence: row[sentenceKey],
+      reason: valueFromRow(row, el.mapReason.value),
+      source: valueFromRow(row, el.mapSource.value),
+      title: valueFromRow(row, el.mapTitle.value),
+      tags: valueFromRow(row, el.mapTags.value) || "#문장 #노션"
+    }))
+    .filter((clip) => clip.sentence);
+
+  if (!imported.length) {
+    notify("가져올 문장을 찾지 못했습니다. 문장 컬럼을 다시 확인해 주세요.");
+    return;
+  }
+
+  state.clips = [...imported, ...state.clips];
+  applyFilters();
+  notify(`노션 문장 ${imported.length}개를 줍줍문장에 합쳤습니다.`);
 }
 
 function applyFilters() {
@@ -473,6 +561,36 @@ function deriveSiteName(url) {
 
 function parseFavorite(value) {
   return ["true", "1", "yes", "y", "예", "좋아요", "별표", "★"].includes(String(value || "").trim().toLowerCase());
+}
+
+function optionView(value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  return option;
+}
+
+function guessHeader(candidates) {
+  const normalized = state.notionHeaders.map((header) => ({
+    raw: header,
+    value: normalizeHeader(header)
+  }));
+  for (const candidate of candidates) {
+    const needle = normalizeHeader(candidate);
+    const exact = normalized.find((header) => header.value === needle);
+    if (exact) return exact.raw;
+    const partial = normalized.find((header) => header.value.includes(needle));
+    if (partial) return partial.raw;
+  }
+  return "";
+}
+
+function normalizeHeader(value) {
+  return String(value || "").toLowerCase().replace(/[\s_/.-]+/g, "");
+}
+
+function valueFromRow(row, key) {
+  return key ? row[key] || "" : "";
 }
 
 function csvCell(value) {

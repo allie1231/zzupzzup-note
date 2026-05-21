@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍사진</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <nav class="nav-actions" aria-label="페이지 이동">
+          <a href="../web/">웹홈</a>
+          <a href="../sentences/">줍줍문장</a>
+        </nav>
+        <div class="hero-copy">
+          <p class="eyebrow">image archive</p>
+          <h1>줍줍사진</h1>
+          <p class="lead">저장해 둔 이미지 폴더를 열어 커다란 보드처럼 보고, CSV를 함께 열면 출처와 메모까지 한 번에 확인합니다.</p>
+        </div>
+      </header>
+
+      <section class="control-strip">
+        <label class="file-button">
+          이미지 폴더 열기
+          <input id="imageInput" type="file" accept="image/*" webkitdirectory directory multiple>
+        </label>
+        <label class="file-button secondary">
+          CSV 같이 열기
+          <input id="csvInput" type="file" accept=".csv,text/csv">
+        </label>
+        <input id="search" placeholder="파일명, 제목, 출처, 태그 검색">
+        <button id="showAll" class="secondary">전체</button>
+      </section>
+
+      <section class="stats" aria-label="이미지 통계">
+        <article>
+          <strong id="imageCount">0</strong>
+          <span>images</span>
+        </article>
+        <article>
+          <strong id="csvCount">0</strong>
+          <span>csv rows</span>
+        </article>
+        <article>
+          <strong id="matchedCount">0</strong>
+          <span>matched</span>
+        </article>
+      </section>
+
+      <p id="status" class="status" role="status">이미지 폴더를 열면 줍줍사진 보드가 채워집니다.</p>
+
+      <section id="feature" class="feature" hidden></section>
+      <section id="gallery" class="gallery" aria-label="이미지 목록"></section>
+    </main>
+
+    <dialog id="detailDialog" class="detail-dialog">
+      <form method="dialog" class="detail-panel">
+        <button value="close" class="close-button">닫기</button>
+        <img id="detailImage" alt="">
+        <div class="detail-copy">
+          <p class="eyebrow">selected image</p>
+          <h2 id="detailTitle">이미지</h2>
+          <p id="detailMeta"></p>
+          <p id="detailReason"></p>
+          <div id="detailLinks" class="detail-links"></div>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

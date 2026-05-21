@@ -67,6 +67,41 @@
         <button id="addSentence">문장 추가</button>
       </section>
 
+      <section class="notion-panel">
+        <div>
+          <p class="eyebrow">notion import</p>
+          <h2>노션 문장 CSV 매핑</h2>
+          <p>노션에서 CSV로 내보낸 문장 DB를 열고, 컬럼을 맞춰 줍줍문장에 합칩니다.</p>
+        </div>
+        <label class="file-button secondary">
+          노션 CSV 열기
+          <input id="notionCsvInput" type="file" accept=".csv,text/csv">
+        </label>
+        <div id="notionMapper" class="mapper" hidden>
+          <label>
+            문장 컬럼
+            <select id="mapSentence"></select>
+          </label>
+          <label>
+            이유 컬럼
+            <select id="mapReason"></select>
+          </label>
+          <label>
+            출처 컬럼
+            <select id="mapSource"></select>
+          </label>
+          <label>
+            제목 컬럼
+            <select id="mapTitle"></select>
+          </label>
+          <label>
+            태그 컬럼
+            <select id="mapTags"></select>
+          </label>
+          <button id="importNotion">매핑해서 가져오기</button>
+        </div>
+      </section>
+
       <section class="reader-tools">
         <input id="search" placeholder="문장, 이유, 출처, 태그 검색">
         <button id="showAll" class="secondary">전체</button>

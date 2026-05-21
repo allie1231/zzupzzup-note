@@ -1,12 +1,14 @@
 :root {
-  --ink: #111;
-  --text: #171717;
-  --muted: #6f6f6c;
-  --line: #d8d8d2;
-  --paper: #f7f6f1;
+  --ink: #f7f7f4;
+  --text: #e7e7e2;
+  --muted: #aaa9a3;
+  --line: rgba(255, 255, 255, .18);
+  --line-strong: rgba(255, 255, 255, .38);
+  --paper: rgba(24, 24, 24, .82);
+  --panel: rgba(255, 255, 255, .06);
   --white: #fffffb;
   --black: #080808;
-  --shadow: 0 18px 46px rgba(0, 0, 0, .22);
+  --shadow: 0 28px 80px rgba(0, 0, 0, .28);
 }
 
 * {
@@ -16,7 +18,9 @@
 body {
   margin: 0;
   color: var(--text);
-  background: #777773;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, .08), transparent 28rem),
+    linear-gradient(135deg, #090909 0%, #1c1c1c 48%, #303030 100%);
   font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
 }
 
@@ -33,9 +37,10 @@ body {
   margin-bottom: 26px;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .nav-actions {
@@ -80,7 +85,7 @@ h1 {
 .lead {
   width: min(620px, 100%);
   margin: 22px 0 0;
-  color: var(--text);
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -98,9 +103,10 @@ h1 {
   align-items: center;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 button,
@@ -112,7 +118,7 @@ button,
   border: 1px solid var(--ink);
   border-radius: 999px;
   padding: 8px 14px;
-  color: var(--white);
+  color: var(--black);
   background: var(--ink);
   font: inherit;
   line-height: 1.1;
@@ -128,7 +134,7 @@ button.secondary,
 button:hover,
 .file-button:hover {
   color: var(--ink);
-  background: #e7e6df;
+  background: rgba(255, 255, 255, .12);
 }
 
 .file-button input {
@@ -145,13 +151,18 @@ input {
   border-radius: 999px;
   padding: 8px 14px;
   color: var(--ink);
-  background: var(--white);
+  background: var(--panel);
   font: inherit;
   outline: none;
 }
 
 input:focus {
   border-color: var(--ink);
+  background: rgba(255, 255, 255, .1);
+}
+
+input::placeholder {
+  color: #777;
 }
 
 .stats {
@@ -166,9 +177,10 @@ input:focus {
   align-content: end;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .stats strong {
@@ -195,9 +207,10 @@ input:focus {
   gap: 12px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .feature:not([hidden]) {
@@ -209,7 +222,7 @@ input:focus {
   height: 100%;
   min-height: 360px;
   object-fit: cover;
-  filter: grayscale(.35);
+  filter: grayscale(.18);
 }
 
 .feature-copy {
@@ -246,9 +259,10 @@ input:focus {
   grid-template-rows: 1fr auto;
   padding: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
   cursor: pointer;
 }
 
@@ -261,8 +275,9 @@ input:focus {
   width: 100%;
   height: 300px;
   object-fit: cover;
-  background: #d8d8d2;
-  filter: grayscale(.2);
+  border-radius: 10px;
+  background: #242424;
+  filter: grayscale(.12);
 }
 
 .photo-card:nth-child(5n + 1) img,
@@ -293,7 +308,7 @@ input:focus {
   grid-column: 1 / -1;
   padding: 60px 18px;
   border: 1px dashed var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   color: var(--muted);
   text-align: center;
   background: var(--paper);
@@ -317,9 +332,10 @@ input:focus {
   margin: 0;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .close-button {
@@ -332,7 +348,8 @@ input:focus {
   width: 100%;
   max-height: 76vh;
   object-fit: contain;
-  background: #d8d8d2;
+  border-radius: 10px;
+  background: #242424;
 }
 
 .detail-copy {

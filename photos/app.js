@@ -97,7 +97,7 @@ function applyFilters() {
   const folderImages = state.images.map((image) => ({
     ...image,
     sourceUrl: image.row?.source || image.row?.imageUrl || "",
-    title: image.row?.title || image.name,
+    title: image.row?.title || "",
     reason: image.row?.reason || "",
     tags: image.row?.tags || "",
     siteName: image.row?.siteName || ""
@@ -112,7 +112,7 @@ function applyFilters() {
       url: row.imageUrl,
       row,
       sourceUrl: row.source || row.imageUrl,
-      title: row.title || row.siteName || filenameFromUrl(row.imageUrl),
+      title: row.title || row.siteName || "",
       reason: row.reason || "",
       tags: row.tags || "",
       siteName: row.siteName || ""
@@ -167,14 +167,14 @@ function renderFeature() {
 
   const image = document.createElement("img");
   image.src = item.url;
-  image.alt = item.title || item.name;
+  image.alt = displayTitle(item);
 
   const copy = document.createElement("div");
   copy.className = "feature-copy";
   copy.append(
     textEl("p", "eyebrow", "selected from archive"),
-    textEl("h2", "", item.title || item.name),
-    textEl("p", "", item.reason || item.path || "이미지 폴더에서 불러온 사진입니다.")
+    textEl("h2", "", displayTitle(item)),
+    textEl("p", "", item.reason || item.siteName || item.tags || "이미지 폴더에서 불러온 사진입니다.")
   );
 
   el.feature.append(image, copy);
@@ -187,13 +187,13 @@ function photoCard(item) {
 
   const image = document.createElement("img");
   image.src = item.url;
-  image.alt = item.title || item.name;
+  image.alt = displayTitle(item);
 
   const footer = document.createElement("footer");
   const copy = document.createElement("div");
   copy.append(
-    textEl("strong", "", item.title || item.name),
-    textEl("span", "", item.siteName || item.path || "local image")
+    textEl("strong", "", displayTitle(item)),
+    textEl("span", "", item.siteName || item.tags || "image archive")
   );
   footer.append(copy, textEl("small", "", item.tags || "image"));
   card.append(image, footer);
@@ -207,15 +207,14 @@ function openCard(event) {
   if (!item) return;
 
   el.detailImage.src = item.url;
-  el.detailImage.alt = item.title || item.name;
-  el.detailTitle.textContent = item.title || item.name;
-  el.detailMeta.textContent = [item.siteName, item.tags, item.path].filter(Boolean).join(" · ");
+  el.detailImage.alt = displayTitle(item);
+  el.detailTitle.textContent = displayTitle(item);
+  el.detailMeta.textContent = [item.siteName, item.tags].filter(Boolean).join(" · ");
   el.detailReason.textContent = item.reason || "아직 메모가 없습니다.";
   el.detailLinks.replaceChildren();
 
   if (item.sourceUrl) el.detailLinks.append(anchorView("출처 열기", item.sourceUrl));
   if (item.row?.imageUrl) el.detailLinks.append(anchorView("이미지 원본", item.row.imageUrl));
-  if (item.path) el.detailLinks.append(textEl("span", "", item.path));
   el.detailDialog.showModal();
 }
 
@@ -310,6 +309,10 @@ function textEl(tag, className, text) {
   item.className = className;
   item.textContent = text || "";
   return item;
+}
+
+function displayTitle(item) {
+  return item.title || item.siteName || "이미지";
 }
 
 function anchorView(label, href) {

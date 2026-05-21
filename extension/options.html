@@ -21,8 +21,8 @@
         <div>
           <h2>처음 설정</h2>
           <ol class="settings-steps">
-            <li>Supabase URL과 anon public key를 입력합니다.</li>
-            <li>Supabase Auth 계정으로 로그인합니다.</li>
+            <li>이메일과 비밀번호로 로그인합니다.</li>
+            <li>필요할 때만 고급 설정에서 서버 정보를 확인합니다.</li>
             <li>웹에서 문장, 링크, 이미지, 동영상, 자료를 서버에 바로 줍습니다.</li>
           </ol>
         </div>
@@ -35,14 +35,6 @@
           <p class="muted">확장프로그램에서 줍줍한 항목은 Supabase의 <strong>zzup_clips</strong> 테이블과 <strong>zzup-images</strong> Storage에 바로 저장됩니다.</p>
           <div class="settings-form">
             <label>
-              Supabase URL
-              <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
-            </label>
-            <label>
-              anon public key
-              <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
-            </label>
-            <label>
               이메일
               <input id="cloudEmail" type="email" placeholder="me@example.com">
             </label>
@@ -51,6 +43,19 @@
               <input id="cloudPassword" type="password" placeholder="비밀번호">
             </label>
           </div>
+          <details class="cloud-advanced">
+            <summary>고급 설정</summary>
+            <div class="settings-form">
+              <label>
+                Supabase URL
+                <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+              </label>
+              <label>
+                anon public key
+                <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+              </label>
+            </div>
+          </details>
           <div class="settings-actions">
             <button id="cloudSave" class="secondary">설정 저장</button>
             <button id="cloudLogin" class="save-button">로그인</button>

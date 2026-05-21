@@ -217,6 +217,22 @@ button:hover,
   font-size: 13px;
 }
 
+.cloud-advanced {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.cloud-advanced summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cloud-advanced .cloud-grid {
+  margin-top: 12px;
+}
+
 .onboarding {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;

@@ -89,6 +89,7 @@ const el = {
   cloudPull: document.querySelector("#cloudPull"),
   cloudPush: document.querySelector("#cloudPush"),
   cloudStatus: document.querySelector("#cloudStatus"),
+  cloudAdvanced: document.querySelector(".cloud-advanced"),
   search: document.querySelector("#search"),
   typeFilter: document.querySelector("#typeFilter"),
   statusFilter: document.querySelector("#statusFilter"),
@@ -204,8 +205,9 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
+  if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
   state.cloudReady = hasCloudSession(settings);
-  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 웹홈을 열면 클라우드 데이터를 불러옵니다." : "Supabase 프로젝트를 연결하면 CSV 없이도 계속 저장하고 확인할 수 있습니다.");
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 웹홈을 열면 클라우드 데이터를 불러옵니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
 
 function saveCloudConfig() {

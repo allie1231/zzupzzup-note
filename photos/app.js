@@ -25,6 +25,7 @@ const el = {
   cloudLogout: document.querySelector("#cloudLogout"),
   cloudPull: document.querySelector("#cloudPull"),
   cloudStatus: document.querySelector("#cloudStatus"),
+  cloudAdvanced: document.querySelector(".cloud-advanced"),
   imageInput: document.querySelector("#imageInput"),
   csvInput: document.querySelector("#csvInput"),
   search: document.querySelector("#search"),
@@ -62,8 +63,9 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
+  if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
   state.cloudReady = hasCloudSession(settings);
-  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 이미지 DB를 불러올 수 있습니다." : "Supabase를 연결하면 Storage URL이 있는 이미지를 바로 볼 수 있습니다.");
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 이미지 DB를 불러올 수 있습니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
 
 function saveCloudConfig() {

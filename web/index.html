@@ -55,14 +55,6 @@
         </div>
         <div class="cloud-grid">
           <label>
-            Supabase URL
-            <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
-          </label>
-          <label>
-            anon public key
-            <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
-          </label>
-          <label>
             이메일
             <input id="cloudEmail" type="email" placeholder="me@example.com">
           </label>
@@ -71,6 +63,19 @@
             <input id="cloudPassword" type="password" placeholder="Supabase Auth 비밀번호">
           </label>
         </div>
+        <details class="cloud-advanced">
+          <summary>고급 설정</summary>
+          <div class="cloud-grid">
+            <label>
+              Supabase URL
+              <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+            </label>
+            <label>
+              anon public key
+              <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+            </label>
+          </div>
+        </details>
         <div class="cloud-actions">
           <button id="cloudSave" class="secondary">설정 저장</button>
           <button id="cloudLogin">로그인</button>

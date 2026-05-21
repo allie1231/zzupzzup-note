@@ -172,6 +172,23 @@ h1 {
   text-transform: uppercase;
 }
 
+.cloud-advanced {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.cloud-advanced summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.cloud-advanced .cloud-grid {
+  margin-top: 12px;
+}
+
 button,
 .file-button {
   min-height: 36px;

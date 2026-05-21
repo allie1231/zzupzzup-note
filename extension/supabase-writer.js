@@ -9,12 +9,14 @@ const SETTINGS_KEYS = [
 
 const TABLE_NAME = "zzup_clips";
 const IMAGE_BUCKET = "zzup-images";
+const DEFAULT_SUPABASE_URL = "https://ypgtipfqxjwtbwazccsr.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "";
 
 export async function getCloudSettings() {
   const values = await chrome.storage.sync.get(SETTINGS_KEYS);
   return {
-    url: normalizeUrl(values.supabaseUrl),
-    anonKey: String(values.supabaseAnonKey || "").trim(),
+    url: normalizeUrl(values.supabaseUrl || DEFAULT_SUPABASE_URL),
+    anonKey: String(values.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY).trim(),
     email: String(values.supabaseEmail || "").trim(),
     accessToken: String(values.supabaseAccessToken || ""),
     refreshToken: String(values.supabaseRefreshToken || ""),
@@ -25,15 +27,15 @@ export async function getCloudSettings() {
 export async function saveCloudConfig({ url, anonKey, email }) {
   await chrome.storage.sync.set({
     supabaseUrl: normalizeUrl(url),
-    supabaseAnonKey: String(anonKey || "").trim(),
+    supabaseAnonKey: String(anonKey || DEFAULT_SUPABASE_ANON_KEY).trim(),
     supabaseEmail: String(email || "").trim()
   });
 }
 
 export async function signInToCloud({ url, anonKey, email, password }) {
   const settings = {
-    url: normalizeUrl(url),
-    anonKey: String(anonKey || "").trim()
+    url: normalizeUrl(url || DEFAULT_SUPABASE_URL),
+    anonKey: String(anonKey || DEFAULT_SUPABASE_ANON_KEY).trim()
   };
   const response = await fetch(`${settings.url}/auth/v1/token?grant_type=password`, {
     method: "POST",
@@ -61,6 +63,10 @@ export async function clearCloudSession() {
 
 export function hasCloudSession(settings) {
   return Boolean(settings?.url && settings?.anonKey && settings?.accessToken);
+}
+
+export function hasBundledCloudConfig() {
+  return Boolean(DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_ANON_KEY);
 }
 
 export async function saveClipToCloud(clip) {

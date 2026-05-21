@@ -90,6 +90,22 @@ section {
   font-size: 13px;
 }
 
+.cloud-advanced {
+  border-top: 1px solid #dfdfdc;
+  padding-top: 12px;
+}
+
+.cloud-advanced summary {
+  width: fit-content;
+  cursor: pointer;
+  color: #666;
+  font-size: 13px;
+}
+
+.cloud-advanced .grid {
+  margin-top: 12px;
+}
+
 label {
   display: grid;
   gap: 6px;

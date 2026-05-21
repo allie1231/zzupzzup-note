@@ -25,6 +25,7 @@ const el = {
   cloudLogout: document.querySelector("#cloudLogout"),
   cloudPull: document.querySelector("#cloudPull"),
   cloudStatus: document.querySelector("#cloudStatus"),
+  cloudAdvanced: document.querySelector(".cloud-advanced"),
   quickSave: document.querySelector("#quickSave"),
   clear: document.querySelector("#clear"),
   contentType: document.querySelector("#contentType"),
@@ -126,7 +127,8 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
-  setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다. 저장하면 서버에 바로 들어갑니다." : "Supabase에 로그인해야 모바일 줍기가 서버에 바로 저장됩니다.");
+  if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
+  setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다. 저장하면 서버에 바로 들어갑니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
 
 function saveCloudConfig() {

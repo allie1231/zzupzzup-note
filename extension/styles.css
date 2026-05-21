@@ -289,6 +289,19 @@ button.secondary:hover,
   font-size: 13px;
 }
 
+.cloud-advanced {
+  margin-top: 12px;
+  border-top: 1px solid #eeeeeb;
+  padding-top: 12px;
+}
+
+.cloud-advanced summary {
+  width: fit-content;
+  cursor: pointer;
+  color: #666;
+  font-size: 13px;
+}
+
 .options-page {
   min-width: 0;
   color: #151515;

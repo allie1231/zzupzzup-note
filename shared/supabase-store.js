@@ -1,12 +1,14 @@
 const SETTINGS_KEY = "zzupzzup:supabase";
 const TABLE_NAME = "zzup_clips";
 const IMAGE_BUCKET = "zzup-images";
+const DEFAULT_SUPABASE_URL = "https://ypgtipfqxjwtbwazccsr.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "";
 
 export function getCloudSettings() {
   try {
-    return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+    return withDefaultConfig(JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"));
   } catch {
-    return {};
+    return withDefaultConfig({});
   }
 }
 
@@ -14,8 +16,8 @@ export function saveCloudSettings(settings = {}) {
   const current = getCloudSettings();
   const next = {
     ...current,
-    url: normalizeUrl(settings.url ?? current.url),
-    anonKey: String(settings.anonKey ?? current.anonKey ?? "").trim(),
+    url: normalizeUrl(settings.url ?? current.url ?? DEFAULT_SUPABASE_URL),
+    anonKey: String(settings.anonKey ?? current.anonKey ?? DEFAULT_SUPABASE_ANON_KEY).trim(),
     email: String(settings.email ?? current.email ?? "").trim(),
     accessToken: settings.accessToken ?? current.accessToken ?? "",
     refreshToken: settings.refreshToken ?? current.refreshToken ?? "",
@@ -28,8 +30,8 @@ export function saveCloudSettings(settings = {}) {
 export function clearCloudSession() {
   const current = getCloudSettings();
   localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-    url: current.url || "",
-    anonKey: current.anonKey || "",
+    url: current.url || DEFAULT_SUPABASE_URL,
+    anonKey: current.anonKey || DEFAULT_SUPABASE_ANON_KEY,
     email: current.email || ""
   }));
 }
@@ -42,9 +44,14 @@ export function hasCloudConfig(settings = getCloudSettings()) {
   return Boolean(settings.url && settings.anonKey);
 }
 
+export function hasBundledCloudConfig() {
+  return Boolean(DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_ANON_KEY);
+}
+
 export async function signInToCloud({ url, anonKey, email, password }) {
-  const baseUrl = normalizeUrl(url);
-  const key = String(anonKey || "").trim();
+  const current = getCloudSettings();
+  const baseUrl = normalizeUrl(url || current.url || DEFAULT_SUPABASE_URL);
+  const key = String(anonKey || current.anonKey || DEFAULT_SUPABASE_ANON_KEY).trim();
   const response = await fetch(`${baseUrl}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: authHeaders({ url: baseUrl, anonKey: key }, false),
@@ -227,4 +234,12 @@ function filenameExtension(name = "") {
 
 function normalizeUrl(url) {
   return String(url || "").trim().replace(/\/+$/, "");
+}
+
+function withDefaultConfig(settings = {}) {
+  return {
+    ...settings,
+    url: normalizeUrl(settings.url || DEFAULT_SUPABASE_URL),
+    anonKey: String(settings.anonKey || DEFAULT_SUPABASE_ANON_KEY).trim()
+  };
 }

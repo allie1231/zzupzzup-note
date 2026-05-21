@@ -20,6 +20,7 @@ const cloudSave = document.querySelector("#cloudSave");
 const cloudLogin = document.querySelector("#cloudLogin");
 const cloudLogout = document.querySelector("#cloudLogout");
 const cloudStatus = document.querySelector("#cloudStatus");
+const cloudAdvanced = document.querySelector(".cloud-advanced");
 
 refreshStatus();
 refreshCloudStatus();
@@ -57,9 +58,10 @@ async function refreshCloudStatus(message = "") {
   cloudUrl.value = settings.url || "";
   cloudAnonKey.value = settings.anonKey || "";
   cloudEmail.value = settings.email || "";
+  if (cloudAdvanced) cloudAdvanced.open = !settings.anonKey;
   cloudStatus.textContent = message || (hasCloudSession(settings)
     ? "Supabase에 로그인되어 있습니다. 확장에서 줍줍하면 서버에 바로 저장됩니다."
-    : "Supabase 설정을 저장하고 로그인해 주세요.");
+    : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
 
 async function saveCloudSettingsOnly() {

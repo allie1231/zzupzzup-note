@@ -41,12 +41,14 @@ const el = {
   gallery: document.querySelector("#gallery"),
   detailDialog: document.querySelector("#detailDialog"),
   detailImage: document.querySelector("#detailImage"),
+  detailVideo: document.querySelector("#detailVideo"),
   detailTitle: document.querySelector("#detailTitle"),
   detailMeta: document.querySelector("#detailMeta"),
   detailReason: document.querySelector("#detailReason"),
   detailLinks: document.querySelector("#detailLinks"),
   pinLayer: document.querySelector("#pinLayer"),
-  pinList: document.querySelector("#pinList")
+  pinList: document.querySelector("#pinList"),
+  pinEditor: document.querySelector("#pinEditor")
 };
 
 el.imageInput.addEventListener("change", loadImages);
@@ -72,7 +74,7 @@ function restoreCloudConfig() {
   el.cloudEmail.value = settings.email || "";
   if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
   state.cloudReady = hasCloudSession(settings);
-  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 이미지 DB를 불러올 수 있습니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
+  setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 미디어 DB를 불러올 수 있습니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
 
 function saveCloudConfig() {
@@ -95,7 +97,7 @@ async function loginCloud() {
     });
     el.cloudPassword.value = "";
     state.cloudReady = true;
-    setCloudStatus("Supabase에 로그인했습니다. 이미지를 불러옵니다.");
+    setCloudStatus("Supabase에 로그인했습니다. 미디어를 불러옵니다.");
     await pullCloud();
   } catch (error) {
     setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
@@ -122,17 +124,17 @@ async function pullCloud(options = {}) {
     setCloudStatus("먼저 Supabase에 로그인해 주세요.");
     return;
   }
-  if (!options.quiet) setCloudStatus("Supabase에서 이미지를 불러오는 중...");
+  if (!options.quiet) setCloudStatus("Supabase에서 미디어를 불러오는 중...");
   try {
     const rows = (await fetchCloudClips())
-      .filter((clip) => clip.contentType === "이미지" || clip.imagePath || clip.imageUrl);
+      .filter(isMediaClip);
     state.rows = mergeRows(state.rows, rows);
     matchRows();
     applyFilters();
     state.cloudReady = true;
-    setCloudStatus(`Supabase에서 이미지 기록 ${rows.length}개를 불러왔습니다.`);
+    setCloudStatus(`Supabase에서 미디어 기록 ${rows.length}개를 불러왔습니다.`);
   } catch (error) {
-    setCloudStatus(error.message || "Supabase에서 이미지를 불러오지 못했습니다.");
+    setCloudStatus(error.message || "Supabase에서 미디어를 불러오지 못했습니다.");
   }
 }
 
@@ -142,7 +144,7 @@ function loadImages() {
   state.urls = new Map();
 
   for (const file of el.imageInput.files || []) {
-    if (file.type && !file.type.startsWith("image/")) continue;
+    if (file.type && !file.type.startsWith("image/") && !file.type.startsWith("video/")) continue;
     const url = URL.createObjectURL(file);
     const path = file.webkitRelativePath || file.name;
     const image = {
@@ -151,6 +153,7 @@ function loadImages() {
       name: file.name,
       path,
       url,
+      mediaKind: file.type?.startsWith("video/") ? "video" : "image",
       row: null
     };
     state.images.push(image);
@@ -161,7 +164,7 @@ function loadImages() {
   matchRows();
   applyFilters();
   el.imageInput.value = "";
-  notify(`이미지 ${state.images.length}개를 열었습니다.`);
+  notify(`미디어 ${state.images.length}개를 열었습니다.`);
 }
 
 async function loadCsv() {
@@ -172,10 +175,10 @@ async function loadCsv() {
     const text = await file.text();
     state.rows = parseCsv(text)
       .map(rowToItem)
-      .filter((item) => item.contentType === "이미지" || item.imagePath || item.imageUrl);
+      .filter(isMediaClip);
     matchRows();
     applyFilters();
-    notify(`${file.name}에서 이미지 기록 ${state.rows.length}개를 읽었습니다.`);
+    notify(`${file.name}에서 미디어 기록 ${state.rows.length}개를 읽었습니다.`);
   } catch (error) {
     notify(error.message || "CSV를 읽지 못했습니다.");
   } finally {
@@ -205,18 +208,22 @@ function applyFilters() {
     reason: image.row?.reason || "",
     connection: image.row?.connection || "",
     tags: image.row?.tags || "",
-    siteName: image.row?.siteName || ""
+    siteName: image.row?.siteName || "",
+    contentType: image.row?.contentType || (image.mediaKind === "video" ? "동영상" : "이미지"),
+    mediaKind: image.mediaKind
   }));
 
   const remoteOnly = state.rows
-    .filter((row) => row.imageUrl && !state.images.some((image) => image.row === row))
+    .filter((row) => hasDisplayableMedia(row) && !state.images.some((image) => image.row === row))
     .map((row) => ({
-      id: row.id || row.imageUrl,
-      name: filenameFromUrl(row.imageUrl),
-      path: row.imagePath || row.imageUrl,
-      url: row.imageUrl,
+      id: row.id || row.imageUrl || row.source,
+      name: filenameFromUrl(row.imageUrl || row.source || row.title || "media"),
+      path: row.imagePath || row.imageUrl || row.source,
+      url: mediaUrl(row),
       row,
       sourceUrl: row.source || row.imageUrl,
+      contentType: row.contentType,
+      mediaKind: mediaKind(row),
       title: row.title || row.siteName || "",
       reason: row.reason || "",
       connection: row.connection || "",
@@ -242,7 +249,7 @@ function applyFilters() {
 function showAll() {
   el.search.value = "";
   applyFilters();
-  notify(`이미지 ${state.visible.length}개를 보여줍니다.`);
+  notify(`미디어 ${state.visible.length}개를 보여줍니다.`);
 }
 
 function render() {
@@ -256,7 +263,7 @@ function render() {
   if (!state.visible.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "images 폴더를 열면 저장한 사진들이 여기에 나타납니다.";
+    empty.textContent = "미디어 폴더를 열거나 DB를 불러오면 이미지와 동영상이 여기에 나타납니다.";
     el.gallery.append(empty);
     return;
   }
@@ -267,18 +274,97 @@ function render() {
 function photoCard(item) {
   const card = document.createElement("article");
   card.className = "photo-card";
+  if (isVideoItem(item)) card.classList.add("is-video");
   card.dataset.id = item.id;
 
-  const image = document.createElement("img");
-  image.src = item.url;
-  image.alt = displayTitle(item);
+  const media = cardMediaView(item);
 
   const footer = document.createElement("footer");
   const copy = document.createElement("div");
-  copy.append(textEl("span", "", item.siteName || item.tags || "image archive"));
-  footer.append(copy, textEl("small", "", item.tags || "image"));
-  card.append(image, footer);
+  copy.append(textEl("span", "", item.siteName || item.tags || (isVideoItem(item) ? "video archive" : "image archive")));
+  footer.append(copy, textEl("small", "", item.tags || (isVideoItem(item) ? "video" : "image")));
+  card.append(media, footer);
   return card;
+}
+
+function cardMediaView(item) {
+  if (!isVideoItem(item)) {
+    if (!item.url) {
+      const fallback = document.createElement("div");
+      fallback.className = "media-preview";
+      fallback.append(textEl("span", "", "IMAGE"));
+      return fallback;
+    }
+    const image = document.createElement("img");
+    image.src = item.url;
+    image.alt = displayTitle(item);
+    return image;
+  }
+
+  const preview = document.createElement("div");
+  preview.className = "media-preview video-preview";
+  const thumbnail = videoThumbnail(item.sourceUrl || item.url);
+  if (thumbnail) {
+    const image = document.createElement("img");
+    image.src = thumbnail;
+    image.alt = "동영상 썸네일";
+    preview.append(image);
+  } else if (isPlayableVideoItem(item)) {
+    const video = document.createElement("video");
+    video.src = item.url;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    preview.append(video);
+  } else {
+    preview.append(textEl("span", "", "VIDEO"));
+  }
+
+  const badge = textEl("strong", "video-badge", "▶");
+  preview.append(badge);
+  return preview;
+}
+
+function renderDetailMedia(item, video) {
+  el.detailVideo.replaceChildren();
+  el.detailVideo.hidden = !video;
+  el.detailImage.hidden = video;
+
+  if (!video) {
+    el.detailImage.src = item.url;
+    el.detailImage.alt = displayTitle(item);
+    return;
+  }
+
+  el.detailImage.removeAttribute("src");
+  const source = item.sourceUrl || item.url;
+  const embed = videoEmbedUrl(source);
+  if (embed) {
+    const frame = document.createElement("iframe");
+    frame.src = embed;
+    frame.title = "줍줍 동영상";
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    frame.allowFullscreen = true;
+    el.detailVideo.append(frame);
+    return;
+  }
+
+  if (isPlayableVideoItem(item) || isDirectVideoUrl(item.url || source)) {
+    const player = document.createElement("video");
+    player.src = item.url || source;
+    player.controls = true;
+    player.playsInline = true;
+    el.detailVideo.append(player);
+    return;
+  }
+
+  const fallback = document.createElement("div");
+  fallback.className = "video-fallback";
+  fallback.append(
+    textEl("strong", "", "VIDEO"),
+    textEl("span", "", "임베드할 수 없는 동영상 링크입니다. 출처 열기로 확인해 주세요.")
+  );
+  el.detailVideo.append(fallback);
 }
 
 function openCard(event) {
@@ -287,17 +373,26 @@ function openCard(event) {
   const item = state.visible.find((entry) => entry.id === card.dataset.id);
   if (!item) return;
 
-  el.detailImage.src = item.url;
-  el.detailImage.alt = displayTitle(item);
-  el.detailTitle.textContent = "이미지 메모";
+  const video = isVideoItem(item);
+  renderDetailMedia(item, video);
+  el.detailTitle.textContent = video ? "동영상 메모" : "이미지 메모";
   el.detailMeta.textContent = [item.siteName, item.tags].filter(Boolean).join(" · ");
   el.detailReason.textContent = item.reason || "아직 메모가 없습니다.";
   el.detailLinks.replaceChildren();
   state.activeItem = item;
 
   if (item.sourceUrl) el.detailLinks.append(anchorView("출처 열기", item.sourceUrl));
-  if (item.row?.imageUrl) el.detailLinks.append(anchorView("이미지 원본", item.row.imageUrl));
-  renderPins(item);
+  if (item.row?.imageUrl && !video) el.detailLinks.append(anchorView("이미지 원본", item.row.imageUrl));
+  if (video) {
+    el.pinLayer.hidden = true;
+    el.pinEditor.hidden = true;
+    el.pinLayer.replaceChildren();
+    el.pinList.replaceChildren();
+  } else {
+    el.pinLayer.hidden = false;
+    el.pinEditor.hidden = false;
+    renderPins(item);
+  }
   el.detailDialog.showModal();
 }
 
@@ -327,7 +422,7 @@ function rowToItem(row) {
 
 async function addPinFromClick(event) {
   const item = state.activeItem;
-  if (!item) return;
+  if (!item || isVideoItem(item)) return;
 
   const bounds = el.pinLayer.getBoundingClientRect();
   if (!bounds.width || !bounds.height) return;
@@ -527,8 +622,79 @@ function clamp(value, min, max) {
 function normalizeContentType(value, row) {
   const type = String(value || "").trim();
   if (type) return type;
+  if (isVideoUrl(row.source || row["출처"] || row.imageUrl || row["이미지 URL"])) return "동영상";
   if (row.imagePath || row.imageUrl || row["이미지 경로"] || row["이미지 URL"]) return "이미지";
   return "자료";
+}
+
+function isMediaClip(clip) {
+  return clip.contentType === "이미지"
+    || clip.contentType === "동영상"
+    || Boolean(clip.imagePath)
+    || Boolean(clip.imageUrl)
+    || isVideoUrl(clip.source);
+}
+
+function hasDisplayableMedia(row) {
+  return Boolean(row.imageUrl || row.source || row.contentType === "동영상");
+}
+
+function isVideoItem(item) {
+  return item.mediaKind === "video"
+    || item.contentType === "동영상"
+    || isVideoUrl(item.sourceUrl || item.url);
+}
+
+function isPlayableVideoItem(item) {
+  return item.mediaKind === "video" && Boolean(item.url);
+}
+
+function mediaKind(row) {
+  return row.contentType === "동영상" || isVideoUrl(row.source || row.imageUrl) ? "video" : "image";
+}
+
+function mediaUrl(row) {
+  if (row.contentType === "동영상") {
+    return videoThumbnail(row.source || row.imageUrl) || row.imageUrl || row.source || "";
+  }
+  return row.imageUrl || row.source || "";
+}
+
+function isVideoUrl(url) {
+  return Boolean(youtubeId(url) || isDirectVideoUrl(url));
+}
+
+function isDirectVideoUrl(url) {
+  try {
+    return /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(new URL(url).pathname);
+  } catch {
+    return /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(String(url || ""));
+  }
+}
+
+function youtubeId(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtu.be")) return parsed.pathname.split("/").filter(Boolean)[0] || "";
+    if (parsed.hostname.includes("youtube.com")) {
+      if (parsed.pathname.startsWith("/shorts/")) return parsed.pathname.split("/").filter(Boolean)[1] || "";
+      if (parsed.pathname.startsWith("/embed/")) return parsed.pathname.split("/").filter(Boolean)[1] || "";
+      return parsed.searchParams.get("v") || "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function videoThumbnail(url) {
+  const id = youtubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+}
+
+function videoEmbedUrl(url) {
+  const id = youtubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : "";
 }
 
 function parseCsv(text) {

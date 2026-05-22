@@ -782,7 +782,9 @@ button,
 input,
 .photo-card img,
 #detailImage,
+.media-preview,
 .pin-stage,
+.detail-video,
 .pin-marker,
 .pin-action,
 .photo-card small,
@@ -855,11 +857,46 @@ button:hover,
 }
 
 .photo-card img,
+.media-preview,
 .photo-card:nth-child(5n + 1) img,
 .photo-card:nth-child(7n + 4) img {
   height: 220px;
   object-fit: contain;
   background: #fff;
+}
+
+.media-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #000;
+  background:
+    repeating-linear-gradient(135deg, #fff 0 8px, #eee 8px 16px);
+  font: 20px/1 var(--pixel-font);
+}
+
+.media-preview img,
+.media-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+  background: #fff;
+}
+
+.video-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 32px;
+  border: 2px solid #000;
+  color: #fff;
+  background: #000;
+  font: 16px/1 var(--pixel-font);
 }
 
 .pin-stage {
@@ -877,6 +914,33 @@ button:hover,
   object-fit: contain;
   border: 0;
   background: #fff;
+}
+
+.detail-video {
+  width: 100%;
+  height: min(76vh, 560px);
+  min-height: 420px;
+  background: #fff;
+}
+
+.detail-video iframe,
+.detail-video video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+}
+
+.video-fallback {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: #000;
+  text-align: center;
+  background: #fff;
+  font: 13px/1.45 var(--pixel-font);
 }
 
 .pin-layer {
@@ -1011,7 +1075,8 @@ button:hover,
   }
 
   .pin-stage,
-  .pin-stage #detailImage {
+  .pin-stage #detailImage,
+  .detail-video {
     min-height: 320px;
   }
 

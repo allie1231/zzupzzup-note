@@ -18,14 +18,14 @@
         <div class="hero-copy">
           <p class="eyebrow">image archive</p>
           <h1>줍줍사진</h1>
-          <p class="lead">저장해 둔 이미지 폴더를 열어 커다란 보드처럼 보고, CSV를 함께 열면 출처와 메모까지 한 번에 확인합니다.</p>
+          <p class="lead">저장해 둔 이미지와 동영상을 보드처럼 보고, CSV나 Supabase 기록을 함께 열면 출처와 메모까지 한 번에 확인합니다.</p>
         </div>
       </header>
 
       <section class="control-strip">
         <label class="file-button">
-          이미지 폴더 열기
-          <input id="imageInput" type="file" accept="image/*" webkitdirectory directory multiple>
+          미디어 폴더 열기
+          <input id="imageInput" type="file" accept="image/*,video/*" webkitdirectory directory multiple>
         </label>
         <label class="file-button secondary">
           CSV 같이 열기
@@ -76,7 +76,7 @@
       <section class="stats" aria-label="이미지 통계">
         <article>
           <strong id="imageCount">0</strong>
-          <span>images</span>
+          <span>media</span>
         </article>
         <article>
           <strong id="csvCount">0</strong>
@@ -88,7 +88,7 @@
         </article>
       </section>
 
-      <p id="status" class="status" role="status">이미지 폴더를 열면 줍줍사진 보드가 채워집니다.</p>
+      <p id="status" class="status" role="status">미디어 폴더를 열거나 DB를 불러오면 줍줍사진 보드가 채워집니다.</p>
 
       <section id="gallery" class="gallery" aria-label="이미지 목록"></section>
     </main>
@@ -96,8 +96,9 @@
     <dialog id="detailDialog" class="detail-dialog">
       <form method="dialog" class="detail-panel">
         <button value="close" class="close-button">닫기</button>
-        <div class="pin-stage" aria-label="이미지 핀 보드">
+        <div class="pin-stage" aria-label="미디어 상세 보기">
           <img id="detailImage" alt="">
+          <div id="detailVideo" class="detail-video" hidden></div>
           <div id="pinLayer" class="pin-layer" aria-label="이미지 위를 클릭해 핀 추가"></div>
         </div>
         <div class="detail-copy">
@@ -106,7 +107,7 @@
           <p id="detailMeta"></p>
           <p id="detailReason"></p>
           <div id="detailLinks" class="detail-links"></div>
-          <section class="pin-editor" aria-label="이미지 핀 메모">
+          <section id="pinEditor" class="pin-editor" aria-label="이미지 핀 메모">
             <div>
               <p class="eyebrow">visual notes</p>
               <h3>시선 핀</h3>

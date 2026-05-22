@@ -8,6 +8,7 @@ import {
   signInToCloud,
   upsertCloudClips
 } from "../shared/supabase-store.js";
+import { analyzeSentence } from "../shared/analyzer.js";
 
 const HEADERS = [
   "id",
@@ -35,6 +36,8 @@ const DB_NAME = "zzupzzup-sentences";
 const DB_VERSION = 1;
 const DB_STORE = "handles";
 const CSV_HANDLE_KEY = "sentenceCsv";
+const CATEGORY_MARKER = "[줍줍문장 분류]";
+const CATEGORIES = ["책", "아티클", "뉴스레터", "영화", "강연", "웹", "기타"];
 
 const state = {
   clips: [],
@@ -44,7 +47,9 @@ const state = {
   notionRows: [],
   notionHeaders: [],
   toastTimer: 0,
-  cloudReady: false
+  cloudReady: false,
+  editingId: "",
+  favoriteOnly: false
 };
 
 const el = {
@@ -65,9 +70,12 @@ const el = {
   status: document.querySelector("#status"),
   sentenceInput: document.querySelector("#sentenceInput"),
   reasonInput: document.querySelector("#reasonInput"),
+  categoryInput: document.querySelector("#categoryInput"),
   sourceInput: document.querySelector("#sourceInput"),
   titleInput: document.querySelector("#titleInput"),
+  favoriteInput: document.querySelector("#favoriteInput"),
   tagsInput: document.querySelector("#tagsInput"),
+  suggestTags: document.querySelector("#suggestTags"),
   addSentence: document.querySelector("#addSentence"),
   notionCsvInput: document.querySelector("#notionCsvInput"),
   notionMapper: document.querySelector("#notionMapper"),
@@ -78,23 +86,48 @@ const el = {
   mapTags: document.querySelector("#mapTags"),
   importNotion: document.querySelector("#importNotion"),
   search: document.querySelector("#search"),
+  categoryFilter: document.querySelector("#categoryFilter"),
   showAll: document.querySelector("#showAll"),
+  showFavorites: document.querySelector("#showFavorites"),
   shuffleOne: document.querySelector("#shuffleOne"),
   count: document.querySelector("#count"),
   sentences: document.querySelector("#sentences"),
-  toast: document.querySelector("#toast")
+  toast: document.querySelector("#toast"),
+  sentenceDialog: document.querySelector("#sentenceDialog"),
+  detailSentence: document.querySelector("#detailSentence"),
+  detailSentenceInput: document.querySelector("#detailSentenceInput"),
+  detailFavorite: document.querySelector("#detailFavorite"),
+  detailCategory: document.querySelector("#detailCategory"),
+  detailReason: document.querySelector("#detailReason"),
+  detailTags: document.querySelector("#detailTags"),
+  detailTitle: document.querySelector("#detailTitle"),
+  detailSource: document.querySelector("#detailSource"),
+  detailImageUrl: document.querySelector("#detailImageUrl"),
+  detailCover: document.querySelector("#detailCover"),
+  detailAnalyze: document.querySelector("#detailAnalyze"),
+  detailImageSearch: document.querySelector("#detailImageSearch"),
+  detailSave: document.querySelector("#detailSave"),
+  detailDelete: document.querySelector("#detailDelete")
 };
 
 el.connectCsv.addEventListener("click", connectCsvFile);
 el.csvInput.addEventListener("change", loadCsv);
 el.saveCsv.addEventListener("click", saveCsv);
+el.suggestTags.addEventListener("click", suggestTagsForNewSentence);
 el.addSentence.addEventListener("click", addSentence);
 el.notionCsvInput.addEventListener("change", loadNotionCsv);
 el.importNotion.addEventListener("click", importNotionRows);
 el.search.addEventListener("input", applyFilters);
+el.categoryFilter.addEventListener("change", applyFilters);
 el.showAll.addEventListener("click", showAll);
+el.showFavorites.addEventListener("click", showFavorites);
 el.shuffleOne.addEventListener("click", shuffleOne);
 el.sentences.addEventListener("click", handleCardClick);
+el.detailSave.addEventListener("click", saveDetail);
+el.detailDelete.addEventListener("click", deleteDetail);
+el.detailAnalyze.addEventListener("click", suggestTagsForDetail);
+el.detailImageSearch.addEventListener("click", searchSourceImage);
+el.detailImageUrl.addEventListener("input", () => renderDetailCover(el.detailImageUrl.value, el.detailTitle.value));
 el.cloudSave.addEventListener("click", saveCloudConfig);
 el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
@@ -279,7 +312,9 @@ function addSentence() {
     reason: el.reasonInput.value,
     source: el.sourceInput.value,
     title: el.titleInput.value,
-    tags: el.tagsInput.value
+    tags: el.tagsInput.value,
+    category: el.categoryInput.value,
+    favorite: el.favoriteInput.value === "true"
   });
   state.clips.unshift(clip);
   saveCloudClip(clip);
@@ -293,7 +328,24 @@ function clearForm() {
   el.reasonInput.value = "";
   el.sourceInput.value = "";
   el.titleInput.value = "";
+  el.categoryInput.value = "자동";
+  el.favoriteInput.value = "";
   el.tagsInput.value = "";
+}
+
+function suggestTagsForNewSentence() {
+  const sentence = el.sentenceInput.value.trim();
+  if (!sentence) {
+    notify("먼저 문장을 입력해 주세요.");
+    el.sentenceInput.focus();
+    return;
+  }
+  const category = el.categoryInput.value === "자동"
+    ? inferCategory({ sentence, source: el.sourceInput.value, title: el.titleInput.value, tags: el.tagsInput.value })
+    : el.categoryInput.value;
+  el.categoryInput.value = category;
+  el.tagsInput.value = suggestTags(sentence, el.tagsInput.value, category);
+  notify("문장을 분석해 태그와 큰 분류를 제안했습니다.");
 }
 
 async function loadNotionCsv() {
@@ -358,7 +410,13 @@ function importNotionRows() {
       reason: valueFromRow(row, el.mapReason.value),
       source: valueFromRow(row, el.mapSource.value),
       title: valueFromRow(row, el.mapTitle.value),
-      tags: valueFromRow(row, el.mapTags.value) || "#문장 #노션"
+      tags: valueFromRow(row, el.mapTags.value) || "#문장 #노션",
+      category: inferCategory({
+        sentence: row[sentenceKey],
+        source: valueFromRow(row, el.mapSource.value),
+        title: valueFromRow(row, el.mapTitle.value),
+        tags: valueFromRow(row, el.mapTags.value)
+      })
     }))
     .filter((clip) => clip.sentence);
 
@@ -375,14 +433,18 @@ function importNotionRows() {
 
 function applyFilters() {
   const query = el.search.value.trim().toLowerCase();
+  const category = el.categoryFilter.value;
   state.visible = state.clips.filter((clip) => {
+    if (state.favoriteOnly && !clip.favorite) return false;
+    if (category && categoryOf(clip) !== category) return false;
     if (!query) return true;
     return [
       clip.sentence,
       clip.reason,
       clip.source,
       clip.title,
-      clip.tags
+      clip.tags,
+      categoryOf(clip)
     ].join(" ").toLowerCase().includes(query);
   }).sort(sortNewest);
   render();
@@ -390,9 +452,17 @@ function applyFilters() {
 
 function showAll() {
   el.search.value = "";
+  el.categoryFilter.value = "";
+  state.favoriteOnly = false;
   state.visible = [...state.clips].sort(sortNewest);
   render();
   notify(`전체 문장 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showFavorites() {
+  state.favoriteOnly = true;
+  applyFilters();
+  notify(`기억하고 싶은 문장 ${state.visible.length}개를 보여줍니다.`);
 }
 
 function shuffleOne() {
@@ -423,32 +493,42 @@ function render() {
 function sentenceCard(clip) {
   const card = document.createElement("article");
   card.className = "sentence-card";
+  if (clip.favorite) card.classList.add("is-favorite");
   card.dataset.id = clip.id;
+
+  const top = document.createElement("div");
+  top.className = "sentence-top";
+  top.append(textEl("span", "category-chip", categoryOf(clip)));
+  const star = document.createElement("button");
+  star.type = "button";
+  star.className = clip.favorite ? "star is-on" : "star";
+  star.dataset.action = "toggle-favorite";
+  star.setAttribute("aria-label", clip.favorite ? "기억 표시 해제" : "기억 표시");
+  star.textContent = clip.favorite ? "★" : "☆";
+  top.append(star);
+
   const quote = document.createElement("blockquote");
   quote.textContent = clip.sentence || "";
+
   const reason = document.createElement("p");
   reason.className = "reason";
-  reason.textContent = clip.reason ? `이유: ${clip.reason}` : "이유를 아직 적지 않았습니다.";
+  reason.textContent = clip.reason ? clip.reason : "이유를 아직 적지 않았습니다.";
+
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.append(
-    textEl("span", "", clip.title || "제목 없음"),
-    clip.source ? anchorView("출처 열기", clip.source) : textEl("span", "", "출처 없음")
-  );
+  if (clip.imageUrl) meta.append(imageThumb(clip.imageUrl, clip.title));
+  meta.append(textEl("span", "", clip.title || "제목 없음"));
+  if (clip.source) meta.append(anchorView("출처 열기", clip.source));
+
   const tags = tagsView(clip.tags);
-  const editor = document.createElement("label");
-  editor.textContent = "수집한 이유";
-  const reasonInput = document.createElement("input");
-  reasonInput.value = clip.reason || "";
-  reasonInput.dataset.role = "reason";
-  editor.append(reasonInput);
+
   const actions = document.createElement("div");
   actions.className = "card-actions";
   actions.append(
-    actionButton("이유 저장", "save-reason"),
+    actionButton("자세히", "open-detail"),
     actionButton("삭제", "delete", "secondary")
   );
-  card.append(quote, reason, meta, tags, editor, actions);
+  card.append(top, quote, reason, meta, tags, actions);
   return card;
 }
 
@@ -468,13 +548,18 @@ function handleCardClick(event) {
   const clip = state.clips.find((item) => item.id === card?.dataset.id);
   if (!clip) return;
 
-  if (button.dataset.action === "save-reason") {
-    clip.reason = card.querySelector("[data-role='reason']").value.trim();
+  if (button.dataset.action === "toggle-favorite") {
+    clip.favorite = !clip.favorite;
     clip.reviewCount = Number(clip.reviewCount || 0) + 1;
     clip.lastReviewed = new Date().toISOString();
     applyFilters();
     saveCloudClip(clip);
-    notify("이유를 저장했습니다.");
+    notify(clip.favorite ? "기억하고 싶은 문장으로 표시했습니다." : "기억 표시를 해제했습니다.");
+    return;
+  }
+
+  if (button.dataset.action === "open-detail") {
+    openDetail(clip.id);
     return;
   }
 
@@ -485,6 +570,98 @@ function handleCardClick(event) {
     removeCloudClip(clip.id);
     notify("문장을 삭제했습니다.");
   }
+}
+
+function openDetail(id) {
+  const clip = state.clips.find((item) => item.id === id);
+  if (!clip) return;
+  state.editingId = id;
+  el.detailSentence.textContent = clip.sentence || "";
+  el.detailSentenceInput.value = clip.sentence || "";
+  el.detailFavorite.checked = Boolean(clip.favorite);
+  el.detailCategory.value = categoryOf(clip);
+  el.detailReason.value = clip.reason || "";
+  el.detailTags.value = clip.tags || "";
+  el.detailTitle.value = clip.title || "";
+  el.detailSource.value = clip.source || "";
+  el.detailImageUrl.value = clip.imageUrl || "";
+  renderDetailCover(clip.imageUrl, clip.title);
+  el.sentenceDialog.showModal();
+}
+
+function saveDetail(event) {
+  event.preventDefault();
+  const clip = state.clips.find((item) => item.id === state.editingId);
+  if (!clip) return;
+  clip.sentence = normalizeSentence(el.detailSentenceInput.value);
+  clip.favorite = el.detailFavorite.checked;
+  clip.reason = normalizeText(el.detailReason.value);
+  clip.tags = normalizeTags(el.detailTags.value);
+  clip.title = normalizeText(el.detailTitle.value);
+  clip.source = normalizeText(el.detailSource.value);
+  clip.siteName = deriveSiteName(clip.source);
+  clip.imageUrl = normalizeText(el.detailImageUrl.value);
+  setCategory(clip, el.detailCategory.value);
+  clip.reviewCount = Number(clip.reviewCount || 0) + 1;
+  clip.lastReviewed = new Date().toISOString();
+  el.sentenceDialog.close();
+  applyFilters();
+  saveCloudClip(clip);
+  notify("문장 상세 정보를 저장했습니다.");
+}
+
+function deleteDetail(event) {
+  event.preventDefault();
+  const clip = state.clips.find((item) => item.id === state.editingId);
+  if (!clip) return;
+  if (!confirm("이 문장을 삭제할까요?")) return;
+  state.clips = state.clips.filter((item) => item.id !== clip.id);
+  state.editingId = "";
+  el.sentenceDialog.close();
+  applyFilters();
+  removeCloudClip(clip.id);
+  notify("문장을 삭제했습니다.");
+}
+
+function suggestTagsForDetail() {
+  const clip = state.clips.find((item) => item.id === state.editingId);
+  const sentence = el.detailSentenceInput.value.trim();
+  if (!clip || !sentence) return;
+  const category = inferCategory({
+    sentence,
+    source: el.detailSource.value,
+    title: el.detailTitle.value,
+    tags: el.detailTags.value
+  });
+  el.detailCategory.value = category;
+  el.detailTags.value = suggestTags(sentence, el.detailTags.value, category);
+  notify("문장을 분석해 태그와 큰 분류를 제안했습니다.");
+}
+
+function searchSourceImage() {
+  const query = [
+    el.detailTitle.value,
+    el.detailCategory.value === "영화" ? "movie poster" : "",
+    el.detailCategory.value === "책" ? "book cover" : "",
+    "이미지"
+  ].filter(Boolean).join(" ");
+  if (!query.trim()) {
+    notify("먼저 출처 제목을 입력해 주세요.");
+    return;
+  }
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`, "_blank", "noopener,noreferrer");
+}
+
+function renderDetailCover(url, title) {
+  el.detailCover.replaceChildren();
+  if (!url) {
+    el.detailCover.append(textEl("span", "", "표지나 참고 이미지를 넣고 싶으면 이미지 URL을 붙여넣으세요."));
+    return;
+  }
+  const image = document.createElement("img");
+  image.src = url;
+  image.alt = title || "출처 이미지";
+  el.detailCover.append(image);
 }
 
 async function saveCsv() {
@@ -510,13 +687,18 @@ async function saveCsv() {
 
 function createSentenceClip(input = {}) {
   const source = normalizeText(input.source || "");
+  const category = input.category && input.category !== "자동"
+    ? input.category
+    : inferCategory(input);
+  const tags = input.tags ? normalizeTags(input.tags) : suggestTags(input.sentence, "", category);
+  const connection = withCategory("", category);
   return {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
     contentType: "문장",
     sentence: normalizeSentence(input.sentence || ""),
     reason: normalizeText(input.reason || ""),
-    connection: "",
+    connection,
     useFor: "정리필요",
     action: "정리필요",
     source,
@@ -525,9 +707,9 @@ function createSentenceClip(input = {}) {
     imagePath: "",
     imageUrl: "",
     title: normalizeText(input.title || ""),
-    tags: normalizeTags(input.tags || "#문장"),
+    tags,
     status: "새로 수집",
-    favorite: false,
+    favorite: Boolean(input.favorite),
     reviewCount: 0,
     lastReviewed: ""
   };
@@ -555,6 +737,53 @@ function rowToClip(row) {
     reviewCount: row["확인 횟수"] || "",
     lastReviewed: row["마지막 확인"] || ""
   };
+}
+
+function suggestTags(sentence, currentTags = "", category = "") {
+  const analyzed = analyzeSentence(sentence);
+  const base = normalizeTags(currentTags || analyzed.tags.join(" "));
+  const extra = ["#문장"];
+  if (category && category !== "자동") extra.push(`#${category}`);
+  return normalizeTags(`${base} ${analyzed.tags.join(" ")} ${extra.join(" ")}`);
+}
+
+function categoryOf(clip) {
+  return readCategory(clip.connection) || inferCategory(clip);
+}
+
+function setCategory(clip, category) {
+  clip.connection = withCategory(clip.connection, category || inferCategory(clip));
+}
+
+function readCategory(connection) {
+  const text = String(connection || "");
+  const index = text.indexOf(CATEGORY_MARKER);
+  if (index < 0) return "";
+  const value = text.slice(index + CATEGORY_MARKER.length).trim().split(/\n/)[0].trim();
+  return CATEGORIES.includes(value) ? value : "";
+}
+
+function withCategory(connection, category) {
+  const cleanCategory = CATEGORIES.includes(category) ? category : "기타";
+  const text = String(connection || "");
+  const plain = text.split(CATEGORY_MARKER)[0].trim();
+  return [plain, `${CATEGORY_MARKER}\n${cleanCategory}`].filter(Boolean).join("\n\n");
+}
+
+function inferCategory(input = {}) {
+  const text = [
+    input.sentence,
+    input.title,
+    input.source,
+    input.tags
+  ].join(" ").toLowerCase();
+  if (/책|도서|소설|시집|문학|book|novel|출판|작가/.test(text)) return "책";
+  if (/뉴스레터|newsletter|메일|letter/.test(text)) return "뉴스레터";
+  if (/영화|드라마|movie|film|cinema|netflix|watcha|왓챠/.test(text)) return "영화";
+  if (/강연|강의|lecture|talk|ted|세미나/.test(text)) return "강연";
+  if (/article|아티클|칼럼|essay|longblack|brunch|medium|substack/.test(text)) return "아티클";
+  if (/https?:\/\//.test(text)) return "웹";
+  return "기타";
 }
 
 async function saveCloudClip(clip) {
@@ -677,6 +906,14 @@ function tagsView(tags) {
     wrap.append(item);
   });
   return wrap;
+}
+
+function imageThumb(url, title) {
+  const image = document.createElement("img");
+  image.className = "sentence-thumb";
+  image.src = url;
+  image.alt = title || "출처 이미지";
+  return image;
 }
 
 function textEl(tag, className, text) {

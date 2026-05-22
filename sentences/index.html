@@ -93,6 +93,19 @@
         </label>
         <div class="grid">
           <label>
+            큰 분류
+            <select id="categoryInput">
+              <option>자동</option>
+              <option>책</option>
+              <option>아티클</option>
+              <option>뉴스레터</option>
+              <option>영화</option>
+              <option>강연</option>
+              <option>웹</option>
+              <option>기타</option>
+            </select>
+          </label>
+          <label>
             출처
             <input id="sourceInput" placeholder="https://...">
           </label>
@@ -100,12 +113,22 @@
             출처 제목
             <input id="titleInput" placeholder="책 제목, 글 제목, 페이지 제목">
           </label>
+          <label>
+            기억 표시
+            <select id="favoriteInput">
+              <option value="">보통 문장</option>
+              <option value="true">기억하고 싶은 문장</option>
+            </select>
+          </label>
         </div>
         <label>
           태그
           <input id="tagsInput" placeholder="#문장 #인용">
         </label>
-        <button id="addSentence">문장 추가</button>
+        <div class="actions">
+          <button id="suggestTags" class="secondary" type="button">AI 태그 제안</button>
+          <button id="addSentence" type="button">문장 추가</button>
+        </div>
       </section>
 
       <section class="notion-panel">
@@ -145,13 +168,83 @@
 
       <section class="reader-tools">
         <input id="search" placeholder="문장, 이유, 출처, 태그 검색">
+        <select id="categoryFilter" aria-label="큰 분류 필터">
+          <option value="">분류 전체</option>
+          <option>책</option>
+          <option>아티클</option>
+          <option>뉴스레터</option>
+          <option>영화</option>
+          <option>강연</option>
+          <option>웹</option>
+          <option>기타</option>
+        </select>
         <button id="showAll" class="secondary">전체</button>
+        <button id="showFavorites" class="secondary">기억 문장</button>
         <button id="shuffleOne" class="secondary">하나 꺼내기</button>
         <strong id="count">0</strong>
       </section>
 
       <section id="sentences" class="sentences" aria-label="문장 목록"></section>
     </main>
+
+    <dialog id="sentenceDialog" class="sentence-dialog">
+      <form method="dialog" class="sentence-detail">
+        <button class="close-button" value="close">닫기</button>
+        <div class="detail-main">
+          <p class="eyebrow">full sentence</p>
+          <blockquote id="detailSentence"></blockquote>
+          <label>
+            문장 수정
+            <textarea id="detailSentenceInput" rows="7"></textarea>
+          </label>
+          <label>
+            기억 표시
+            <input id="detailFavorite" type="checkbox"> 기억하고 싶은 문장으로 표시
+          </label>
+        </div>
+        <div class="detail-side">
+          <label>
+            큰 분류
+            <select id="detailCategory">
+              <option>책</option>
+              <option>아티클</option>
+              <option>뉴스레터</option>
+              <option>영화</option>
+              <option>강연</option>
+              <option>웹</option>
+              <option>기타</option>
+            </select>
+          </label>
+          <label>
+            수집한 이유
+            <textarea id="detailReason" rows="4"></textarea>
+          </label>
+          <label>
+            태그
+            <input id="detailTags" placeholder="#문장 #책">
+          </label>
+          <label>
+            출처 제목
+            <input id="detailTitle">
+          </label>
+          <label>
+            출처 링크
+            <input id="detailSource">
+          </label>
+          <label>
+            표지/이미지 URL
+            <input id="detailImageUrl" placeholder="검색한 이미지 주소를 붙여넣기">
+          </label>
+          <div id="detailCover" class="detail-cover"></div>
+          <div class="actions">
+            <button id="detailAnalyze" class="secondary" type="button">AI 태그 제안</button>
+            <button id="detailImageSearch" class="secondary" type="button">표지 검색</button>
+            <button id="detailSave" type="submit">저장</button>
+            <button id="detailDelete" class="secondary" type="button">삭제</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="app.js"></script>

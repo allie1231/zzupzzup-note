@@ -757,3 +757,185 @@ button:hover,
   color: #fff;
   background: #000;
 }
+
+/* Sentence reader upgrade: compact cards, category filters, full-detail modal */
+.reader-tools select {
+  flex: 0 1 150px;
+}
+
+.sentences {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+.sentence-card {
+  min-height: 260px;
+  gap: 10px;
+  padding: 14px;
+  cursor: default;
+}
+
+.sentence-card.is-favorite {
+  box-shadow: 4px 4px 0 #000, inset 0 0 0 4px #fff, inset 0 0 0 6px #000;
+}
+
+.sentence-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.category-chip {
+  border: 2px solid #000;
+  padding: 4px 8px;
+  color: #fff;
+  background: #000;
+  font: 12px/1 var(--pixel-font);
+}
+
+.star {
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  color: #000;
+  background: #fff;
+  font: 18px/1 var(--pixel-font);
+}
+
+.star.is-on {
+  color: #fff;
+  background: #000;
+}
+
+.sentence-card blockquote {
+  display: -webkit-box;
+  max-height: 8.2em;
+  overflow: hidden;
+  color: #000;
+  font: 17px/1.62 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.sentence-card .reason {
+  min-height: 2.8em;
+  margin: 0;
+  color: #444;
+  font: 12px/1.45 var(--pixel-font);
+}
+
+.sentence-thumb {
+  width: 38px;
+  height: 38px;
+  border: 2px solid #000;
+  object-fit: cover;
+  background: #fff;
+}
+
+.sentence-dialog {
+  width: min(1120px, calc(100% - 32px));
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.sentence-dialog::backdrop {
+  background: rgba(0, 0, 0, .62);
+}
+
+.sentence-detail {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .7fr);
+  gap: 14px;
+  margin: 0;
+  padding: 44px 14px 14px;
+  border: 2px solid #000;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.sentence-detail::before {
+  content: "□ Sentence Detail";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  background:
+    linear-gradient(#fff, #fff) center / 180px 100% no-repeat,
+    repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px);
+  text-align: center;
+  font: 13px/24px var(--pixel-font);
+}
+
+.close-button {
+  position: absolute;
+  top: 30px;
+  right: 14px;
+  z-index: 2;
+}
+
+.detail-main,
+.detail-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.detail-main blockquote {
+  margin: 0;
+  border: 2px solid #000;
+  padding: 16px;
+  color: #000;
+  background: #fff;
+  font: 23px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  white-space: pre-wrap;
+}
+
+.detail-cover {
+  min-height: 74px;
+  border: 2px dotted #000;
+  padding: 8px;
+  color: #444;
+  background: #fff;
+  font: 12px/1.45 var(--pixel-font);
+}
+
+.detail-cover img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  background: #fff;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  min-height: auto;
+  margin-right: 8px;
+}
+
+@media (max-width: 980px) {
+  .sentences {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sentence-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .sentences {
+    grid-template-columns: 1fr;
+  }
+
+  .sentence-card {
+    min-height: 220px;
+  }
+
+  .reader-tools select {
+    flex: 1 1 100%;
+  }
+}

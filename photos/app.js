@@ -38,7 +38,6 @@ const el = {
   imageCount: document.querySelector("#imageCount"),
   csvCount: document.querySelector("#csvCount"),
   matchedCount: document.querySelector("#matchedCount"),
-  feature: document.querySelector("#feature"),
   gallery: document.querySelector("#gallery"),
   detailDialog: document.querySelector("#detailDialog"),
   detailImage: document.querySelector("#detailImage"),
@@ -252,7 +251,6 @@ function render() {
   el.csvCount.textContent = String(state.rows.length);
   el.matchedCount.textContent = String(matched);
 
-  renderFeature();
   el.gallery.replaceChildren();
 
   if (!state.visible.length) {
@@ -266,27 +264,6 @@ function render() {
   el.gallery.append(...state.visible.map(photoCard));
 }
 
-function renderFeature() {
-  el.feature.replaceChildren();
-  const item = state.visible[0];
-  el.feature.hidden = !item;
-  if (!item) return;
-
-  const image = document.createElement("img");
-  image.src = item.url;
-  image.alt = displayTitle(item);
-
-  const copy = document.createElement("div");
-  copy.className = "feature-copy";
-  copy.append(
-    textEl("p", "eyebrow", "selected from archive"),
-    textEl("h2", "", displayTitle(item)),
-    textEl("p", "", item.reason || item.siteName || item.tags || "이미지 폴더에서 불러온 사진입니다.")
-  );
-
-  el.feature.append(image, copy);
-}
-
 function photoCard(item) {
   const card = document.createElement("article");
   card.className = "photo-card";
@@ -298,10 +275,7 @@ function photoCard(item) {
 
   const footer = document.createElement("footer");
   const copy = document.createElement("div");
-  copy.append(
-    textEl("strong", "", displayTitle(item)),
-    textEl("span", "", item.siteName || item.tags || "image archive")
-  );
+  copy.append(textEl("span", "", item.siteName || item.tags || "image archive"));
   footer.append(copy, textEl("small", "", item.tags || "image"));
   card.append(image, footer);
   return card;
@@ -315,7 +289,7 @@ function openCard(event) {
 
   el.detailImage.src = item.url;
   el.detailImage.alt = displayTitle(item);
-  el.detailTitle.textContent = displayTitle(item);
+  el.detailTitle.textContent = "이미지 메모";
   el.detailMeta.textContent = [item.siteName, item.tags].filter(Boolean).join(" · ");
   el.detailReason.textContent = item.reason || "아직 메모가 없습니다.";
   el.detailLinks.replaceChildren();
@@ -626,7 +600,7 @@ function textEl(tag, className, text) {
 }
 
 function displayTitle(item) {
-  return item.title || item.siteName || "이미지";
+  return item.siteName || "이미지";
 }
 
 function anchorView(label, href) {

@@ -2,7 +2,7 @@ const SETTINGS_KEY = "zzupzzup:supabase";
 const TABLE_NAME = "zzup_clips";
 const IMAGE_BUCKET = "zzup-images";
 const DEFAULT_SUPABASE_URL = "https://ypgtipfqxjwtbwazccsr.supabase.co";
-const DEFAULT_SUPABASE_ANON_KEY = "";
+const DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwZ3RpcGZxeGp3dGJ3YXpjY3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTY2ODYsImV4cCI6MjA5NDkzMjY4Nn0.CvsH3IvTiTTk3CdgnTXsKOHa9CzueUj3fID-4J6pNio";
 
 export function getCloudSettings() {
   try {

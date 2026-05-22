@@ -61,7 +61,8 @@ export async function clearCloudSession() {
   await chrome.storage.sync.remove(["supabaseAccessToken", "supabaseRefreshToken", "supabaseUserId"]);
 }
 
-export async function refreshCloudSession(settings = await getCloudSettings()) {
+export async function refreshCloudSession(settings) {
+  settings = settings || await getCloudSettings();
   if (!settings.refreshToken) {
     throw new Error("로그인 세션이 만료되었습니다. 설정에서 다시 로그인해 주세요.");
   }

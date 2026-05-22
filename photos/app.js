@@ -4,7 +4,8 @@ import {
   getCloudSettings,
   hasCloudSession,
   saveCloudSettings,
-  signInToCloud
+  signInToCloud,
+  updateCloudClip
 } from "../shared/supabase-store.js";
 
 const state = {
@@ -12,8 +13,11 @@ const state = {
   rows: [],
   visible: [],
   urls: new Map(),
-  cloudReady: false
+  cloudReady: false,
+  activeItem: null
 };
+
+const PIN_BLOCK_START = "[줍줍사진 핀]";
 
 const el = {
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -41,7 +45,9 @@ const el = {
   detailTitle: document.querySelector("#detailTitle"),
   detailMeta: document.querySelector("#detailMeta"),
   detailReason: document.querySelector("#detailReason"),
-  detailLinks: document.querySelector("#detailLinks")
+  detailLinks: document.querySelector("#detailLinks"),
+  pinLayer: document.querySelector("#pinLayer"),
+  pinList: document.querySelector("#pinList")
 };
 
 el.imageInput.addEventListener("change", loadImages);
@@ -53,6 +59,8 @@ el.cloudSave.addEventListener("click", saveCloudConfig);
 el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
+el.pinLayer.addEventListener("click", addPinFromClick);
+el.pinList.addEventListener("click", handlePinAction);
 
 restoreCloudConfig();
 render();
@@ -196,6 +204,7 @@ function applyFilters() {
     sourceUrl: image.row?.source || image.row?.imageUrl || "",
     title: image.row?.title || "",
     reason: image.row?.reason || "",
+    connection: image.row?.connection || "",
     tags: image.row?.tags || "",
     siteName: image.row?.siteName || ""
   }));
@@ -211,6 +220,7 @@ function applyFilters() {
       sourceUrl: row.source || row.imageUrl,
       title: row.title || row.siteName || "",
       reason: row.reason || "",
+      connection: row.connection || "",
       tags: row.tags || "",
       siteName: row.siteName || ""
     }));
@@ -309,9 +319,11 @@ function openCard(event) {
   el.detailMeta.textContent = [item.siteName, item.tags].filter(Boolean).join(" · ");
   el.detailReason.textContent = item.reason || "아직 메모가 없습니다.";
   el.detailLinks.replaceChildren();
+  state.activeItem = item;
 
   if (item.sourceUrl) el.detailLinks.append(anchorView("출처 열기", item.sourceUrl));
   if (item.row?.imageUrl) el.detailLinks.append(anchorView("이미지 원본", item.row.imageUrl));
+  renderPins(item);
   el.detailDialog.showModal();
 }
 
@@ -322,6 +334,9 @@ function rowToItem(row) {
     contentType: normalizeContentType(row.contentType || row["유형"], row),
     sentence: row.sentence || row["주운 글"] || row["문장"] || "",
     reason: row.reason || row["수집한 이유"] || "",
+    connection: row.connection || row["연결/확장"] || "",
+    useFor: row.useFor || row["활용처"] || "정리필요",
+    action: row.action || row["다음 액션"] || "정리필요",
     source: row.source || row["출처"] || "",
     siteName: row.siteName || row["사이트명"] || "",
     iconUrl: row.iconUrl || row["아이콘 URL"] || "",
@@ -329,8 +344,210 @@ function rowToItem(row) {
     imageUrl: row.imageUrl || row["이미지 URL"] || "",
     title: row.title || row["제목"] || "",
     tags: row.tags || row["태그"] || "",
-    status: row.status || row["상태"] || ""
+    status: row.status || row["상태"] || "",
+    favorite: Boolean(row.favorite || row["별표"]),
+    reviewCount: Number(row.reviewCount || row["확인 횟수"] || 0),
+    lastReviewed: row.lastReviewed || row["마지막 확인"] || ""
   };
+}
+
+async function addPinFromClick(event) {
+  const item = state.activeItem;
+  if (!item) return;
+
+  const bounds = el.pinLayer.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+
+  const note = prompt("이 부분이 눈에 들어온 이유나 설명을 적어주세요.");
+  if (note === null) return;
+  const cleanNote = note.trim();
+  if (!cleanNote) {
+    notify("핀 설명이 비어 있어 추가하지 않았습니다.");
+    return;
+  }
+
+  const row = writableRowForItem(item);
+  const pins = parsePins(row.connection);
+  pins.push({
+    id: crypto.randomUUID(),
+    x: clamp((event.clientX - bounds.left) / bounds.width, 0, 1),
+    y: clamp((event.clientY - bounds.top) / bounds.height, 0, 1),
+    note: cleanNote,
+    createdAt: new Date().toISOString()
+  });
+
+  await persistPins(item, row, pins, "핀을 추가했습니다.");
+}
+
+async function handlePinAction(event) {
+  const button = event.target.closest("[data-pin-action]");
+  if (!button || !state.activeItem) return;
+
+  const row = writableRowForItem(state.activeItem);
+  const pins = parsePins(row.connection);
+  const pin = pins.find((entry) => entry.id === button.dataset.pinId);
+  if (!pin) return;
+
+  if (button.dataset.pinAction === "delete") {
+    const nextPins = pins.filter((entry) => entry.id !== pin.id);
+    await persistPins(state.activeItem, row, nextPins, "핀을 삭제했습니다.");
+    return;
+  }
+
+  if (button.dataset.pinAction === "edit") {
+    const nextNote = prompt("핀 설명을 수정하세요.", pin.note || "");
+    if (nextNote === null) return;
+    pin.note = nextNote.trim();
+    await persistPins(state.activeItem, row, pins, "핀 설명을 수정했습니다.");
+  }
+}
+
+async function persistPins(item, row, pins, doneMessage) {
+  writePins(row, pins);
+  item.connection = row.connection;
+  renderPins(item);
+
+  if (!row.id) {
+    notify(`${doneMessage} DB 항목이 없는 로컬 이미지는 서버 저장 전까지 이 화면에서만 유지됩니다.`);
+    return;
+  }
+
+  if (!hasCloudSession()) {
+    notify(`${doneMessage} Supabase 로그인 후 DB에 저장할 수 있습니다.`);
+    return;
+  }
+
+  try {
+    const updated = await updateCloudClip(row);
+    const nextRow = rowToItem(updated);
+    Object.assign(row, nextRow);
+    item.row = row;
+    item.connection = row.connection;
+    replaceStoredRow(row);
+    renderPins(item);
+    notify(`${doneMessage} Supabase에 저장했습니다.`);
+  } catch (error) {
+    notify(error.message || "핀을 Supabase에 저장하지 못했습니다.");
+  }
+}
+
+function renderPins(item) {
+  const pins = parsePins(item.row?.connection || item.connection || "");
+  el.pinLayer.replaceChildren();
+  el.pinList.replaceChildren();
+
+  if (!pins.length) {
+    const empty = document.createElement("li");
+    empty.className = "pin-empty";
+    empty.textContent = "아직 핀이 없습니다.";
+    el.pinList.append(empty);
+    return;
+  }
+
+  pins.forEach((pin, index) => {
+    const marker = document.createElement("button");
+    marker.type = "button";
+    marker.className = "pin-marker";
+    marker.style.left = `${pin.x * 100}%`;
+    marker.style.top = `${pin.y * 100}%`;
+    marker.textContent = String(index + 1);
+    marker.title = pin.note || `핀 ${index + 1}`;
+    marker.addEventListener("click", (event) => event.stopPropagation());
+    el.pinLayer.append(marker);
+
+    const listItem = document.createElement("li");
+    const body = document.createElement("div");
+    body.append(
+      textEl("strong", "", `PIN ${index + 1}`),
+      textEl("p", "", pin.note || "설명 없음")
+    );
+
+    const actions = document.createElement("div");
+    actions.className = "pin-actions";
+    actions.append(
+      pinActionButton("edit", pin.id, "수정"),
+      pinActionButton("delete", pin.id, "삭제")
+    );
+
+    listItem.append(body, actions);
+    el.pinList.append(listItem);
+  });
+}
+
+function writableRowForItem(item) {
+  if (item.row) return item.row;
+  item.row = {
+    id: "",
+    createdAt: new Date().toISOString(),
+    contentType: "이미지",
+    sentence: "",
+    reason: item.reason || "",
+    connection: item.connection || "",
+    useFor: "정리필요",
+    action: "정리필요",
+    source: item.sourceUrl || "",
+    siteName: item.siteName || "",
+    iconUrl: "",
+    imagePath: item.path || "",
+    imageUrl: "",
+    title: item.title || item.name || "이미지",
+    tags: item.tags || "#이미지",
+    status: "새로 수집",
+    favorite: false,
+    reviewCount: 0,
+    lastReviewed: ""
+  };
+  return item.row;
+}
+
+function parsePins(connection) {
+  const text = String(connection || "");
+  const markerIndex = text.indexOf(PIN_BLOCK_START);
+  if (markerIndex < 0) return [];
+
+  const json = text.slice(markerIndex + PIN_BLOCK_START.length).trim();
+  try {
+    const parsed = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((pin) => ({
+        id: pin.id || crypto.randomUUID(),
+        x: clamp(Number(pin.x), 0, 1),
+        y: clamp(Number(pin.y), 0, 1),
+        note: String(pin.note || ""),
+        createdAt: pin.createdAt || ""
+      }))
+      .filter((pin) => Number.isFinite(pin.x) && Number.isFinite(pin.y));
+  } catch {
+    return [];
+  }
+}
+
+function writePins(row, pins) {
+  const existing = String(row.connection || "");
+  const plainText = existing.split(PIN_BLOCK_START)[0].trim();
+  const block = `${PIN_BLOCK_START}\n${JSON.stringify(pins)}`;
+  row.connection = [plainText, pins.length ? block : ""].filter(Boolean).join("\n\n");
+}
+
+function pinActionButton(action, pinId, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "pin-action";
+  button.dataset.pinAction = action;
+  button.dataset.pinId = pinId;
+  button.textContent = label;
+  return button;
+}
+
+function replaceStoredRow(nextRow) {
+  const index = state.rows.findIndex((row) => row.id && row.id === nextRow.id);
+  if (index >= 0) state.rows[index] = nextRow;
+}
+
+function clamp(value, min, max) {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(Math.max(value, min), max);
 }
 
 function normalizeContentType(value, row) {

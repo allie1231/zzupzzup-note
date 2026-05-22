@@ -97,13 +97,24 @@
     <dialog id="detailDialog" class="detail-dialog">
       <form method="dialog" class="detail-panel">
         <button value="close" class="close-button">닫기</button>
-        <img id="detailImage" alt="">
+        <div class="pin-stage" aria-label="이미지 핀 보드">
+          <img id="detailImage" alt="">
+          <div id="pinLayer" class="pin-layer" aria-label="이미지 위를 클릭해 핀 추가"></div>
+        </div>
         <div class="detail-copy">
           <p class="eyebrow">selected image</p>
           <h2 id="detailTitle">이미지</h2>
           <p id="detailMeta"></p>
           <p id="detailReason"></p>
           <div id="detailLinks" class="detail-links"></div>
+          <section class="pin-editor" aria-label="이미지 핀 메모">
+            <div>
+              <p class="eyebrow">visual notes</p>
+              <h3>시선 핀</h3>
+            </div>
+            <p class="pin-help">이미지에서 시선이 간 부분을 클릭하고 이유나 설명을 적어두세요.</p>
+            <ol id="pinList" class="pin-list"></ol>
+          </section>
         </div>
       </form>
     </dialog>

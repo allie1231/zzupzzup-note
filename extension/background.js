@@ -1,4 +1,21 @@
 chrome.runtime.onInstalled.addListener(() => {
+  registerContextMenus();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  registerContextMenus();
+});
+
+function registerContextMenus() {
+  chrome.contextMenus.removeAll(() => {
+    if (chrome.runtime.lastError) {
+      console.warn("줍줍노트 메뉴 초기화 실패:", chrome.runtime.lastError.message);
+    }
+    createContextMenus();
+  });
+}
+
+function createContextMenus() {
   chrome.contextMenus.create({
     id: "collect-sentence",
     title: "문장/링크 줍줍하기",
@@ -24,7 +41,7 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "동영상 줍줍하기",
     contexts: ["video"]
   });
-});
+}
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "collect-sentence") {
@@ -170,11 +187,23 @@ async function openPopupIfPossible() {
   if (chrome.action.openPopup) {
     try {
       await chrome.action.openPopup();
+      return;
     } catch {
-      // Some Chrome versions only allow this from specific user gestures.
-      // The pending clip remains stored, so clicking the extension still opens it.
+      await openPopupWindow();
     }
+    return;
   }
+  await openPopupWindow();
+}
+
+async function openPopupWindow() {
+  await chrome.windows.create({
+    url: chrome.runtime.getURL("popup.html"),
+    type: "popup",
+    width: 440,
+    height: 720,
+    focused: true
+  });
 }
 
 async function collectImage(info, tab) {

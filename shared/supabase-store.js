@@ -36,6 +36,26 @@ export function clearCloudSession() {
   }));
 }
 
+export async function refreshCloudSession(settings = getCloudSettings()) {
+  if (!settings.refreshToken) {
+    throw new Error("로그인 세션이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+  const response = await fetch(`${settings.url}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: authHeaders(settings, false),
+    body: JSON.stringify({ refresh_token: settings.refreshToken })
+  });
+  const data = await parseJsonResponse(response, "Supabase 로그인 세션을 갱신하지 못했습니다.");
+  return saveCloudSettings({
+    url: settings.url,
+    anonKey: settings.anonKey,
+    email: settings.email,
+    accessToken: data.access_token || "",
+    refreshToken: data.refresh_token || settings.refreshToken || "",
+    userId: data.user?.id || settings.userId || ""
+  });
+}
+
 export function hasCloudSession(settings = getCloudSettings()) {
   return Boolean(settings.url && settings.anonKey && settings.accessToken);
 }
@@ -73,9 +93,11 @@ export async function signInToCloud({ url, anonKey, email, password }) {
 
 export async function fetchCloudClips(settings = getCloudSettings()) {
   ensureSession(settings);
-  const response = await fetch(`${settings.url}/rest/v1/${TABLE_NAME}?select=*&order=created_at.desc`, {
-    headers: authHeaders(settings)
-  });
+  const response = await fetchWithAutoRefresh(
+    settings,
+    `${settings.url}/rest/v1/${TABLE_NAME}?select=*&order=created_at.desc`,
+    (session) => ({ headers: authHeaders(session) })
+  );
   const rows = await parseJsonResponse(response, "Supabase에서 데이터를 불러오지 못했습니다.");
   return rows.map(rowToClip);
 }
@@ -84,38 +106,50 @@ export async function upsertCloudClips(clips, settings = getCloudSettings()) {
   ensureSession(settings);
   const rows = clips.map(clipToRow);
   if (!rows.length) return [];
-  const response = await fetch(`${settings.url}/rest/v1/${TABLE_NAME}?on_conflict=id`, {
-    method: "POST",
-    headers: {
-      ...authHeaders(settings),
-      Prefer: "resolution=merge-duplicates,return=representation"
-    },
-    body: JSON.stringify(rows)
-  });
+  const response = await fetchWithAutoRefresh(
+    settings,
+    `${settings.url}/rest/v1/${TABLE_NAME}?on_conflict=id`,
+    (session) => ({
+      method: "POST",
+      headers: {
+        ...authHeaders(session),
+        Prefer: "resolution=merge-duplicates,return=representation"
+      },
+      body: JSON.stringify(rows)
+    })
+  );
   const data = await parseJsonResponse(response, "Supabase에 저장하지 못했습니다.");
   return data.map(rowToClip);
 }
 
 export async function updateCloudClip(clip, settings = getCloudSettings()) {
   ensureSession(settings);
-  const response = await fetch(`${settings.url}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(clip.id)}`, {
-    method: "PATCH",
-    headers: {
-      ...authHeaders(settings),
-      Prefer: "return=representation"
-    },
-    body: JSON.stringify(clipToRow(clip))
-  });
+  const response = await fetchWithAutoRefresh(
+    settings,
+    `${settings.url}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(clip.id)}`,
+    (session) => ({
+      method: "PATCH",
+      headers: {
+        ...authHeaders(session),
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify(clipToRow(clip))
+    })
+  );
   const rows = await parseJsonResponse(response, "Supabase 항목을 수정하지 못했습니다.");
   return rows[0] ? rowToClip(rows[0]) : clip;
 }
 
 export async function deleteCloudClip(id, settings = getCloudSettings()) {
   ensureSession(settings);
-  const response = await fetch(`${settings.url}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`, {
-    method: "DELETE",
-    headers: authHeaders(settings)
-  });
+  const response = await fetchWithAutoRefresh(
+    settings,
+    `${settings.url}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`,
+    (session) => ({
+      method: "DELETE",
+      headers: authHeaders(session)
+    })
+  );
   if (!response.ok) await parseJsonResponse(response, "Supabase 항목을 삭제하지 못했습니다.");
 }
 
@@ -123,21 +157,36 @@ export async function uploadCloudImage(file, settings = getCloudSettings()) {
   ensureSession(settings);
   const extension = filenameExtension(file.name) || "jpg";
   const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
-  const response = await fetch(`${settings.url}/storage/v1/object/${IMAGE_BUCKET}/${path}`, {
-    method: "POST",
-    headers: {
-      apikey: settings.anonKey,
-      Authorization: `Bearer ${settings.accessToken}`,
-      "Content-Type": file.type || "application/octet-stream",
-      "x-upsert": "true"
-    },
-    body: file
-  });
+  const response = await fetchWithAutoRefresh(
+    settings,
+    `${settings.url}/storage/v1/object/${IMAGE_BUCKET}/${path}`,
+    (session) => ({
+      method: "POST",
+      headers: {
+        apikey: session.anonKey,
+        Authorization: `Bearer ${session.accessToken}`,
+        "Content-Type": file.type || "application/octet-stream",
+        "x-upsert": "true"
+      },
+      body: file
+    })
+  );
   await parseJsonResponse(response, "Supabase Storage에 이미지를 올리지 못했습니다.");
   return {
     imagePath: path,
     imageUrl: `${settings.url}/storage/v1/object/public/${IMAGE_BUCKET}/${path}`
   };
+}
+
+async function fetchWithAutoRefresh(settings, url, buildOptions) {
+  ensureSession(settings);
+  let response = await fetch(url, buildOptions(settings));
+  if (response.status !== 401) return response;
+  if (!settings.refreshToken) {
+    throw new Error("로그인 세션이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+  const refreshed = await refreshCloudSession(settings);
+  return fetch(url, buildOptions(refreshed));
 }
 
 function authHeaders(settings, withBearer = true) {

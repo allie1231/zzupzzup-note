@@ -1083,9 +1083,36 @@ button:hover,
   grid-template-columns: auto auto minmax(220px, 1fr) auto auto auto;
 }
 
+.topbar {
+  grid-template-rows: 1fr;
+  padding-top: 72px;
+}
+
+.nav-actions {
+  position: absolute;
+  top: 36px;
+  right: 16px;
+  z-index: 2;
+  width: min(640px, calc(100% - 32px));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 @media (max-width: 860px) {
   .control-strip {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    padding-top: 96px;
+  }
+
+  .nav-actions {
+    top: 34px;
+    right: 12px;
+    width: calc(100% - 24px);
   }
 
   .feature {

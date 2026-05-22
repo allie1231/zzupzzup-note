@@ -1054,7 +1054,40 @@ button:hover,
   font: 11px/1 var(--pixel-font);
 }
 
+.state-chip {
+  display: inline-flex;
+  width: fit-content;
+  border: 2px solid #000;
+  padding: 3px 7px;
+  color: #000;
+  background: #fff;
+  font: 11px/1 var(--pixel-font);
+}
+
+.state-chip.is-reviewed {
+  color: #fff;
+  background: #000;
+}
+
+.photo-card.is-inbox {
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    repeating-linear-gradient(135deg, #000 0 2px, transparent 2px 8px) border-box;
+}
+
+.photo-card.is-reviewed {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+}
+
+.control-strip {
+  grid-template-columns: auto auto minmax(220px, 1fr) auto auto auto;
+}
+
 @media (max-width: 860px) {
+  .control-strip {
+    grid-template-columns: 1fr;
+  }
+
   .feature {
     grid-template-columns: 1fr;
   }

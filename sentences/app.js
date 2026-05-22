@@ -49,7 +49,8 @@ const state = {
   toastTimer: 0,
   cloudReady: false,
   editingId: "",
-  favoriteOnly: false
+  favoriteOnly: false,
+  viewMode: "all"
 };
 
 const el = {
@@ -88,6 +89,8 @@ const el = {
   search: document.querySelector("#search"),
   categoryFilter: document.querySelector("#categoryFilter"),
   showAll: document.querySelector("#showAll"),
+  showInbox: document.querySelector("#showInbox"),
+  showReviewed: document.querySelector("#showReviewed"),
   showFavorites: document.querySelector("#showFavorites"),
   shuffleOne: document.querySelector("#shuffleOne"),
   count: document.querySelector("#count"),
@@ -120,6 +123,8 @@ el.importNotion.addEventListener("click", importNotionRows);
 el.search.addEventListener("input", applyFilters);
 el.categoryFilter.addEventListener("change", applyFilters);
 el.showAll.addEventListener("click", showAll);
+el.showInbox.addEventListener("click", showInbox);
+el.showReviewed.addEventListener("click", showReviewed);
 el.showFavorites.addEventListener("click", showFavorites);
 el.shuffleOne.addEventListener("click", shuffleOne);
 el.sentences.addEventListener("click", handleCardClick);
@@ -436,6 +441,8 @@ function applyFilters() {
   const category = el.categoryFilter.value;
   state.visible = state.clips.filter((clip) => {
     if (state.favoriteOnly && !clip.favorite) return false;
+    if (state.viewMode === "inbox" && isReviewed(clip)) return false;
+    if (state.viewMode === "reviewed" && !isReviewed(clip)) return false;
     if (category && categoryOf(clip) !== category) return false;
     if (!query) return true;
     return [
@@ -454,13 +461,29 @@ function showAll() {
   el.search.value = "";
   el.categoryFilter.value = "";
   state.favoriteOnly = false;
+  state.viewMode = "all";
   state.visible = [...state.clips].sort(sortNewest);
   render();
   notify(`전체 문장 ${state.visible.length}개를 보여줍니다.`);
 }
 
+function showInbox() {
+  state.favoriteOnly = false;
+  state.viewMode = "inbox";
+  applyFilters();
+  notify(`아직 확인하지 않은 인박스 문장 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showReviewed() {
+  state.favoriteOnly = false;
+  state.viewMode = "reviewed";
+  applyFilters();
+  notify(`확인하거나 편집한 문장 ${state.visible.length}개를 보여줍니다.`);
+}
+
 function showFavorites() {
   state.favoriteOnly = true;
+  state.viewMode = "all";
   applyFilters();
   notify(`기억하고 싶은 문장 ${state.visible.length}개를 보여줍니다.`);
 }
@@ -494,11 +517,13 @@ function sentenceCard(clip) {
   const card = document.createElement("article");
   card.className = "sentence-card";
   if (clip.favorite) card.classList.add("is-favorite");
+  card.classList.add(isReviewed(clip) ? "is-reviewed-state" : "is-inbox-state");
   card.dataset.id = clip.id;
 
   const top = document.createElement("div");
   top.className = "sentence-top";
   top.append(textEl("span", "category-chip", categoryOf(clip)));
+  top.append(textEl("span", isReviewed(clip) ? "state-chip is-reviewed" : "state-chip", isReviewed(clip) ? "확인함" : "인박스"));
   const star = document.createElement("button");
   star.type = "button";
   star.className = clip.favorite ? "star is-on" : "star";
@@ -526,6 +551,7 @@ function sentenceCard(clip) {
   actions.className = "card-actions";
   actions.append(
     actionButton("자세히", "open-detail"),
+    actionButton("확인 완료", "mark-reviewed", "secondary"),
     actionButton("삭제", "delete", "secondary")
   );
   card.append(top, quote, reason, meta, tags, actions);
@@ -550,8 +576,7 @@ function handleCardClick(event) {
 
   if (button.dataset.action === "toggle-favorite") {
     clip.favorite = !clip.favorite;
-    clip.reviewCount = Number(clip.reviewCount || 0) + 1;
-    clip.lastReviewed = new Date().toISOString();
+    markReviewed(clip);
     applyFilters();
     saveCloudClip(clip);
     notify(clip.favorite ? "기억하고 싶은 문장으로 표시했습니다." : "기억 표시를 해제했습니다.");
@@ -560,6 +585,14 @@ function handleCardClick(event) {
 
   if (button.dataset.action === "open-detail") {
     openDetail(clip.id);
+    return;
+  }
+
+  if (button.dataset.action === "mark-reviewed") {
+    markReviewed(clip);
+    applyFilters();
+    saveCloudClip(clip);
+    notify("확인한 문장으로 표시했습니다.");
     return;
   }
 
@@ -602,8 +635,7 @@ function saveDetail(event) {
   clip.siteName = deriveSiteName(clip.source);
   clip.imageUrl = normalizeText(el.detailImageUrl.value);
   setCategory(clip, el.detailCategory.value);
-  clip.reviewCount = Number(clip.reviewCount || 0) + 1;
-  clip.lastReviewed = new Date().toISOString();
+  markReviewed(clip);
   el.sentenceDialog.close();
   applyFilters();
   saveCloudClip(clip);
@@ -749,6 +781,19 @@ function suggestTags(sentence, currentTags = "", category = "") {
 
 function categoryOf(clip) {
   return readCategory(clip.connection) || inferCategory(clip);
+}
+
+function isReviewed(clip) {
+  const status = clip.status || "새로 수집";
+  return status !== "새로 수집"
+    || Number(clip.reviewCount || 0) > 0
+    || Boolean(clip.lastReviewed);
+}
+
+function markReviewed(clip) {
+  if (clip.status === "새로 수집" || !clip.status) clip.status = "확인함";
+  clip.reviewCount = Number(clip.reviewCount || 0) + 1;
+  clip.lastReviewed = new Date().toISOString();
 }
 
 function setCategory(clip, category) {

@@ -14,7 +14,8 @@ const state = {
   visible: [],
   urls: new Map(),
   cloudReady: false,
-  activeItem: null
+  activeItem: null,
+  viewMode: "all"
 };
 
 const PIN_BLOCK_START = "[줍줍사진 핀]";
@@ -34,6 +35,8 @@ const el = {
   csvInput: document.querySelector("#csvInput"),
   search: document.querySelector("#search"),
   showAll: document.querySelector("#showAll"),
+  showInbox: document.querySelector("#showInbox"),
+  showReviewed: document.querySelector("#showReviewed"),
   status: document.querySelector("#status"),
   imageCount: document.querySelector("#imageCount"),
   csvCount: document.querySelector("#csvCount"),
@@ -46,6 +49,7 @@ const el = {
   detailMeta: document.querySelector("#detailMeta"),
   detailReason: document.querySelector("#detailReason"),
   detailLinks: document.querySelector("#detailLinks"),
+  markReviewed: document.querySelector("#markReviewed"),
   pinLayer: document.querySelector("#pinLayer"),
   pinList: document.querySelector("#pinList"),
   pinEditor: document.querySelector("#pinEditor")
@@ -55,11 +59,14 @@ el.imageInput.addEventListener("change", loadImages);
 el.csvInput.addEventListener("change", loadCsv);
 el.search.addEventListener("input", applyFilters);
 el.showAll.addEventListener("click", showAll);
+el.showInbox.addEventListener("click", showInbox);
+el.showReviewed.addEventListener("click", showReviewed);
 el.gallery.addEventListener("click", openCard);
 el.cloudSave.addEventListener("click", saveCloudConfig);
 el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
+el.markReviewed.addEventListener("click", markActiveReviewed);
 el.pinLayer.addEventListener("click", addPinFromClick);
 el.pinList.addEventListener("click", handlePinAction);
 
@@ -210,7 +217,10 @@ function applyFilters() {
     tags: image.row?.tags || "",
     siteName: image.row?.siteName || "",
     contentType: image.row?.contentType || (image.mediaKind === "video" ? "동영상" : "이미지"),
-    mediaKind: image.mediaKind
+    mediaKind: image.mediaKind,
+    status: image.row?.status || "새로 수집",
+    reviewCount: image.row?.reviewCount || 0,
+    lastReviewed: image.row?.lastReviewed || ""
   }));
 
   const remoteOnly = state.rows
@@ -228,10 +238,15 @@ function applyFilters() {
       reason: row.reason || "",
       connection: row.connection || "",
       tags: row.tags || "",
-      siteName: row.siteName || ""
+      siteName: row.siteName || "",
+      status: row.status || "새로 수집",
+      reviewCount: row.reviewCount || 0,
+      lastReviewed: row.lastReviewed || ""
     }));
 
   state.visible = [...folderImages, ...remoteOnly].filter((item) => {
+    if (state.viewMode === "inbox" && isReviewedItem(item)) return false;
+    if (state.viewMode === "reviewed" && !isReviewedItem(item)) return false;
     if (!query) return true;
     return [
       item.name,
@@ -248,8 +263,21 @@ function applyFilters() {
 
 function showAll() {
   el.search.value = "";
+  state.viewMode = "all";
   applyFilters();
   notify(`미디어 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showInbox() {
+  state.viewMode = "inbox";
+  applyFilters();
+  notify(`아직 확인하지 않은 인박스 미디어 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showReviewed() {
+  state.viewMode = "reviewed";
+  applyFilters();
+  notify(`확인하거나 편집한 미디어 ${state.visible.length}개를 보여줍니다.`);
 }
 
 function render() {
@@ -275,13 +303,18 @@ function photoCard(item) {
   const card = document.createElement("article");
   card.className = "photo-card";
   if (isVideoItem(item)) card.classList.add("is-video");
+  if (isReviewedItem(item)) card.classList.add("is-reviewed");
+  else card.classList.add("is-inbox");
   card.dataset.id = item.id;
 
   const media = cardMediaView(item);
 
   const footer = document.createElement("footer");
   const copy = document.createElement("div");
-  copy.append(textEl("span", "", item.siteName || item.tags || (isVideoItem(item) ? "video archive" : "image archive")));
+  copy.append(
+    textEl("span", "", item.siteName || item.tags || (isVideoItem(item) ? "video archive" : "image archive")),
+    textEl("span", isReviewedItem(item) ? "state-chip is-reviewed" : "state-chip", isReviewedItem(item) ? "확인함" : "인박스")
+  );
   footer.append(copy, textEl("small", "", item.tags || (isVideoItem(item) ? "video" : "image")));
   card.append(media, footer);
   return card;
@@ -473,8 +506,11 @@ async function handlePinAction(event) {
 
 async function persistPins(item, row, pins, doneMessage) {
   writePins(row, pins);
+  markRowReviewed(row);
   item.connection = row.connection;
+  syncItemFromRow(item, row);
   renderPins(item);
+  applyFilters();
 
   if (!row.id) {
     notify(`${doneMessage} DB 항목이 없는 로컬 이미지는 서버 저장 전까지 이 화면에서만 유지됩니다.`);
@@ -494,6 +530,7 @@ async function persistPins(item, row, pins, doneMessage) {
     item.connection = row.connection;
     replaceStoredRow(row);
     renderPins(item);
+    applyFilters();
     notify(`${doneMessage} Supabase에 저장했습니다.`);
   } catch (error) {
     notify(error.message || "핀을 Supabase에 저장하지 못했습니다.");
@@ -548,7 +585,7 @@ function writableRowForItem(item) {
   item.row = {
     id: "",
     createdAt: new Date().toISOString(),
-    contentType: "이미지",
+    contentType: item.contentType || (isVideoItem(item) ? "동영상" : "이미지"),
     sentence: "",
     reason: item.reason || "",
     connection: item.connection || "",
@@ -561,10 +598,10 @@ function writableRowForItem(item) {
     imageUrl: "",
     title: item.title || item.name || "이미지",
     tags: item.tags || "#이미지",
-    status: "새로 수집",
+    status: item.status || "새로 수집",
     favorite: false,
-    reviewCount: 0,
-    lastReviewed: ""
+    reviewCount: Number(item.reviewCount || 0),
+    lastReviewed: item.lastReviewed || ""
   };
   return item.row;
 }
@@ -612,6 +649,58 @@ function pinActionButton(action, pinId, label) {
 function replaceStoredRow(nextRow) {
   const index = state.rows.findIndex((row) => row.id && row.id === nextRow.id);
   if (index >= 0) state.rows[index] = nextRow;
+}
+
+async function markActiveReviewed() {
+  const item = state.activeItem;
+  if (!item) return;
+  const row = writableRowForItem(item);
+  markRowReviewed(row);
+  syncItemFromRow(item, row);
+
+  if (!row.id) {
+    applyFilters();
+    notify("확인한 미디어로 표시했습니다. DB 항목이 없는 로컬 파일은 이 화면에서만 유지됩니다.");
+    return;
+  }
+
+  if (!hasCloudSession()) {
+    applyFilters();
+    notify("확인한 미디어로 표시했습니다. Supabase 로그인 후 DB에 저장할 수 있습니다.");
+    return;
+  }
+
+  try {
+    const updated = await updateCloudClip(row);
+    const nextRow = rowToItem(updated);
+    Object.assign(row, nextRow);
+    syncItemFromRow(item, row);
+    replaceStoredRow(row);
+    applyFilters();
+    notify("확인한 미디어로 표시하고 Supabase에 저장했습니다.");
+  } catch (error) {
+    notify(error.message || "확인 상태를 Supabase에 저장하지 못했습니다.");
+  }
+}
+
+function isReviewedItem(item) {
+  const status = item.row?.status || item.status || "새로 수집";
+  const reviewCount = Number(item.row?.reviewCount || item.reviewCount || 0);
+  const lastReviewed = item.row?.lastReviewed || item.lastReviewed || "";
+  return status !== "새로 수집" || reviewCount > 0 || Boolean(lastReviewed);
+}
+
+function markRowReviewed(row) {
+  if (row.status === "새로 수집" || !row.status) row.status = "확인함";
+  row.reviewCount = Number(row.reviewCount || 0) + 1;
+  row.lastReviewed = new Date().toISOString();
+}
+
+function syncItemFromRow(item, row) {
+  item.status = row.status || "새로 수집";
+  item.reviewCount = row.reviewCount || 0;
+  item.lastReviewed = row.lastReviewed || "";
+  item.connection = row.connection || item.connection || "";
 }
 
 function clamp(value, min, max) {

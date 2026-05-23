@@ -1,3 +1,6 @@
+import { createClip } from "./shared/schema.js";
+import { saveClip } from "./data-writer.js";
+
 chrome.runtime.onInstalled.addListener(() => {
   registerContextMenus();
 });
@@ -45,14 +48,13 @@ function createContextMenus() {
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "collect-sentence") {
-    await setPendingClip({
+    await collectSentenceWithoutPopup({
       contentType: "문장",
       sentence: info.selectionText || "",
       source: info.pageUrl || tab?.url || "",
       title: tab?.title || "",
       iconUrl: tab?.favIconUrl || ""
     });
-    await openPopupIfPossible();
     return;
   }
 
@@ -120,19 +122,18 @@ chrome.commands.onCommand.addListener(async (command) => {
     func: () => window.getSelection()?.toString() || ""
   });
 
-  await setPendingClip({
+  await collectSentenceWithoutPopup({
     contentType: "문장",
     sentence: result || "",
     source: tab.url || "",
     title: tab.title || "",
     iconUrl: tab.favIconUrl || ""
   });
-  await openPopupIfPossible();
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type !== "selection-captured") return false;
-  setPendingClip({
+  collectSentenceWithoutPopup({
     contentType: "문장",
     sentence: message.sentence || "",
     source: sender.tab?.url || "",
@@ -142,6 +143,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     .then(() => sendResponse({ ok: true }));
   return true;
 });
+
+async function collectSentenceWithoutPopup({ contentType = "문장", sentence, source, title, iconUrl }) {
+  const pending = {
+    contentType,
+    sentence,
+    source,
+    title,
+    siteName: deriveSiteName(source),
+    iconUrl
+  };
+  try {
+    await saveClip(createClip({
+      ...pending,
+      reason: "",
+      connection: "",
+      useFor: "정리필요",
+      action: "정리필요",
+      tags: "#문장",
+      status: "새로 수집"
+    }));
+    await flashBadge("OK", "#111111");
+  } catch (error) {
+    console.warn("문장 바로 저장 실패:", error);
+    await chrome.storage.local.set({ pendingClip: pending });
+    await flashBadge("ERR", "#9b111e");
+    await openPopupIfPossible();
+  }
+}
 
 async function setPendingClip({ contentType = "링크", sentence, source, title, iconUrl }) {
   await chrome.storage.local.set({
@@ -204,6 +233,14 @@ async function openPopupWindow() {
     height: 720,
     focused: true
   });
+}
+
+async function flashBadge(text, color) {
+  await chrome.action.setBadgeBackgroundColor({ color });
+  await chrome.action.setBadgeText({ text });
+  setTimeout(() => {
+    chrome.action.setBadgeText({ text: "" });
+  }, 1200);
 }
 
 async function collectImage(info, tab) {

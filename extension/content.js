@@ -33,7 +33,7 @@ function showButton() {
     button.addEventListener("click", async () => {
       if (!lastSelection) return;
       await chrome.runtime.sendMessage({ type: "selection-captured", sentence: lastSelection });
-      button.textContent = "줍줍 준비됨";
+      button.textContent = "줍줍 완료";
       setTimeout(() => {
         button.textContent = "줍줍하기";
         hideButton();

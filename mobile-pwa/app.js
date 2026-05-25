@@ -13,7 +13,13 @@ import {
   upsertCloudClips
 } from "../shared/supabase-store.js";
 
+const DEPLOYED_MOBILE_URL = "https://allie1231.github.io/zzupzzup-note/mobile-pwa/";
 const STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
+
+if (window.location.protocol === "file:") {
+  redirectFilePageToDeployed();
+}
+
 const el = {
   install: document.querySelector("#install"),
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -26,6 +32,9 @@ const el = {
   cloudPull: document.querySelector("#cloudPull"),
   cloudStatus: document.querySelector("#cloudStatus"),
   cloudAdvanced: document.querySelector(".cloud-advanced"),
+  bookmarkletLink: document.querySelector("#bookmarkletLink"),
+  bookmarkletCode: document.querySelector("#bookmarkletCode"),
+  copyBookmarklet: document.querySelector("#copyBookmarklet"),
   quickSave: document.querySelector("#quickSave"),
   clear: document.querySelector("#clear"),
   contentType: document.querySelector("#contentType"),
@@ -75,6 +84,7 @@ el.cloudSave.addEventListener("click", saveCloudConfig);
 el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
+el.copyBookmarklet.addEventListener("click", copyBookmarklet);
 el.clear.addEventListener("click", clearEditor);
 el.quickSave.addEventListener("click", saveClip);
 el.imageFile.addEventListener("change", handleImageFile);
@@ -94,10 +104,15 @@ el.showAll.addEventListener("click", () => {
   render();
 });
 
+setupBookmarklet();
 restoreCloudConfig();
-prefillFromUrl();
+const prefillResult = prefillFromUrl();
 render();
-autoPullCloud();
+if (prefillResult.autosave) {
+  autoSaveBookmarkletClip();
+} else {
+  autoPullCloud();
+}
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js");
@@ -110,16 +125,34 @@ function prefillFromUrl() {
   const text = params.get("text") || params.get("memo") || params.get("sentence") || "";
   const imageUrl = params.get("imageUrl") || "";
   const type = params.get("type") || inferType(source, imageUrl, text);
+  const autosave = ["1", "true", "yes", "y"].includes(String(params.get("autosave") || "").toLowerCase());
 
-  if (!source && !title && !text && !imageUrl) return;
+  if (!source && !title && !text && !imageUrl) return { autosave: false };
   el.contentType.value = type;
   el.source.value = source || imageUrl;
   el.title.value = title;
   el.sentence.value = text;
   el.imageUrl.value = imageUrl;
   syncImageUrlPreview();
-  el.tags.value = `#${type} #모바일`;
-  setStatus("공유된 내용을 불러왔습니다. 확인 후 저장해 주세요.");
+  el.tags.value = `#${type} ${autosave ? "#북마클릿" : "#모바일"}`;
+  setStatus(autosave ? "북마클릿으로 받은 내용을 서버에 바로 저장합니다." : "공유된 내용을 불러왔습니다. 확인 후 저장해 주세요.");
+  return { autosave };
+}
+
+function setupBookmarklet() {
+  const script = `javascript:(()=>{const s=(window.getSelection&&window.getSelection().toString().trim())||prompt('줍줍할 문장을 입력하세요','')||'';const u=location.href;const t=document.title||'';const y=s?'문장':'링크';location.href='${DEPLOYED_MOBILE_URL}?autosave=1&type='+encodeURIComponent(y)+'&url='+encodeURIComponent(u)+'&title='+encodeURIComponent(t)+'&text='+encodeURIComponent(s);})()`;
+  el.bookmarkletLink.href = script;
+  el.bookmarkletCode.value = script;
+}
+
+async function copyBookmarklet() {
+  try {
+    await navigator.clipboard.writeText(el.bookmarkletCode.value);
+    setStatus("북마클릿 코드를 복사했습니다. Safari 책갈피의 주소 칸에 붙여넣어 주세요.");
+  } catch {
+    el.bookmarkletCode.select();
+    setStatus("복사가 막혔습니다. 코드 칸을 길게 눌러 직접 복사해 주세요.");
+  }
 }
 
 function restoreCloudConfig() {
@@ -153,7 +186,7 @@ async function loginCloud() {
     setCloudStatus("Supabase에 로그인했습니다. 서버 저장함을 불러옵니다.");
     await pullCloud({ quiet: true });
   } catch (error) {
-    setCloudStatus(error.message || "Supabase에 로그인하지 못했습니다.");
+    setCloudStatus(loginErrorMessage(error));
   }
 }
 
@@ -169,6 +202,15 @@ async function autoPullCloud() {
   } catch (error) {
     setCloudStatus(error.message || "Supabase 데이터를 자동으로 불러오지 못했습니다.");
   }
+}
+
+async function autoSaveBookmarkletClip() {
+  if (!hasCloudSession()) {
+    setStatus("북마클릿 내용을 받았습니다. Supabase에 로그인한 뒤 서버에 바로 저장을 눌러 주세요.");
+    setCloudStatus("이 기기에서 한 번 로그인하면 다음 북마클릿 줍줍부터 자동 저장됩니다.");
+    return;
+  }
+  await saveClip({ autosave: true });
 }
 
 async function pullCloud(options = {}) {
@@ -208,7 +250,7 @@ async function handleImageFile() {
   }
 }
 
-async function saveClip() {
+async function saveClip(options = {}) {
   if (!hasCloudSession()) {
     setStatus("먼저 Supabase에 로그인해 주세요. 이제 모바일 줍기는 서버에 바로 저장됩니다.");
     setCloudStatus("Supabase 로그인 후 다시 저장하면 서버 보관함에 들어갑니다.");
@@ -255,12 +297,27 @@ async function saveClip() {
     setClips(mergeClips([savedClip], getClips()));
     clearEditor();
     render();
-    setStatus("서버에 바로 저장했습니다.");
+    setStatus(options.autosave ? "북마클릿 문장을 서버에 저장했습니다. Safari로 돌아가도 됩니다." : "서버에 바로 저장했습니다.");
     setCloudStatus("Supabase 저장함에 저장했습니다. 웹홈에서도 바로 불러올 수 있습니다.");
   } catch (error) {
     setStatus("서버 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     setCloudStatus(error.message || "Supabase 저장에 실패했습니다.");
   }
+}
+
+function loginErrorMessage(error) {
+  const message = error?.message || "";
+  if (message === "Failed to fetch" || message.includes("Failed to fetch")) {
+    return "서버에 닿지 못했습니다. file:// 로컬 파일이 아니라 배포 주소에서 열어 주세요.";
+  }
+  return message || "Supabase에 로그인하지 못했습니다.";
+}
+
+function redirectFilePageToDeployed() {
+  const target = new URL(DEPLOYED_MOBILE_URL);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  window.location.replace(target.href);
 }
 
 function exportCsv() {

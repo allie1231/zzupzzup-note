@@ -725,6 +725,10 @@ section::before {
   content: "□ Guide";
 }
 
+.bookmarklet-panel::before {
+  content: "□ Bookmarklet";
+}
+
 .editor::before {
   content: "□ Capture";
 }
@@ -811,6 +815,13 @@ button:hover,
 .page-switcher a[aria-current="page"] {
   color: #fff;
   background: #000;
+}
+
+#bookmarkletCode {
+  min-height: 120px;
+  margin-top: 12px;
+  font-size: 11px;
+  word-break: break-all;
 }
 
 @media (max-width: 560px) {

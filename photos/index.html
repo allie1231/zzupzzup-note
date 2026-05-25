@@ -22,7 +22,7 @@
         </div>
       </header>
 
-      <section class="control-strip">
+      <section class="control-strip floating-panel" data-floating-panel="import">
         <label class="file-button">
           미디어 폴더 열기
           <input id="imageInput" type="file" accept="image/*,video/*" webkitdirectory directory multiple>
@@ -95,6 +95,13 @@
       <p id="status" class="status" role="status">미디어 폴더를 열거나 DB를 불러오면 줍줍사진 보드가 채워집니다.</p>
 
       <section id="gallery" class="gallery" aria-label="이미지 목록"></section>
+      <nav class="floating-dock" aria-label="빠른 이동과 도구">
+        <a href="../web/" title="웹홈">⌂</a>
+        <a href="../mobile-pwa/" title="모바일">M</a>
+        <a href="../sentences/" title="줍줍문장">¶</a>
+        <a href="../photos/" aria-current="page" title="줍줍사진">▧</a>
+        <button type="button" data-open-panel="import" title="필터와 가져오기">⇪</button>
+      </nav>
     </main>
 
     <dialog id="detailDialog" class="detail-dialog">

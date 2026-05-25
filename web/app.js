@@ -40,6 +40,7 @@ const MAX_HISTORY_ITEMS = 3;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
+const DISPLAY_LIMIT = 15;
 
 const state = {
   clips: [],
@@ -188,6 +189,9 @@ el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
 el.cloudPush.addEventListener("click", pushCloud);
+document.querySelectorAll("[data-open-panel]").forEach((button) => {
+  button.addEventListener("click", () => toggleFloatingPanel(button.dataset.openPanel));
+});
 
 restoreOnboarding();
 restoreCloudConfig();
@@ -649,6 +653,7 @@ function toggleCalendar() {
 
 function render() {
   const clips = state.visible.length || state.clips.length ? state.visible : [];
+  const displayed = clips.slice(0, DISPLAY_LIMIT);
   renderStats();
   renderCalendar();
   el.cards.replaceChildren();
@@ -661,7 +666,21 @@ function render() {
     return;
   }
 
-  el.cards.append(...clips.map(cardView));
+  el.cards.append(...displayed.map(cardView));
+  if (clips.length > DISPLAY_LIMIT) {
+    const more = document.createElement("div");
+    more.className = "empty";
+    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
+    el.cards.append(more);
+  }
+}
+
+function toggleFloatingPanel(name) {
+  const panel = document.querySelector(`[data-floating-panel="${name}"]`);
+  if (!panel) return;
+  const shouldOpen = !panel.classList.contains("is-open");
+  document.querySelectorAll("[data-floating-panel]").forEach((item) => item.classList.remove("is-open"));
+  if (shouldOpen) panel.classList.add("is-open");
 }
 
 function renderStats() {

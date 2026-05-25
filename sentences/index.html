@@ -22,7 +22,7 @@
         </nav>
       </header>
 
-      <section class="control-panel">
+      <section class="control-panel floating-panel" data-floating-panel="import">
         <div>
           <p class="eyebrow">CSV</p>
           <h2>문장 CSV 열기</h2>
@@ -131,7 +131,7 @@
         </div>
       </section>
 
-      <section class="notion-panel">
+      <section class="notion-panel floating-panel" data-floating-panel="notion">
         <div>
           <p class="eyebrow">notion import</p>
           <h2>노션 문장 CSV 매핑</h2>
@@ -187,6 +187,14 @@
       </section>
 
       <section id="sentences" class="sentences" aria-label="문장 목록"></section>
+      <nav class="floating-dock" aria-label="빠른 이동과 도구">
+        <a href="../web/" title="웹홈">⌂</a>
+        <a href="../mobile-pwa/" title="모바일">M</a>
+        <a href="../sentences/" aria-current="page" title="줍줍문장">¶</a>
+        <a href="../photos/" title="줍줍사진">▧</a>
+        <button type="button" data-open-panel="import" title="CSV">⇪</button>
+        <button type="button" data-open-panel="notion" title="Notion">N</button>
+      </nav>
     </main>
 
     <dialog id="sentenceDialog" class="sentence-dialog">

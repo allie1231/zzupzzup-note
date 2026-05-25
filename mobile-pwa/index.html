@@ -201,7 +201,7 @@
       <section class="library">
         <div class="section-head">
           <h2>서버 저장함</h2>
-          <div class="actions">
+          <div class="actions floating-panel" data-floating-panel="export">
             <select id="exportMode" aria-label="CSV 내보내기 방식" hidden>
               <option value="replace">백업 CSV</option>
               <option value="mobile">모바일 백업 CSV</option>
@@ -218,6 +218,13 @@
         </div>
         <ol id="clips"></ol>
       </section>
+      <nav class="floating-dock" aria-label="빠른 이동과 도구">
+        <a href="../web/" title="웹홈">⌂</a>
+        <a href="../mobile-pwa/" aria-current="page" title="모바일">M</a>
+        <a href="../sentences/" title="줍줍문장">¶</a>
+        <a href="../photos/" title="줍줍사진">▧</a>
+        <button type="button" data-open-panel="export" title="백업">⇩</button>
+      </nav>
     </main>
     <script type="module" src="app.js"></script>
   </body>

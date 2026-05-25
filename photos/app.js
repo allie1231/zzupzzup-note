@@ -20,6 +20,7 @@ const state = {
 };
 
 const PIN_BLOCK_START = "[줍줍사진 핀]";
+const DISPLAY_LIMIT = 15;
 
 const el = {
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -74,6 +75,9 @@ el.cloudPull.addEventListener("click", pullCloud);
 el.markReviewed.addEventListener("click", markActiveReviewed);
 el.pinLayer.addEventListener("click", addPinFromClick);
 el.pinList.addEventListener("click", handlePinAction);
+document.querySelectorAll("[data-open-panel]").forEach((button) => {
+  button.addEventListener("click", () => toggleFloatingPanel(button.dataset.openPanel));
+});
 
 restoreCloudConfig();
 render();
@@ -303,6 +307,7 @@ function showReviewed() {
 
 function render() {
   const matched = state.images.filter((image) => image.row).length;
+  const displayed = state.visible.slice(0, DISPLAY_LIMIT);
   el.imageCount.textContent = String(state.images.length);
   el.csvCount.textContent = String(state.rows.length);
   el.matchedCount.textContent = String(matched);
@@ -317,7 +322,21 @@ function render() {
     return;
   }
 
-  el.gallery.append(...state.visible.map(photoCard));
+  el.gallery.append(...displayed.map(photoCard));
+  if (state.visible.length > DISPLAY_LIMIT) {
+    const more = document.createElement("div");
+    more.className = "empty";
+    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
+    el.gallery.append(more);
+  }
+}
+
+function toggleFloatingPanel(name) {
+  const panel = document.querySelector(`[data-floating-panel="${name}"]`);
+  if (!panel) return;
+  const shouldOpen = !panel.classList.contains("is-open");
+  document.querySelectorAll("[data-floating-panel]").forEach((item) => item.classList.remove("is-open"));
+  if (shouldOpen) panel.classList.add("is-open");
 }
 
 function photoCard(item) {

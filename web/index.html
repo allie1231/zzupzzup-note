@@ -25,7 +25,7 @@
             <a href="../sentences/">줍줍문장</a>
             <a href="../photos/">줍줍사진</a>
           </nav>
-          <div class="actions">
+          <div class="actions floating-panel" id="importPanel" data-floating-panel="import">
             <button id="connectCsv" class="secondary" hidden>CSV 연결</button>
             <label class="file-button">
               CSV 열기
@@ -160,7 +160,7 @@
         <button id="showCalendar" class="secondary">캘린더 보기</button>
       </section>
 
-      <section class="paste-panel">
+      <section class="paste-panel floating-panel" id="pastePanel" data-floating-panel="paste">
         <div>
           <p class="eyebrow">모바일에서 가져오기</p>
           <h2>모바일 CSV 복사 내용을 바로 붙여넣어 합치기</h2>
@@ -174,7 +174,7 @@
         </div>
       </section>
 
-      <section class="history-panel">
+      <section class="history-panel floating-panel" id="historyPanel" data-floating-panel="history">
         <div class="history-head">
           <div>
             <p class="eyebrow">CSV 히스토리</p>
@@ -191,7 +191,7 @@
       <section class="stats" id="stats"></section>
       <section class="calendar-board" id="calendar" hidden></section>
       <section class="cards" id="cards"></section>
-      <section class="export-panel">
+      <section class="export-panel floating-panel" id="exportPanel" data-floating-panel="export">
         <div>
           <p class="eyebrow">정리 후 내보내기</p>
           <h2>변경사항을 저장하거나 다음 보관함으로 넘기기</h2>
@@ -206,6 +206,16 @@
           <button id="exportDoneCsv" class="secondary" hidden>정리 완료만 CSV</button>
         </div>
       </section>
+      <nav class="floating-dock" aria-label="빠른 이동과 도구">
+        <a href="../web/" aria-current="page" title="웹홈">⌂</a>
+        <a href="../mobile-pwa/" title="모바일">M</a>
+        <a href="../sentences/" title="줍줍문장">¶</a>
+        <a href="../photos/" title="줍줍사진">▧</a>
+        <button type="button" data-open-panel="import" title="가져오기">⇪</button>
+        <button type="button" data-open-panel="paste" title="붙여넣기">⌘</button>
+        <button type="button" data-open-panel="history" title="히스토리">H</button>
+        <button type="button" data-open-panel="export" title="내보내기">⇩</button>
+      </nav>
     </main>
 
     <dialog class="detail-dialog" id="detailDialog">

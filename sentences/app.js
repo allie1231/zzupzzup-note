@@ -38,6 +38,7 @@ const DB_STORE = "handles";
 const CSV_HANDLE_KEY = "sentenceCsv";
 const CATEGORY_MARKER = "[줍줍문장 분류]";
 const CATEGORIES = ["책", "아티클", "뉴스레터", "영화", "강연", "웹", "기타"];
+const DISPLAY_LIMIT = 15;
 
 const state = {
   clips: [],
@@ -138,6 +139,9 @@ el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
 el.cloudPush.addEventListener("click", pushCloud);
+document.querySelectorAll("[data-open-panel]").forEach((button) => {
+  button.addEventListener("click", () => toggleFloatingPanel(button.dataset.openPanel));
+});
 
 restoreCloudConfig();
 render();
@@ -502,6 +506,7 @@ function shuffleOne() {
 
 function render() {
   el.count.textContent = String(state.visible.length);
+  const displayed = state.visible.slice(0, DISPLAY_LIMIT);
   el.sentences.replaceChildren();
   if (!state.visible.length) {
     const empty = document.createElement("div");
@@ -511,7 +516,21 @@ function render() {
     return;
   }
 
-  el.sentences.append(...state.visible.map(sentenceCard));
+  el.sentences.append(...displayed.map(sentenceCard));
+  if (state.visible.length > DISPLAY_LIMIT) {
+    const more = document.createElement("div");
+    more.className = "empty";
+    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
+    el.sentences.append(more);
+  }
+}
+
+function toggleFloatingPanel(name) {
+  const panel = document.querySelector(`[data-floating-panel="${name}"]`);
+  if (!panel) return;
+  const shouldOpen = !panel.classList.contains("is-open");
+  document.querySelectorAll("[data-floating-panel]").forEach((item) => item.classList.remove("is-open"));
+  if (shouldOpen) panel.classList.add("is-open");
 }
 
 function sentenceCard(clip) {

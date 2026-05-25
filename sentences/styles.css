@@ -962,3 +962,60 @@ input[type="checkbox"] {
     flex: 1 1 100%;
   }
 }
+
+[data-floating-panel] {
+  display: none;
+}
+
+[data-floating-panel].is-open {
+  position: fixed;
+  right: 18px;
+  bottom: 82px;
+  z-index: 90;
+  display: grid;
+  width: min(560px, calc(100vw - 36px));
+  max-height: min(74vh, 720px);
+  overflow: auto;
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.floating-dock {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: min(420px, calc(100vw - 36px));
+  border: 2px solid #000;
+  padding: 6px;
+  background: #fff;
+  box-shadow: var(--stamp-shadow);
+}
+
+.floating-dock a,
+.floating-dock button {
+  min-width: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #000;
+  border-radius: 0;
+  padding: 6px 8px;
+  color: #000;
+  background: #fff;
+  font: 13px/1 var(--pixel-font);
+  text-decoration: none;
+}
+
+.floating-dock a:hover,
+.floating-dock button:hover,
+.floating-dock a[aria-current="page"] {
+  color: #fff;
+  background: #000;
+}

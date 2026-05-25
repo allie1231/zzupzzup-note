@@ -15,6 +15,7 @@ import {
 
 const DEPLOYED_MOBILE_URL = "https://allie1231.github.io/zzupzzup-note/mobile-pwa/";
 const STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
+const DISPLAY_LIMIT = 15;
 
 if (window.location.protocol === "file:") {
   redirectFilePageToDeployed();
@@ -102,6 +103,9 @@ el.showAll.addEventListener("click", () => {
   favoriteOnly = false;
   el.search.value = "";
   render();
+});
+document.querySelectorAll("[data-open-panel]").forEach((button) => {
+  button.addEventListener("click", () => toggleFloatingPanel(button.dataset.openPanel));
 });
 
 setupBookmarklet();
@@ -352,13 +356,27 @@ async function copyCsv() {
 
 function render() {
   const clips = filteredClips();
-  el.clips.replaceChildren(...clips.map(cardView));
+  const displayed = clips.slice(0, DISPLAY_LIMIT);
+  el.clips.replaceChildren(...displayed.map(cardView));
   if (!clips.length) {
     const empty = document.createElement("li");
     empty.className = "empty";
     empty.textContent = hasCloudSession() ? "서버 저장함이 비어 있습니다. 저장하면 여기에 표시됩니다." : "Supabase에 로그인하면 서버 저장함을 불러옵니다.";
     el.clips.append(empty);
+  } else if (clips.length > DISPLAY_LIMIT) {
+    const more = document.createElement("li");
+    more.className = "empty";
+    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색으로 더 좁혀 보세요.`;
+    el.clips.append(more);
   }
+}
+
+function toggleFloatingPanel(name) {
+  const panel = document.querySelector(`[data-floating-panel="${name}"]`);
+  if (!panel) return;
+  const shouldOpen = !panel.classList.contains("is-open");
+  document.querySelectorAll("[data-floating-panel]").forEach((item) => item.classList.remove("is-open"));
+  if (shouldOpen) panel.classList.add("is-open");
 }
 
 function cardView(clip) {

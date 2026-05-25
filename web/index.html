@@ -26,12 +26,12 @@
             <a href="../photos/">줍줍사진</a>
           </nav>
           <div class="actions">
-            <button id="connectCsv" class="secondary">CSV 연결</button>
+            <button id="connectCsv" class="secondary" hidden>CSV 연결</button>
             <label class="file-button">
               CSV 열기
               <input id="csvInput" type="file" accept=".csv,text/csv">
             </label>
-            <label class="file-button secondary">
+            <label class="file-button secondary" hidden>
               모바일 CSV 합치기
               <input id="mergeCsvInput" type="file" accept=".csv,text/csv">
             </label>
@@ -199,11 +199,11 @@
         <div class="export-actions">
           <button id="exportCsv">변경사항 CSV 내보내기</button>
           <button id="copyNotion" class="secondary">Notion용 Markdown 복사</button>
-          <button id="exportSentenceCsv" class="secondary">문장만 CSV</button>
+          <button id="exportSentenceCsv" class="secondary" hidden>문장만 CSV</button>
           <a class="button-link secondary" href="../sentences/">줍줍문장</a>
           <a class="button-link secondary" href="../photos/">줍줍사진</a>
-          <button id="exportPendingCsv" class="secondary">정리 완료 제외 CSV</button>
-          <button id="exportDoneCsv" class="secondary">정리 완료만 CSV</button>
+          <button id="exportPendingCsv" class="secondary" hidden>정리 완료 제외 CSV</button>
+          <button id="exportDoneCsv" class="secondary" hidden>정리 완료만 CSV</button>
         </div>
       </section>
     </main>

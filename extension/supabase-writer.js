@@ -2,6 +2,7 @@ const SETTINGS_KEYS = [
   "supabaseUrl",
   "supabaseAnonKey",
   "supabaseEmail",
+  "supabasePassword",
   "supabaseAccessToken",
   "supabaseRefreshToken",
   "supabaseUserId"
@@ -18,17 +19,19 @@ export async function getCloudSettings() {
     url: normalizeUrl(values.supabaseUrl || DEFAULT_SUPABASE_URL),
     anonKey: String(values.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY).trim(),
     email: String(values.supabaseEmail || "").trim(),
+    password: String(values.supabasePassword || ""),
     accessToken: String(values.supabaseAccessToken || ""),
     refreshToken: String(values.supabaseRefreshToken || ""),
     userId: String(values.supabaseUserId || "")
   };
 }
 
-export async function saveCloudConfig({ url, anonKey, email }) {
+export async function saveCloudConfig({ url, anonKey, email, password }) {
   await chrome.storage.sync.set({
     supabaseUrl: normalizeUrl(url),
     supabaseAnonKey: String(anonKey || DEFAULT_SUPABASE_ANON_KEY).trim(),
-    supabaseEmail: String(email || "").trim()
+    supabaseEmail: String(email || "").trim(),
+    supabasePassword: String(password || "")
   });
 }
 
@@ -50,6 +53,7 @@ export async function signInToCloud({ url, anonKey, email, password }) {
     supabaseUrl: settings.url,
     supabaseAnonKey: settings.anonKey,
     supabaseEmail: String(email || "").trim(),
+    supabasePassword: String(password || ""),
     supabaseAccessToken: data.access_token || "",
     supabaseRefreshToken: data.refresh_token || "",
     supabaseUserId: data.user?.id || ""
@@ -76,6 +80,7 @@ export async function refreshCloudSession(settings) {
     supabaseUrl: settings.url,
     supabaseAnonKey: settings.anonKey,
     supabaseEmail: settings.email,
+    supabasePassword: settings.password,
     supabaseAccessToken: data.access_token || "",
     supabaseRefreshToken: data.refresh_token || settings.refreshToken || "",
     supabaseUserId: data.user?.id || settings.userId || ""

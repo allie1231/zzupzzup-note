@@ -58,6 +58,7 @@ async function refreshCloudStatus(message = "") {
   cloudUrl.value = settings.url || "";
   cloudAnonKey.value = settings.anonKey || "";
   cloudEmail.value = settings.email || "";
+  cloudPassword.value = settings.password || "";
   if (cloudAdvanced) cloudAdvanced.open = !settings.anonKey;
   cloudStatus.textContent = message || (hasCloudSession(settings)
     ? "Supabase에 로그인되어 있습니다. 확장에서 줍줍하면 서버에 바로 저장됩니다."
@@ -68,7 +69,8 @@ async function saveCloudSettingsOnly() {
   await saveCloudConfig({
     url: cloudUrl.value,
     anonKey: cloudAnonKey.value,
-    email: cloudEmail.value
+    email: cloudEmail.value,
+    password: cloudPassword.value
   });
   await refreshCloudStatus("Supabase 설정을 저장했습니다. 이제 로그인해 주세요.");
 }
@@ -82,7 +84,6 @@ async function loginCloud() {
       email: cloudEmail.value,
       password: cloudPassword.value
     });
-    cloudPassword.value = "";
     await refreshCloudStatus("Supabase 로그인 완료. 이제 확장프로그램 저장은 서버로 바로 들어갑니다.");
   } catch (error) {
     cloudStatus.textContent = error.message || "Supabase에 로그인하지 못했습니다.";

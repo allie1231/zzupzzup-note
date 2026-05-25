@@ -18,7 +18,7 @@
         <div class="hero-copy">
           <p class="eyebrow">image archive</p>
           <h1>줍줍사진</h1>
-          <p class="lead">저장해 둔 이미지와 동영상을 보드처럼 보고, CSV나 Supabase 기록을 함께 열면 출처와 메모까지 한 번에 확인합니다.</p>
+          <p class="lead">저장해 둔 이미지와 동영상을 보드처럼 보고, Supabase 기록의 출처와 메모까지 한 번에 확인합니다.</p>
         </div>
       </header>
 
@@ -27,12 +27,14 @@
           미디어 폴더 열기
           <input id="imageInput" type="file" accept="image/*,video/*" webkitdirectory directory multiple>
         </label>
-        <label class="file-button secondary">
+        <label class="file-button secondary" hidden>
           CSV 같이 열기
           <input id="csvInput" type="file" accept=".csv,text/csv">
         </label>
         <input id="search" placeholder="파일명, 제목, 출처, 태그 검색">
         <button id="showAll" class="secondary">전체</button>
+        <button id="showImages" class="secondary">이미지</button>
+        <button id="showVideos" class="secondary">동영상</button>
         <button id="showInbox" class="secondary">인박스</button>
         <button id="showReviewed" class="secondary">확인함</button>
       </section>
@@ -80,7 +82,7 @@
           <strong id="imageCount">0</strong>
           <span>media</span>
         </article>
-        <article>
+        <article hidden>
           <strong id="csvCount">0</strong>
           <span>csv rows</span>
         </article>

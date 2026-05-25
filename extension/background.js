@@ -1,5 +1,6 @@
 import { createClip } from "./shared/schema.js";
 import { saveClip } from "./data-writer.js";
+import { uploadImageFromUrl } from "./supabase-writer.js";
 
 chrome.runtime.onInstalled.addListener(() => {
   registerContextMenus();
@@ -88,14 +89,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 
   if (info.menuItemId === "collect-video") {
-    await setPendingClip({
+    await collectSimpleClipWithoutPopup({
       contentType: "동영상",
       sentence: "",
       source: info.srcUrl || info.pageUrl || tab?.url || "",
       title: tab?.title || "",
-      iconUrl: tab?.favIconUrl || ""
+      iconUrl: tab?.favIconUrl || "",
+      tags: "#동영상"
     });
-    await openPopupIfPossible();
   }
 });
 
@@ -166,6 +167,36 @@ async function collectSentenceWithoutPopup({ contentType = "문장", sentence, s
     await flashBadge("OK", "#111111");
   } catch (error) {
     console.warn("문장 바로 저장 실패:", error);
+    await chrome.storage.local.set({ pendingClip: pending });
+    await flashBadge("ERR", "#9b111e");
+    await openPopupIfPossible();
+  }
+}
+
+async function collectSimpleClipWithoutPopup({ contentType, sentence = "", source, title, iconUrl, imagePath = "", imageUrl = "", tags }) {
+  const pending = {
+    contentType,
+    sentence,
+    source,
+    title,
+    siteName: deriveSiteName(source),
+    iconUrl,
+    imagePath,
+    imageUrl,
+    tags
+  };
+  try {
+    await saveClip(createClip({
+      ...pending,
+      reason: "",
+      connection: "",
+      useFor: "정리필요",
+      action: "정리필요",
+      status: "새로 수집"
+    }));
+    await flashBadge("OK", "#111111");
+  } catch (error) {
+    console.warn(`${contentType} 바로 저장 실패:`, error);
     await chrome.storage.local.set({ pendingClip: pending });
     await flashBadge("ERR", "#9b111e");
     await openPopupIfPossible();
@@ -245,11 +276,27 @@ async function flashBadge(text, color) {
 
 async function collectImage(info, tab) {
   const source = info.pageUrl || tab?.url || "";
-  await setPendingImage({
-    imageUrl: info.srcUrl || "",
-    source,
-    title: tab?.title || "",
-    iconUrl: tab?.favIconUrl || ""
-  });
-  await openPopupIfPossible();
+  const originalImageUrl = info.srcUrl || "";
+  try {
+    const uploaded = originalImageUrl ? await uploadImageFromUrl(originalImageUrl) : {};
+    await collectSimpleClipWithoutPopup({
+      contentType: "이미지",
+      sentence: "",
+      source,
+      title: tab?.title || "",
+      iconUrl: tab?.favIconUrl || "",
+      imagePath: uploaded.imagePath || "",
+      imageUrl: uploaded.imageUrl || originalImageUrl,
+      tags: "#이미지 #스크랩"
+    });
+  } catch (error) {
+    console.warn("이미지 업로드 실패:", error);
+    await setPendingImage({
+      imageUrl: originalImageUrl,
+      source,
+      title: tab?.title || "",
+      iconUrl: tab?.favIconUrl || ""
+    });
+    await openPopupIfPossible();
+  }
 }

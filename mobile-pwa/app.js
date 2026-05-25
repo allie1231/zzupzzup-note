@@ -160,6 +160,7 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
+  el.cloudPassword.value = settings.password || "";
   if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
   setCloudStatus(hasCloudSession(settings) ? "Supabase에 로그인되어 있습니다. 저장하면 서버에 바로 들어갑니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
 }
@@ -168,7 +169,8 @@ function saveCloudConfig() {
   saveCloudSettings({
     url: el.cloudUrl.value,
     anonKey: el.cloudAnonKey.value,
-    email: el.cloudEmail.value
+    email: el.cloudEmail.value,
+    password: el.cloudPassword.value
   });
   setCloudStatus("Supabase 설정을 저장했습니다. 로그인해 주세요.");
 }
@@ -182,7 +184,6 @@ async function loginCloud() {
       email: el.cloudEmail.value,
       password: el.cloudPassword.value
     });
-    el.cloudPassword.value = "";
     setCloudStatus("Supabase에 로그인했습니다. 서버 저장함을 불러옵니다.");
     await pullCloud({ quiet: true });
   } catch (error) {

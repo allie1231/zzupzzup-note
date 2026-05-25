@@ -19,6 +19,7 @@ export function saveCloudSettings(settings = {}) {
     url: normalizeUrl(settings.url ?? current.url ?? DEFAULT_SUPABASE_URL),
     anonKey: String(settings.anonKey ?? current.anonKey ?? DEFAULT_SUPABASE_ANON_KEY).trim(),
     email: String(settings.email ?? current.email ?? "").trim(),
+    password: settings.password ?? current.password ?? "",
     accessToken: settings.accessToken ?? current.accessToken ?? "",
     refreshToken: settings.refreshToken ?? current.refreshToken ?? "",
     userId: settings.userId ?? current.userId ?? ""
@@ -32,7 +33,8 @@ export function clearCloudSession() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify({
     url: current.url || DEFAULT_SUPABASE_URL,
     anonKey: current.anonKey || DEFAULT_SUPABASE_ANON_KEY,
-    email: current.email || ""
+    email: current.email || "",
+    password: current.password || ""
   }));
 }
 
@@ -50,6 +52,7 @@ export async function refreshCloudSession(settings = getCloudSettings()) {
     url: settings.url,
     anonKey: settings.anonKey,
     email: settings.email,
+    password: settings.password,
     accessToken: data.access_token || "",
     refreshToken: data.refresh_token || settings.refreshToken || "",
     userId: data.user?.id || settings.userId || ""
@@ -85,6 +88,7 @@ export async function signInToCloud({ url, anonKey, email, password }) {
     url: baseUrl,
     anonKey: key,
     email,
+    password,
     accessToken: data.access_token || "",
     refreshToken: data.refresh_token || "",
     userId: data.user?.id || ""

@@ -15,7 +15,8 @@ const state = {
   urls: new Map(),
   cloudReady: false,
   activeItem: null,
-  viewMode: "all"
+  viewMode: "all",
+  mediaFilter: "all"
 };
 
 const PIN_BLOCK_START = "[줍줍사진 핀]";
@@ -35,6 +36,8 @@ const el = {
   csvInput: document.querySelector("#csvInput"),
   search: document.querySelector("#search"),
   showAll: document.querySelector("#showAll"),
+  showImages: document.querySelector("#showImages"),
+  showVideos: document.querySelector("#showVideos"),
   showInbox: document.querySelector("#showInbox"),
   showReviewed: document.querySelector("#showReviewed"),
   status: document.querySelector("#status"),
@@ -59,6 +62,8 @@ el.imageInput.addEventListener("change", loadImages);
 el.csvInput.addEventListener("change", loadCsv);
 el.search.addEventListener("input", applyFilters);
 el.showAll.addEventListener("click", showAll);
+el.showImages.addEventListener("click", showImages);
+el.showVideos.addEventListener("click", showVideos);
 el.showInbox.addEventListener("click", showInbox);
 el.showReviewed.addEventListener("click", showReviewed);
 el.gallery.addEventListener("click", openCard);
@@ -79,6 +84,7 @@ function restoreCloudConfig() {
   el.cloudUrl.value = settings.url || "";
   el.cloudAnonKey.value = settings.anonKey || "";
   el.cloudEmail.value = settings.email || "";
+  el.cloudPassword.value = settings.password || "";
   if (el.cloudAdvanced) el.cloudAdvanced.open = !settings.anonKey;
   state.cloudReady = hasCloudSession(settings);
   setCloudStatus(state.cloudReady ? "Supabase에 로그인되어 있습니다. 미디어 DB를 불러올 수 있습니다." : "이메일/비밀번호로 로그인해 주세요. 처음 연결이라면 고급 설정에 anon key가 필요합니다.");
@@ -88,7 +94,8 @@ function saveCloudConfig() {
   saveCloudSettings({
     url: el.cloudUrl.value,
     anonKey: el.cloudAnonKey.value,
-    email: el.cloudEmail.value
+    email: el.cloudEmail.value,
+    password: el.cloudPassword.value
   });
   setCloudStatus("Supabase 설정을 저장했습니다. 이메일/비밀번호로 로그인해 주세요.");
 }
@@ -102,7 +109,6 @@ async function loginCloud() {
       email: el.cloudEmail.value,
       password: el.cloudPassword.value
     });
-    el.cloudPassword.value = "";
     state.cloudReady = true;
     setCloudStatus("Supabase에 로그인했습니다. 미디어를 불러옵니다.");
     await pullCloud();
@@ -231,7 +237,7 @@ function applyFilters() {
       path: row.imagePath || row.imageUrl || row.source,
       url: mediaUrl(row),
       row,
-      sourceUrl: row.source || row.imageUrl,
+      sourceUrl: originalMediaUrl(row),
       contentType: row.contentType,
       mediaKind: mediaKind(row),
       title: row.title || row.siteName || "",
@@ -247,6 +253,8 @@ function applyFilters() {
   state.visible = [...folderImages, ...remoteOnly].filter((item) => {
     if (state.viewMode === "inbox" && isReviewedItem(item)) return false;
     if (state.viewMode === "reviewed" && !isReviewedItem(item)) return false;
+    if (state.mediaFilter === "image" && isVideoItem(item)) return false;
+    if (state.mediaFilter === "video" && !isVideoItem(item)) return false;
     if (!query) return true;
     return [
       item.name,
@@ -264,8 +272,21 @@ function applyFilters() {
 function showAll() {
   el.search.value = "";
   state.viewMode = "all";
+  state.mediaFilter = "all";
   applyFilters();
   notify(`미디어 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showImages() {
+  state.mediaFilter = "image";
+  applyFilters();
+  notify(`이미지 ${state.visible.length}개를 보여줍니다.`);
+}
+
+function showVideos() {
+  state.mediaFilter = "video";
+  applyFilters();
+  notify(`동영상 ${state.visible.length}개를 보여줍니다.`);
 }
 
 function showInbox() {
@@ -744,9 +765,17 @@ function mediaKind(row) {
 
 function mediaUrl(row) {
   if (row.contentType === "동영상") {
-    return videoThumbnail(row.source || row.imageUrl) || row.imageUrl || row.source || "";
+    return videoThumbnail(originalMediaUrl(row)) || row.imageUrl || row.source || "";
   }
   return row.imageUrl || row.source || "";
+}
+
+function originalMediaUrl(row) {
+  if (row.contentType === "동영상") {
+    if (isVideoUrl(row.source)) return row.source;
+    if (isVideoUrl(row.imageUrl)) return row.imageUrl;
+  }
+  return row.source || row.imageUrl || "";
 }
 
 function isVideoUrl(url) {

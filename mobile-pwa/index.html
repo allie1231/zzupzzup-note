@@ -202,12 +202,12 @@
         <div class="section-head">
           <h2>서버 저장함</h2>
           <div class="actions">
-            <select id="exportMode" aria-label="CSV 내보내기 방식">
+            <select id="exportMode" aria-label="CSV 내보내기 방식" hidden>
               <option value="replace">백업 CSV</option>
               <option value="mobile">모바일 백업 CSV</option>
             </select>
             <button id="exportCsv" class="secondary">백업 내보내기</button>
-            <button id="copyCsv" class="secondary">백업 복사</button>
+            <button id="copyCsv" class="secondary" hidden>백업 복사</button>
             <a class="button-link secondary" href="../web/">웹홈 열기</a>
           </div>
         </div>

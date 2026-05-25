@@ -6,6 +6,7 @@ Browser extension and local web home for collecting links, images, videos, and m
 
 - `extension/`: Chrome extension for collecting links, images, videos, and materials.
 - `web/`: local web home for opening `줍줍노트.csv` and organizing collected cards.
+- `ios/ZZupZZupNote/`: SwiftUI iPhone/iPad app that reads and writes the same Supabase `zzup_clips` data.
 - `safari/`: Safari Web Extension packaging notes and generated Xcode project location.
 - `tools/package_safari_extension.mjs`: helper script for creating a Safari Web Extension Xcode project when Xcode is installed.
 - `apps-script/`: Google Apps Script Web App endpoint for appending rows to Google Sheets.

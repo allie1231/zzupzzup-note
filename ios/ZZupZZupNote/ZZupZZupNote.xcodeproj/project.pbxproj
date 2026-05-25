@@ -21,7 +21,42 @@
 		10000000000000000000010C /* SentencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000C /* SentencesView.swift */; };
 		10000000000000000000010D /* PhotosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000D /* PhotosView.swift */; };
 		10000000000000000000010E /* ClipDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000E /* ClipDetailView.swift */; };
+		10000000000000000000010F /* MetadataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* MetadataService.swift */; };
+		100000000000000000000110 /* ZZStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* ZZStyle.swift */; };
+		100000000000000000000111 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* ShareViewController.swift */; };
+		100000000000000000000112 /* ShareExtensionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* ShareExtensionView.swift */; };
+		100000000000000000000113 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* Clip.swift */; };
+		100000000000000000000114 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000004 /* AppConfig.swift */; };
+		100000000000000000000115 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000005 /* KeychainStore.swift */; };
+		100000000000000000000116 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000006 /* SupabaseClient.swift */; };
+		100000000000000000000117 /* MetadataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* MetadataService.swift */; };
+		100000000000000000000118 /* ZZStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* ZZStyle.swift */; };
+		100000000000000000000119 /* ZZupZZupNoteShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* ZZupZZupNoteShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		100000000000000000000801 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000501 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000402;
+			remoteInfo = ZZupZZupNoteShareExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		100000000000000000000207 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				100000000000000000000119 /* ZZupZZupNoteShareExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		100000000000000000000001 /* ZZupZZupNoteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZZupZZupNoteApp.swift; sourceTree = "<group>"; };
@@ -39,10 +74,23 @@
 		10000000000000000000000D /* PhotosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosView.swift; sourceTree = "<group>"; };
 		10000000000000000000000E /* ClipDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDetailView.swift; sourceTree = "<group>"; };
 		10000000000000000000000F /* ZZupZZupNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZZupZZupNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000010 /* MetadataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataService.swift; sourceTree = "<group>"; };
+		100000000000000000000011 /* ZZStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZZStyle.swift; sourceTree = "<group>"; };
+		100000000000000000000012 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		100000000000000000000013 /* ShareExtensionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExtensionView.swift; sourceTree = "<group>"; };
+		100000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		100000000000000000000015 /* ZZupZZupNoteShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZZupZZupNoteShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		100000000000000000000201 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000204 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -56,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000302 /* ZZupZZupNote */,
+				100000000000000000000307 /* ZZupZZupNoteShareExtension */,
 				100000000000000000000303 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				10000000000000000000000F /* ZZupZZupNote.app */,
+				100000000000000000000015 /* ZZupZZupNoteShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +145,7 @@
 				100000000000000000000005 /* KeychainStore.swift */,
 				100000000000000000000006 /* SupabaseClient.swift */,
 				100000000000000000000007 /* ClipStore.swift */,
+				100000000000000000000010 /* MetadataService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -109,8 +160,19 @@
 				10000000000000000000000C /* SentencesView.swift */,
 				10000000000000000000000D /* PhotosView.swift */,
 				10000000000000000000000E /* ClipDetailView.swift */,
+				100000000000000000000011 /* ZZStyle.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		100000000000000000000307 /* ZZupZZupNoteShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000012 /* ShareViewController.swift */,
+				100000000000000000000013 /* ShareExtensionView.swift */,
+				100000000000000000000014 /* Info.plist */,
+			);
+			path = ZZupZZupNoteShareExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,15 +185,34 @@
 				100000000000000000000202 /* Sources */,
 				100000000000000000000201 /* Frameworks */,
 				100000000000000000000203 /* Resources */,
+				100000000000000000000207 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				100000000000000000000802 /* PBXTargetDependency */,
 			);
 			name = ZZupZZupNote;
 			productName = ZZupZZupNote;
 			productReference = 10000000000000000000000F /* ZZupZZupNote.app */;
 			productType = "com.apple.product-type.application";
+		};
+		100000000000000000000402 /* ZZupZZupNoteShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000602 /* Build configuration list for PBXNativeTarget "ZZupZZupNoteShareExtension" */;
+			buildPhases = (
+				100000000000000000000205 /* Sources */,
+				100000000000000000000204 /* Frameworks */,
+				100000000000000000000206 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZZupZZupNoteShareExtension;
+			productName = ZZupZZupNoteShareExtension;
+			productReference = 100000000000000000000015 /* ZZupZZupNoteShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -144,6 +225,9 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					100000000000000000000401 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					100000000000000000000402 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -163,12 +247,20 @@
 			projectRoot = "";
 			targets = (
 				100000000000000000000401 /* ZZupZZupNote */,
+				100000000000000000000402 /* ZZupZZupNoteShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		100000000000000000000203 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000206 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -196,10 +288,35 @@
 				10000000000000000000010C /* SentencesView.swift in Sources */,
 				10000000000000000000010D /* PhotosView.swift in Sources */,
 				10000000000000000000010E /* ClipDetailView.swift in Sources */,
+				10000000000000000000010F /* MetadataService.swift in Sources */,
+				100000000000000000000110 /* ZZStyle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000205 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000111 /* ShareViewController.swift in Sources */,
+				100000000000000000000112 /* ShareExtensionView.swift in Sources */,
+				100000000000000000000113 /* Clip.swift in Sources */,
+				100000000000000000000114 /* AppConfig.swift in Sources */,
+				100000000000000000000115 /* KeychainStore.swift in Sources */,
+				100000000000000000000116 /* SupabaseClient.swift in Sources */,
+				100000000000000000000117 /* MetadataService.swift in Sources */,
+				100000000000000000000118 /* ZZStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		100000000000000000000802 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000402 /* ZZupZZupNoteShareExtension */;
+			targetProxy = 100000000000000000000801 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		100000000000000000000701 /* Debug */ = {
@@ -318,7 +435,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = AWWYAU43N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "줍줍노트";
@@ -351,7 +468,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = AWWYAU43N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "줍줍노트";
@@ -378,6 +495,56 @@
 			};
 			name = Release;
 		};
+		100000000000000000000705 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AWWYAU43N4;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ZZupZZupNoteShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.allie.zzupzzupnote.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		100000000000000000000706 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AWWYAU43N4;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ZZupZZupNoteShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.allie.zzupzzupnote.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -395,6 +562,15 @@
 			buildConfigurations = (
 				100000000000000000000703 /* Debug */,
 				100000000000000000000704 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		100000000000000000000602 /* Build configuration list for PBXNativeTarget "ZZupZZupNoteShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000705 /* Debug */,
+				100000000000000000000706 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

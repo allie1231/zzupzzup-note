@@ -34,6 +34,8 @@ struct SentencesView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(ZZStyle.page)
             .navigationTitle("줍줍문장")
             .toolbar {
                 Button {
@@ -45,4 +47,3 @@ struct SentencesView: View {
         }
     }
 }
-

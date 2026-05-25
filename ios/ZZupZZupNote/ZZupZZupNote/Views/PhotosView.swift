@@ -38,7 +38,7 @@ struct PhotosView: View {
                 }
                 .padding(16)
             }
-            .background(Color(.systemGray6))
+            .background(ZZStyle.page)
             .navigationTitle("줍줍사진")
             .toolbar {
                 Button {
@@ -101,4 +101,3 @@ struct MediaTile: View {
         return URL(string: "https://img.youtube.com/vi/\(id)/hqdefault.jpg")
     }
 }
-

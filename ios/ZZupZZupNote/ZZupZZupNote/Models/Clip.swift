@@ -41,6 +41,10 @@ struct Clip: Identifiable, Codable, Equatable {
     var reviewCount: Int
     var lastReviewed: Date?
     var updatedAt: Date?
+    var pins: [PhotoPin] {
+        get { PhotoPin.decode(from: connection) }
+        set { connection = PhotoPin.encode(newValue, into: connection) }
+    }
 
     init(
         id: String = UUID().uuidString,
@@ -84,6 +88,58 @@ struct Clip: Identifiable, Codable, Equatable {
         self.reviewCount = reviewCount
         self.lastReviewed = lastReviewed
         self.updatedAt = updatedAt
+    }
+}
+
+struct PhotoPin: Identifiable, Codable, Equatable {
+    var id: String
+    var x: Double
+    var y: Double
+    var note: String
+
+    init(id: String = UUID().uuidString, x: Double, y: Double, note: String = "") {
+        self.id = id
+        self.x = x
+        self.y = y
+        self.note = note
+    }
+
+    private static let start = "[줍줍사진 핀]"
+    private static let end = "[/줍줍사진 핀]"
+
+    static func decode(from text: String) -> [PhotoPin] {
+        guard
+            let startRange = text.range(of: start),
+            let endRange = text.range(of: end),
+            startRange.upperBound <= endRange.lowerBound
+        else { return [] }
+
+        let jsonText = text[startRange.upperBound..<endRange.lowerBound]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let data = jsonText.data(using: .utf8) else { return [] }
+        return (try? JSONDecoder().decode([PhotoPin].self, from: data)) ?? []
+    }
+
+    static func encode(_ pins: [PhotoPin], into text: String) -> String {
+        let cleaned = removeBlock(from: text)
+        guard !pins.isEmpty else { return cleaned }
+        let data = (try? JSONEncoder().encode(pins)) ?? Data("[]".utf8)
+        let json = String(data: data, encoding: .utf8) ?? "[]"
+        return [cleaned, start, json, end]
+            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .joined(separator: "\n")
+    }
+
+    private static func removeBlock(from text: String) -> String {
+        guard
+            let startRange = text.range(of: start),
+            let endRange = text.range(of: end),
+            startRange.upperBound <= endRange.lowerBound
+        else { return text }
+
+        var next = text
+        next.removeSubrange(startRange.lowerBound..<endRange.upperBound)
+        return next.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
@@ -183,4 +239,3 @@ struct ClipRow: Codable {
         )
     }
 }
-

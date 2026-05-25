@@ -123,6 +123,28 @@ final class SupabaseClient {
         let _: EmptyResponse = try await authorizedRequest(components.url!, method: "DELETE")
     }
 
+    func uploadImage(data: Data, fileExtension: String = "jpg", contentType: String = "image/jpeg") async throws -> (path: String, url: String) {
+        let path = "\(ISO8601DateFormatter().string(from: Date()).prefix(10))/\(UUID().uuidString).\(fileExtension)"
+        let url = baseURL.appending(path: "/storage/v1/object/\(AppConfig.imageBucket)/\(path)")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.setValue("true", forHTTPHeaderField: "x-upsert")
+        request.httpBody = data
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw SupabaseError.message("이미지를 Supabase Storage에 올리지 못했습니다.")
+        }
+
+        return (
+            path,
+            "\(baseURL.absoluteString)/storage/v1/object/public/\(AppConfig.imageBucket)/\(path)"
+        )
+    }
+
     private func authorizedRequest<T: Decodable>(
         _ url: URL,
         method: String,

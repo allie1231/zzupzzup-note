@@ -77,6 +77,16 @@ final class ClipStore: ObservableObject {
         }
     }
 
+    func uploadImage(data: Data) async -> (path: String, url: String)? {
+        var result: (path: String, url: String)?
+        await runLoading {
+            result = try await client.uploadImage(data: data)
+            message = "이미지를 업로드했습니다."
+            saveSession()
+        }
+        return result
+    }
+
     func delete(_ clip: Clip) async {
         await runLoading {
             try await client.deleteClip(id: clip.id)
@@ -148,4 +158,3 @@ final class ClipStore: ObservableObject {
         }
     }
 }
-

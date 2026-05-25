@@ -7,6 +7,7 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 16) {
+                    header
                     summary
 
                     ForEach(store.inboxClips.prefix(30)) { clip in
@@ -24,7 +25,7 @@ struct HomeView: View {
                 }
                 .padding(18)
             }
-            .background(Color(.systemGray6))
+            .background(ZZStyle.page)
             .navigationTitle("줍줍노트")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -53,6 +54,22 @@ struct HomeView: View {
             StatBox(title: "문장", value: store.sentenceClips.count)
         }
     }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("개인용 정보 수집 보드")
+                .font(.caption)
+                .foregroundStyle(ZZStyle.muted)
+            Text("줍줍노트")
+                .font(.system(size: 42, weight: .black))
+            Text(store.message)
+                .font(.footnote)
+                .foregroundStyle(ZZStyle.muted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .zzCard()
+    }
 }
 
 struct StatBox: View {
@@ -69,8 +86,6 @@ struct StatBox: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color.white)
-        .border(.black)
+        .zzCard()
     }
 }
-

@@ -9,12 +9,7 @@ struct ClipCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(clip.contentType.rawValue.uppercased())
-                        .font(.caption.monospaced())
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.black)
-                        .foregroundStyle(.white)
+                    ZZTag(text: clip.contentType.rawValue)
 
                     Text(displayTitle)
                         .font(.headline)
@@ -25,6 +20,8 @@ struct ClipCardView: View {
 
                 Button(action: onFavorite) {
                     Image(systemName: clip.favorite ? "star.fill" : "star")
+                        .font(.title2)
+                        .foregroundStyle(.black)
                 }
                 .buttonStyle(.plain)
             }
@@ -60,13 +57,12 @@ struct ClipCardView: View {
                 Spacer()
                 Button("정리 완료", action: onDone)
                     .buttonStyle(.bordered)
+                    .tint(.black)
                     .disabled(clip.status == .done)
             }
         }
         .padding(16)
-        .background(Color.white)
-        .border(.black, width: 1.5)
-        .shadow(color: .black.opacity(0.25), radius: 0, x: 4, y: 4)
+        .zzCard()
     }
 
     private var displayTitle: String {
@@ -76,4 +72,3 @@ struct ClipCardView: View {
         return "주운 정보"
     }
 }
-

@@ -31,6 +31,7 @@ struct LoginView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .tint(.black)
             .disabled(store.isLoading)
 
             Text(store.message)
@@ -40,6 +41,6 @@ struct LoginView: View {
             Spacer()
         }
         .padding(24)
+        .background(ZZStyle.page)
     }
 }
-

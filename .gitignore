@@ -1,0 +1,6 @@
+.DS_Store
+*.xcuserstate
+xcuserdata/
+*.xcodeproj/project.xcworkspace/
+**/*.xcodeproj/project.xcworkspace/
+ios/ZZupZZupNote/ZZupZZupNote.xcodeproj/project.xcworkspace/xcuserdata/

@@ -1067,3 +1067,48 @@ input[type="checkbox"] {
     width: min(var(--zz-page-max), calc(100% - 28px));
   }
 }
+
+/* Series UX polish: unified scale and dock tooltips. */
+:root {
+  --zz-ui-font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --zz-title-size: clamp(32px, 5vw, 52px);
+  --zz-body-size: 14px;
+}
+
+body {
+  font-size: var(--zz-body-size);
+}
+
+h1 {
+  font-size: var(--zz-title-size);
+}
+
+input,
+textarea,
+select {
+  min-width: 0;
+  font-family: var(--zz-ui-font);
+}
+
+.floating-dock a,
+.floating-dock button {
+  position: relative;
+}
+
+.floating-dock a[title]:hover::after,
+.floating-dock button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 120;
+  width: max-content;
+  max-width: 180px;
+  border: 2px solid #000;
+  padding: 6px 8px;
+  color: #000;
+  background: #fff;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+  font: 12px/1.2 var(--pixel-font);
+  pointer-events: none;
+}

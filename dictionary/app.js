@@ -1,16 +1,19 @@
 import {
   clearCloudSession,
+  deleteCloudClip,
   fetchCloudClips,
   getCloudSettings,
   hasCloudSession,
   saveCloudSettings,
-  signInToCloud
+  signInToCloud,
+  updateCloudClip
 } from "../shared/supabase-store.js";
 
 const state = {
   clips: [],
   activeTag: "",
-  query: ""
+  query: "",
+  editingId: ""
 };
 
 const el = {
@@ -29,7 +32,21 @@ const el = {
   tagList: document.querySelector("#tagList"),
   activeTag: document.querySelector("#activeTag"),
   count: document.querySelector("#count"),
-  entries: document.querySelector("#entries")
+  entries: document.querySelector("#entries"),
+  detailDialog: document.querySelector("#detailDialog"),
+  detailHeading: document.querySelector("#detailHeading"),
+  detailPreview: document.querySelector("#detailPreview"),
+  detailType: document.querySelector("#detailType"),
+  detailTitle: document.querySelector("#detailTitle"),
+  detailSentence: document.querySelector("#detailSentence"),
+  detailReason: document.querySelector("#detailReason"),
+  detailSource: document.querySelector("#detailSource"),
+  detailImageUrl: document.querySelector("#detailImageUrl"),
+  detailTags: document.querySelector("#detailTags"),
+  detailStatus: document.querySelector("#detailStatus"),
+  detailFavorite: document.querySelector("#detailFavorite"),
+  detailSave: document.querySelector("#detailSave"),
+  detailDelete: document.querySelector("#detailDelete")
 };
 
 el.cloudSave.addEventListener("click", saveCloudConfig);
@@ -43,6 +60,13 @@ el.search.addEventListener("input", () => {
 el.showAll.addEventListener("click", () => {
   state.activeTag = "";
   render();
+});
+el.entries.addEventListener("click", handleEntryClick);
+el.detailSave.addEventListener("click", saveDetail);
+el.detailDelete.addEventListener("click", deleteDetail);
+el.detailTags.addEventListener("input", () => renderTagSuggestions(el.detailTags));
+el.detailTags.addEventListener("blur", () => {
+  el.detailTags.value = normalizeTags(el.detailTags.value);
 });
 
 restoreCloudConfig();
@@ -179,6 +203,7 @@ function matchesQuery(clip) {
 function entryCard(clip) {
   const card = document.createElement("article");
   card.className = "entry-card";
+  card.dataset.id = clip.id;
   card.append(
     textEl("span", "type", clip.contentType || "자료"),
     textEl("h3", "", clip.title || clip.sentence || clip.source || "주운 정보")
@@ -192,23 +217,129 @@ function entryCard(clip) {
   if (clip.sentence) card.append(textEl("p", "sentence", clip.sentence));
   if (clip.reason) card.append(textEl("p", "reason", clip.reason));
   card.append(tagsView(clip.tags));
+  const actions = document.createElement("div");
+  actions.className = "entry-actions";
+  const detail = document.createElement("button");
+  detail.type = "button";
+  detail.dataset.action = "detail";
+  detail.textContent = "자세히 / 편집";
+  actions.append(detail);
   if (clip.source) {
     const link = document.createElement("a");
     link.href = clip.source;
     link.target = "_blank";
     link.rel = "noreferrer";
     link.textContent = "원본 열기";
-    card.append(link);
+    actions.append(link);
   }
+  card.append(actions);
   return card;
 }
 
+function handleEntryClick(event) {
+  const button = event.target.closest("[data-action='detail']");
+  if (!button) return;
+  const card = event.target.closest(".entry-card");
+  if (!card) return;
+  openDetail(card.dataset.id);
+}
+
+function openDetail(id) {
+  const clip = state.clips.find((item) => item.id === id);
+  if (!clip) return;
+  state.editingId = id;
+  el.detailHeading.textContent = clip.title || clip.sentence || clip.source || "주운 정보";
+  el.detailType.value = clip.contentType || "링크";
+  el.detailTitle.value = clip.title || "";
+  el.detailSentence.value = clip.sentence || "";
+  el.detailReason.value = clip.reason || "";
+  el.detailSource.value = clip.source || "";
+  el.detailImageUrl.value = clip.imageUrl || "";
+  el.detailTags.value = normalizeTags(clip.tags);
+  el.detailStatus.value = clip.status || "새로 수집";
+  el.detailFavorite.checked = Boolean(clip.favorite);
+  renderDetailPreview(clip);
+  renderTagSuggestions(el.detailTags);
+  el.detailDialog.showModal();
+}
+
+function renderDetailPreview(clip) {
+  el.detailPreview.replaceChildren();
+  if (clip.imageUrl) {
+    const image = document.createElement("img");
+    image.src = clip.imageUrl;
+    image.alt = clip.title || "주운 이미지";
+    el.detailPreview.append(image);
+  }
+  if (clip.sentence) el.detailPreview.append(textEl("p", "sentence", clip.sentence));
+  if (clip.source) {
+    const link = document.createElement("a");
+    link.href = clip.source;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "원본 열기";
+    el.detailPreview.append(link);
+  }
+}
+
+async function saveDetail(event) {
+  event.preventDefault();
+  const clip = state.clips.find((item) => item.id === state.editingId);
+  if (!clip) return;
+  Object.assign(clip, {
+    contentType: el.detailType.value,
+    title: el.detailTitle.value.trim(),
+    sentence: normalizeMultiline(el.detailSentence.value),
+    reason: el.detailReason.value.trim(),
+    source: el.detailSource.value.trim(),
+    siteName: deriveSiteName(el.detailSource.value),
+    imageUrl: el.detailImageUrl.value.trim(),
+    tags: normalizeTags(el.detailTags.value),
+    status: el.detailStatus.value,
+    favorite: el.detailFavorite.checked,
+    reviewCount: Number(clip.reviewCount || 0) + 1,
+    lastReviewed: new Date().toISOString()
+  });
+  try {
+    if (hasCloudSession()) {
+      const updated = await updateCloudClip(clip);
+      Object.assign(clip, updated);
+    }
+    el.detailDialog.close();
+    render();
+    setCloudStatus("사전 항목을 저장했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "사전 항목을 저장하지 못했습니다.");
+  }
+}
+
+async function deleteDetail() {
+  const clip = state.clips.find((item) => item.id === state.editingId);
+  if (!clip) return;
+  if (!confirm("이 항목을 삭제할까요?")) return;
+  try {
+    if (hasCloudSession()) await deleteCloudClip(clip.id);
+    state.clips = state.clips.filter((item) => item.id !== clip.id);
+    state.editingId = "";
+    el.detailDialog.close();
+    render();
+    setCloudStatus("사전 항목을 삭제했습니다.");
+  } catch (error) {
+    setCloudStatus(error.message || "사전 항목을 삭제하지 못했습니다.");
+  }
+}
+
 function parseTags(tags) {
+  return normalizeTags(tags).split(/\s+/).filter(Boolean);
+}
+
+function normalizeTags(tags) {
   return [...new Set(String(Array.isArray(tags) ? tags.join(" ") : tags || "")
     .split(/[,\s]+/)
     .map((tag) => tag.trim())
     .filter(Boolean)
-    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))];
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .join(" ");
 }
 
 function tagsView(tags) {
@@ -223,6 +354,53 @@ function textEl(tag, className, text) {
   node.className = className || "";
   node.textContent = text || "";
   return node;
+}
+
+function normalizeMultiline(value) {
+  return String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .trim();
+}
+
+function deriveSiteName(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function tagPool() {
+  return [...new Set(state.clips.flatMap((clip) => parseTags(clip.tags)))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+function renderTagSuggestions(input) {
+  if (!input) return;
+  let box = input.parentElement.querySelector(".tag-suggestions");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "tag-suggestions";
+    input.insertAdjacentElement("afterend", box);
+  }
+  const selected = new Set(normalizeTags(input.value).split(/\s+/).filter(Boolean));
+  const query = String(input.value || "").split(/[,\s]+/).pop().replace(/^#/, "").toLowerCase();
+  const tags = tagPool()
+    .filter((tag) => !selected.has(tag) && (!query || tag.toLowerCase().includes(query)))
+    .slice(0, 10);
+  box.replaceChildren(...tags.map((tag) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-suggestion";
+    button.textContent = tag;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      input.value = normalizeTags(`${input.value} ${tag}`);
+      renderTagSuggestions(input);
+    });
+    return button;
+  }));
 }
 
 function setCloudStatus(message) {

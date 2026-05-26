@@ -576,15 +576,17 @@ function sentenceCard(clip) {
 
   const top = document.createElement("div");
   top.className = "sentence-top";
-  top.append(textEl("span", "category-chip", categoryOf(clip)));
-  top.append(textEl("span", isReviewed(clip) ? "state-chip is-reviewed" : "state-chip", isReviewed(clip) ? "확인함" : "인박스"));
+  const chips = document.createElement("div");
+  chips.className = "sentence-chips";
+  chips.append(textEl("span", "category-chip", categoryOf(clip)));
+  chips.append(textEl("span", isReviewed(clip) ? "state-chip is-reviewed" : "state-chip", isReviewed(clip) ? "확인함" : "인박스"));
   const star = document.createElement("button");
   star.type = "button";
   star.className = clip.favorite ? "star is-on" : "star";
   star.dataset.action = "toggle-favorite";
   star.setAttribute("aria-label", clip.favorite ? "기억 표시 해제" : "기억 표시");
   star.textContent = clip.favorite ? "★" : "☆";
-  top.append(star);
+  top.append(chips, star);
 
   const quote = document.createElement("blockquote");
   quote.textContent = clip.sentence || "";

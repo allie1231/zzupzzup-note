@@ -389,11 +389,12 @@ function photoCard(item) {
 
   const footer = document.createElement("footer");
   const copy = document.createElement("div");
+  copy.className = "photo-meta";
   copy.append(
-    textEl("span", "", item.siteName || item.tags || (isVideoItem(item) ? "video archive" : "image archive")),
+    textEl("span", "photo-source", item.siteName || (isVideoItem(item) ? "video archive" : "image archive")),
     textEl("span", isReviewedItem(item) ? "state-chip is-reviewed" : "state-chip", isReviewedItem(item) ? "확인함" : "인박스")
   );
-  footer.append(copy, textEl("small", "", item.tags || (isVideoItem(item) ? "video" : "image")));
+  footer.append(copy, tagsView(item.tags || (isVideoItem(item) ? "#동영상" : "#이미지")));
   card.append(media, footer);
   return card;
 }
@@ -1071,6 +1072,15 @@ function textEl(tag, className, text) {
   item.className = className;
   item.textContent = text || "";
   return item;
+}
+
+function tagsView(tags) {
+  const wrap = document.createElement("div");
+  wrap.className = "tags";
+  normalizeTagInput(tags).split(/\s+/).filter(Boolean).forEach((tag) => {
+    wrap.append(textEl("span", "tag", tag));
+  });
+  return wrap;
 }
 
 function displayTitle(item) {

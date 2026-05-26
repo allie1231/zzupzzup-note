@@ -61,18 +61,19 @@
           <button id="cloudLogout" class="secondary">로그아웃</button>
         </div>
         <p id="cloudStatus" class="cloud-status" role="status"></p>
-      </section>
 
-      <section class="toolbar">
-        <input id="search" placeholder="태그, 제목, 문장, 출처 검색">
-        <button id="showAll" type="button">전체 태그</button>
+        <section class="toolbar dictionary-search" aria-label="태그 검색">
+          <input id="search" placeholder="태그, 제목, 문장, 출처 검색">
+          <button id="showAll" type="button">전체 태그</button>
+        </section>
+
+        <section class="dictionary-tags" aria-label="태그 목록">
+          <p class="eyebrow">tags</p>
+          <div id="tagList" class="tag-list"></div>
+        </section>
       </section>
 
       <section class="dictionary-layout">
-        <aside>
-          <p class="eyebrow">tags</p>
-          <div id="tagList" class="tag-list"></div>
-        </aside>
         <section>
           <div class="section-head">
             <div>

@@ -1,3 +1,5 @@
+@import url("https://cdn.jsdelivr.net/npm/wanted-sans@1.0.3/fonts/webfonts/static/complete/WantedSans.css");
+
 /* ZZupZZup series deck redesign
    A shared editorial layer for web, mobile, sentences, photos, dictionary, and memo. */
 :root {
@@ -9,7 +11,7 @@
   --zz-soft: #f3f4f2;
   --zz-max: 1240px;
   --zz-gap: clamp(14px, 2vw, 22px);
-  --zz-ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --zz-ui: "Wanted Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --zz-mono: Monaco, "Courier New", monospace;
 }
 
@@ -96,7 +98,7 @@ body > main > header:not(.topbar) {
   margin: 0 0 clamp(18px, 3vw, 30px) !important;
   border: 1px solid var(--zz-line) !important;
   border-radius: 0 !important;
-  padding: clamp(26px, 5vw, 56px) !important;
+  padding: clamp(24px, 4vw, 44px) !important;
   color: var(--zz-ink) !important;
   background: var(--zz-paper) !important;
   box-shadow: none !important;
@@ -120,8 +122,8 @@ header h1,
 h1 {
   margin: 0 !important;
   color: var(--zz-ink) !important;
-  font: 500 clamp(44px, 9vw, 124px)/.86 var(--zz-ui) !important;
-  letter-spacing: -.02em !important;
+  font: 800 clamp(38px, 6vw, 82px)/.9 var(--zz-ui) !important;
+  letter-spacing: -.035em !important;
   text-shadow: none !important;
 }
 
@@ -130,7 +132,7 @@ h1 {
   max-width: 780px !important;
   margin: clamp(16px, 2vw, 26px) 0 0 !important;
   color: var(--zz-muted) !important;
-  font: 18px/1.75 var(--zz-ui) !important;
+  font: 400 16px/1.7 var(--zz-ui) !important;
   word-break: keep-all !important;
 }
 
@@ -382,7 +384,7 @@ button,
   padding: 9px 14px !important;
   color: var(--zz-ink) !important;
   background: var(--zz-paper) !important;
-  font: 700 13px/1 var(--zz-ui) !important;
+  font: 600 13px/1 var(--zz-ui) !important;
 }
 
 button:hover,
@@ -416,7 +418,7 @@ select {
   padding: 10px 12px !important;
   color: var(--zz-ink) !important;
   background: #fff !important;
-  font: 14px/1.45 var(--zz-ui) !important;
+  font: 400 14px/1.45 var(--zz-ui) !important;
 }
 
 textarea {
@@ -851,6 +853,60 @@ dialog,
   background: transparent !important;
 }
 
+.cloud-panel .dictionary-search,
+.cloud-panel .dictionary-tags,
+.cloud-panel .guide,
+.cloud-panel .bookmarklet-panel {
+  grid-column: auto !important;
+  border: 0 !important;
+  border-top: 1px solid var(--zz-line) !important;
+  padding: 14px 0 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.cloud-panel .dictionary-search,
+.cloud-panel .guide,
+.cloud-panel .bookmarklet-panel {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+
+.cloud-panel .guide ol {
+  margin: 0 !important;
+  padding-left: 18px !important;
+  color: var(--zz-muted) !important;
+}
+
+.cloud-panel .bookmarklet-panel textarea {
+  min-height: 90px !important;
+}
+
+.cloud-panel .dictionary-tags .tag-list {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.cloud-panel .dictionary-tags .tag-button {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  min-height: 38px !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 9px 12px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  font-weight: 700 !important;
+}
+
+.cloud-panel .dictionary-tags .tag-button:hover,
+.cloud-panel .dictionary-tags .tag-button.is-active {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
 .cloud-panel .stat {
   min-height: 72px !important;
   display: grid !important;
@@ -951,7 +1007,21 @@ a.card,
 .sentence-card {
   height: 460px !important;
   min-height: 460px !important;
+  align-content: stretch !important;
   grid-template-rows: auto auto auto auto auto 1fr !important;
+}
+
+.sentence-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.sentence-chips {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
 }
 
 .sentence-card .meta a {
@@ -972,9 +1042,53 @@ a.card,
   background: transparent !important;
 }
 
+.sentence-card .meta img,
+.sentence-card .sentence-thumb {
+  display: none !important;
+}
+
 .sentence-card.is-expanded .deck-clamp-target {
   max-height: 190px !important;
   overflow: auto !important;
+}
+
+.photo-card footer {
+  display: grid !important;
+  gap: 12px !important;
+  border-top: 1px solid var(--zz-line) !important;
+  padding-top: 14px !important;
+}
+
+.photo-meta {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.photo-source {
+  overflow: hidden !important;
+  color: var(--zz-ink) !important;
+  font-weight: 500 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.state-chip,
+.category-chip {
+  width: fit-content !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 5px 10px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  font: 700 12px/1 var(--zz-ui) !important;
+}
+
+.state-chip.is-reviewed,
+.category-chip {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
 }
 
 .has-card-toggle {
@@ -986,13 +1100,56 @@ a.card,
   top: 10px !important;
   left: 10px !important;
   z-index: 8 !important;
-  border-radius: 999px !important;
+  min-width: 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
   color: var(--zz-paper) !important;
   background: var(--zz-ink) !important;
+  font: 700 18px/1 var(--zz-ui) !important;
 }
 
 .card-toggle:hover,
 .card-toggle:focus {
   color: var(--zz-ink) !important;
   background: var(--zz-paper) !important;
+}
+
+.star-toggle,
+.star {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 9 !important;
+  min-width: 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+  font: 700 18px/1 var(--zz-ui) !important;
+}
+
+.star-toggle.is-on,
+.star.is-on {
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+}
+
+.source img,
+.card-body .source img {
+  display: none !important;
+}
+
+.dictionary-layout {
+  grid-template-columns: 1fr !important;
+}
+
+.dictionary-layout > aside {
+  display: none !important;
 }

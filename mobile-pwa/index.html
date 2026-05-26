@@ -29,28 +29,6 @@
         </div>
       </header>
 
-      <section class="guide">
-        <p class="eyebrow">아이폰/아이패드 사용법</p>
-        <ol>
-          <li>처음 한 번 Supabase에 로그인합니다.</li>
-          <li>Safari에서 문장을 선택하고 북마클릿을 누르면 바로 서버에 저장됩니다.</li>
-          <li>저장 즉시 서버 보관함에 들어가고, 웹홈/줍줍문장/줍줍사진에서 다시 볼 수 있습니다.</li>
-        </ol>
-      </section>
-
-      <section class="bookmarklet-panel">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Safari Bookmarklet</p>
-            <h2>아이폰/아이패드 문장 줍줍 버튼</h2>
-          </div>
-          <button id="copyBookmarklet" class="secondary" type="button">북마클릿 복사</button>
-        </div>
-        <p class="helper">아래 코드를 Safari 책갈피 URL에 넣어두면, 선택한 문장이 Supabase 서버에 바로 저장됩니다.</p>
-        <a id="bookmarkletLink" class="button-link" href="#">줍줍하기 북마클릿</a>
-        <textarea id="bookmarkletCode" rows="4" readonly></textarea>
-      </section>
-
       <section class="cloud-panel">
         <div class="section-head">
           <div>
@@ -88,6 +66,28 @@
           <button id="cloudLogout" class="secondary" type="button">로그아웃</button>
         </div>
         <p id="cloudStatus" role="status"></p>
+
+        <section class="guide">
+          <p class="eyebrow">아이폰/아이패드 사용법</p>
+          <ol>
+            <li>처음 한 번 Supabase에 로그인합니다.</li>
+            <li>Safari에서 문장을 선택하고 북마클릿을 누르면 바로 서버에 저장됩니다.</li>
+            <li>저장 즉시 서버 보관함에 들어가고, 웹홈/줍줍문장/줍줍사진에서 다시 볼 수 있습니다.</li>
+          </ol>
+        </section>
+
+        <section class="bookmarklet-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Safari Bookmarklet</p>
+              <h2>아이폰/아이패드 문장 줍줍 버튼</h2>
+            </div>
+            <button id="copyBookmarklet" class="secondary" type="button">북마클릿 복사</button>
+          </div>
+          <p class="helper">아래 코드를 Safari 책갈피 URL에 넣어두면, 선택한 문장이 Supabase 서버에 바로 저장됩니다.</p>
+          <a id="bookmarkletLink" class="button-link" href="#">줍줍하기 북마클릿</a>
+          <textarea id="bookmarkletCode" rows="4" readonly></textarea>
+        </section>
       </section>
 
       <section class="editor">

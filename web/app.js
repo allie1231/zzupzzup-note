@@ -828,12 +828,6 @@ function cardEmbedView(clip) {
 function sourceView(clip) {
   const item = document.createElement("div");
   item.className = "source";
-  if (clip.iconUrl) {
-    const icon = document.createElement("img");
-    icon.src = clip.iconUrl;
-    icon.alt = "";
-    item.append(icon);
-  }
   const text = document.createElement("span");
   text.textContent = [clip.siteName, clip.title].filter(Boolean).join(" · ") || "출처 없음";
   item.append(text);

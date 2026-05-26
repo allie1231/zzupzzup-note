@@ -1,0 +1,265 @@
+:root {
+  --ink: #000;
+  --paper: #fff;
+  --soft: #bdbdbd;
+  --muted: #5f5f5f;
+  --shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+  --pixel-font: Monaco, "Courier New", monospace;
+  --zz-page-max: 1180px;
+  --zz-page-gutter: clamp(16px, 4vw, 32px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding-top: 28px;
+  color: var(--ink);
+  background-color: var(--soft);
+  background-image: radial-gradient(#777 0.8px, transparent 0.8px);
+  background-size: 3px 3px;
+  font: 13px/1.45 var(--pixel-font);
+}
+
+body::before {
+  content: "●  File  Edit  View  Special       줍줍사전";
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 24px;
+  border-bottom: 2px solid #000;
+  padding: 3px 10px;
+  background: #fff;
+}
+
+.app {
+  width: min(var(--zz-page-max), calc(100% - var(--zz-page-gutter) * 2));
+  margin: 0 auto;
+  padding: 40px 0 86px;
+}
+
+.topbar,
+.cloud-panel,
+.toolbar,
+.dictionary-layout > aside,
+.dictionary-layout > section,
+.entry-card,
+.empty {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.topbar,
+.cloud-panel,
+.toolbar {
+  margin-bottom: 20px;
+  padding: 24px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font: 700 clamp(34px, 5vw, 58px)/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 17px;
+}
+
+.lead {
+  max-width: 620px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  font-size: 18px;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.nav-actions,
+.actions,
+.toolbar,
+.floating-dock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+a,
+button,
+input {
+  font: inherit;
+}
+
+a,
+button {
+  border: 2px solid #000;
+  padding: 8px 12px;
+  color: #000;
+  background: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover,
+button:hover,
+a[aria-current="page"],
+.tag-button.is-active {
+  color: #fff;
+  background: #000;
+}
+
+input {
+  width: 100%;
+  border: 2px solid #000;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+}
+
+.cloud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.toolbar {
+  align-items: center;
+}
+
+.toolbar input {
+  flex: 1 1 280px;
+}
+
+.dictionary-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.dictionary-layout > aside,
+.dictionary-layout > section {
+  padding: 20px;
+}
+
+.tag-list,
+.entries {
+  display: grid;
+  gap: 12px;
+}
+
+.tag-button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.entry-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.entry-card img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border: 2px solid #000;
+}
+
+.type {
+  width: fit-content;
+  padding: 4px 8px;
+  color: #fff;
+  background: #000;
+}
+
+.sentence {
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  font-size: 15px;
+}
+
+.reason {
+  color: var(--muted);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tags span {
+  border: 1px solid #000;
+  padding: 3px 7px;
+}
+
+.floating-dock {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  border: 2px solid #000;
+  padding: 6px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.floating-dock a {
+  min-width: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+}
+
+@media (max-width: 760px) {
+  .app {
+    width: min(var(--zz-page-max), calc(100% - 28px));
+  }
+
+  .topbar,
+  .cloud-grid,
+  .dictionary-layout {
+    grid-template-columns: 1fr;
+  }
+}

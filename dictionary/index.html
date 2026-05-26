@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>줍줍사전</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">tag wiki</p>
+          <h1>줍줍사전</h1>
+          <p class="lead">내가 덧붙인 태그별로 문장, 링크, 이미지, 동영상, 자료가 연결되는 개인 위키입니다.</p>
+        </div>
+        <nav class="nav-actions" aria-label="페이지 이동">
+          <a href="../web/">웹홈</a>
+          <a href="../mobile-pwa/">모바일</a>
+          <a href="../sentences/">줍줍문장</a>
+          <a href="../photos/">줍줍사진</a>
+          <a href="../dictionary/" aria-current="page">줍줍사전</a>
+        </nav>
+      </header>
+
+      <section class="cloud-panel">
+        <div>
+          <p class="eyebrow">Supabase</p>
+          <h2>서버 보관함 불러오기</h2>
+          <p>웹홈과 같은 계정으로 로그인하면 태그 사전이 자동으로 채워집니다.</p>
+        </div>
+        <div class="cloud-grid">
+          <label>
+            이메일
+            <input id="cloudEmail" type="email" placeholder="me@example.com">
+          </label>
+          <label>
+            비밀번호
+            <input id="cloudPassword" type="password" placeholder="비밀번호">
+          </label>
+        </div>
+        <details class="cloud-advanced">
+          <summary>고급 설정</summary>
+          <div class="cloud-grid">
+            <label>
+              Supabase URL
+              <input id="cloudUrl" placeholder="https://xxxx.supabase.co">
+            </label>
+            <label>
+              anon public key
+              <input id="cloudAnonKey" placeholder="eyJhbGciOi...">
+            </label>
+          </div>
+        </details>
+        <div class="actions">
+          <button id="cloudSave" class="secondary">설정 저장</button>
+          <button id="cloudLogin">로그인</button>
+          <button id="cloudPull" class="secondary">DB 불러오기</button>
+          <button id="cloudLogout" class="secondary">로그아웃</button>
+        </div>
+        <p id="cloudStatus" class="cloud-status" role="status"></p>
+      </section>
+
+      <section class="toolbar">
+        <input id="search" placeholder="태그, 제목, 문장, 출처 검색">
+        <button id="showAll" type="button">전체 태그</button>
+      </section>
+
+      <section class="dictionary-layout">
+        <aside>
+          <p class="eyebrow">tags</p>
+          <div id="tagList" class="tag-list"></div>
+        </aside>
+        <section>
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">connected items</p>
+              <h2 id="activeTag">전체 태그</h2>
+            </div>
+            <strong id="count">0</strong>
+          </div>
+          <div id="entries" class="entries"></div>
+        </section>
+      </section>
+
+      <nav class="floating-dock" aria-label="빠른 이동">
+        <a href="../web/" title="웹홈">⌂</a>
+        <a href="../mobile-pwa/" title="모바일">M</a>
+        <a href="../sentences/" title="줍줍문장">¶</a>
+        <a href="../photos/" title="줍줍사진">▧</a>
+        <a href="../dictionary/" aria-current="page" title="줍줍사전">#</a>
+      </nav>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

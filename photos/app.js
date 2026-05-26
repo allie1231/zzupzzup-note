@@ -5,6 +5,7 @@ import {
   hasCloudSession,
   saveCloudSettings,
   signInToCloud,
+  deleteCloudClip,
   updateCloudClip
 } from "../shared/supabase-store.js";
 
@@ -16,11 +17,12 @@ const state = {
   cloudReady: false,
   activeItem: null,
   viewMode: "all",
-  mediaFilter: "all"
+  mediaFilter: "all",
+  page: 1
 };
 
 const PIN_BLOCK_START = "[줍줍사진 핀]";
-const DISPLAY_LIMIT = 15;
+const PAGE_SIZE = 10;
 
 const el = {
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -52,8 +54,14 @@ const el = {
   detailTitle: document.querySelector("#detailTitle"),
   detailMeta: document.querySelector("#detailMeta"),
   detailReason: document.querySelector("#detailReason"),
+  detailEditTitle: document.querySelector("#detailEditTitle"),
+  detailEditSource: document.querySelector("#detailEditSource"),
+  detailEditReason: document.querySelector("#detailEditReason"),
+  detailEditTags: document.querySelector("#detailEditTags"),
   detailLinks: document.querySelector("#detailLinks"),
   markReviewed: document.querySelector("#markReviewed"),
+  saveMediaDetail: document.querySelector("#saveMediaDetail"),
+  deleteMediaDetail: document.querySelector("#deleteMediaDetail"),
   pinLayer: document.querySelector("#pinLayer"),
   pinList: document.querySelector("#pinList"),
   pinEditor: document.querySelector("#pinEditor")
@@ -73,6 +81,12 @@ el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
 el.markReviewed.addEventListener("click", markActiveReviewed);
+el.saveMediaDetail.addEventListener("click", saveActiveMediaDetail);
+el.deleteMediaDetail.addEventListener("click", deleteActiveMediaDetail);
+el.detailEditTags.addEventListener("input", () => renderTagSuggestions(el.detailEditTags));
+el.detailEditTags.addEventListener("blur", () => {
+  el.detailEditTags.value = normalizeTagInput(el.detailEditTags.value);
+});
 el.pinLayer.addEventListener("click", addPinFromClick);
 el.pinList.addEventListener("click", handlePinAction);
 document.querySelectorAll("[data-open-panel]").forEach((button) => {
@@ -270,6 +284,7 @@ function applyFilters() {
       item.sourceUrl
     ].join(" ").toLowerCase().includes(query);
   });
+  state.page = 1;
   render();
 }
 
@@ -307,7 +322,10 @@ function showReviewed() {
 
 function render() {
   const matched = state.images.filter((image) => image.row).length;
-  const displayed = state.visible.slice(0, DISPLAY_LIMIT);
+  const pageCount = Math.max(1, Math.ceil(state.visible.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), pageCount);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const displayed = state.visible.slice(start, start + PAGE_SIZE);
   el.imageCount.textContent = String(state.images.length);
   el.csvCount.textContent = String(state.rows.length);
   el.matchedCount.textContent = String(matched);
@@ -323,12 +341,32 @@ function render() {
   }
 
   el.gallery.append(...displayed.map(photoCard));
-  if (state.visible.length > DISPLAY_LIMIT) {
-    const more = document.createElement("div");
-    more.className = "empty";
-    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
-    el.gallery.append(more);
-  }
+  if (state.visible.length > PAGE_SIZE) el.gallery.append(paginationView(state.visible.length, pageCount));
+}
+
+function paginationView(total, pageCount) {
+  const nav = document.createElement("nav");
+  nav.className = "pagination";
+  nav.setAttribute("aria-label", "페이지 이동");
+  nav.append(
+    pageButton("이전", state.page - 1, state.page <= 1),
+    textEl("span", "page-info", `${state.page} / ${pageCount} · 전체 ${total}개`),
+    pageButton("다음", state.page + 1, state.page >= pageCount)
+  );
+  return nav;
+}
+
+function pageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", () => {
+    state.page = page;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  return button;
 }
 
 function toggleFloatingPanel(name) {
@@ -451,6 +489,11 @@ function openCard(event) {
   el.detailTitle.textContent = video ? "동영상 메모" : "이미지 메모";
   el.detailMeta.textContent = [item.siteName, item.tags].filter(Boolean).join(" · ");
   el.detailReason.textContent = item.reason || "아직 메모가 없습니다.";
+  el.detailEditTitle.value = item.title || "";
+  el.detailEditSource.value = item.sourceUrl || "";
+  el.detailEditReason.value = item.reason || "";
+  el.detailEditTags.value = item.tags || "";
+  renderTagSuggestions(el.detailEditTags);
   el.detailLinks.replaceChildren();
   state.activeItem = item;
 
@@ -689,6 +732,7 @@ function pinActionButton(action, pinId, label) {
 function replaceStoredRow(nextRow) {
   const index = state.rows.findIndex((row) => row.id && row.id === nextRow.id);
   if (index >= 0) state.rows[index] = nextRow;
+  else state.rows.unshift(nextRow);
 }
 
 async function markActiveReviewed() {
@@ -741,6 +785,79 @@ function syncItemFromRow(item, row) {
   item.reviewCount = row.reviewCount || 0;
   item.lastReviewed = row.lastReviewed || "";
   item.connection = row.connection || item.connection || "";
+  item.title = row.title || "";
+  item.sourceUrl = row.source || row.imageUrl || "";
+  item.reason = row.reason || "";
+  item.tags = normalizeTagInput(row.tags || "");
+  item.siteName = row.siteName || "";
+  item.contentType = row.contentType || item.contentType;
+}
+
+async function saveActiveMediaDetail() {
+  const item = state.activeItem;
+  if (!item) return;
+  const row = writableRowForItem(item);
+  row.title = el.detailEditTitle.value.trim();
+  row.source = el.detailEditSource.value.trim();
+  row.siteName = deriveSiteName(row.source);
+  row.reason = el.detailEditReason.value.trim();
+  row.tags = normalizeTagInput(el.detailEditTags.value);
+  row.contentType = isVideoItem(item) ? "동영상" : "이미지";
+  markRowReviewed(row);
+  syncItemFromRow(item, row);
+  replaceStoredRow(row);
+
+  if (!row.id) {
+    applyFilters();
+    notify("상세 정보를 저장했습니다. DB 항목이 없는 로컬 파일은 이 화면에서만 유지됩니다.");
+    return;
+  }
+
+  if (!hasCloudSession()) {
+    applyFilters();
+    notify("상세 정보를 저장했습니다. Supabase 로그인 후 서버에도 저장할 수 있습니다.");
+    return;
+  }
+
+  try {
+    const updated = await updateCloudClip(row);
+    const nextRow = rowToItem(updated);
+    Object.assign(row, nextRow);
+    syncItemFromRow(item, row);
+    replaceStoredRow(row);
+    applyFilters();
+    notify("상세 정보를 Supabase에 저장했습니다.");
+  } catch (error) {
+    notify(error.message || "상세 정보를 Supabase에 저장하지 못했습니다.");
+  }
+}
+
+async function deleteActiveMediaDetail() {
+  const item = state.activeItem;
+  if (!item) return;
+  const label = item.title || item.siteName || item.sourceUrl || "이 미디어";
+  if (!confirm(`"${label}" 항목을 삭제할까요?`)) return;
+  const row = item.row;
+
+  if (row?.id && hasCloudSession()) {
+    try {
+      await deleteCloudClip(row.id);
+    } catch (error) {
+      notify(error.message || "Supabase 항목을 삭제하지 못했습니다.");
+      return;
+    }
+  }
+
+  state.rows = state.rows.filter((entry) => {
+    if (row?.id) return entry.id !== row.id;
+    return entry !== row;
+  });
+  state.images = state.images.filter((entry) => entry.id !== item.id);
+  state.visible = state.visible.filter((entry) => entry.id !== item.id);
+  state.activeItem = null;
+  el.detailDialog.close();
+  applyFilters();
+  notify(row?.id ? "미디어 항목을 Supabase에서도 삭제했습니다." : "이 화면에서 미디어 항목을 삭제했습니다.");
 }
 
 function clamp(value, min, max) {
@@ -893,6 +1010,60 @@ function filenameFromUrl(url) {
   } catch {
     return String(url || "image").split("/").pop() || "image";
   }
+}
+
+function deriveSiteName(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function normalizeTagInput(value) {
+  return [...new Set(String(value || "")
+    .split(/[,\s]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .join(" ");
+}
+
+function tagPool() {
+  return [...new Set(state.rows
+    .flatMap((row) => String(row.tags || "").split(/[,\s]+/))
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+function renderTagSuggestions(input) {
+  if (!input) return;
+  let box = input.parentElement.querySelector(".tag-suggestions");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "tag-suggestions";
+    input.insertAdjacentElement("afterend", box);
+  }
+  const selected = new Set(normalizeTagInput(input.value).split(/\s+/).filter(Boolean));
+  const query = String(input.value || "").split(/[,\s]+/).pop().replace(/^#/, "").toLowerCase();
+  const tags = tagPool()
+    .filter((tag) => !selected.has(tag) && (!query || tag.toLowerCase().includes(query)))
+    .slice(0, 10);
+  box.replaceChildren(...tags.map((tag) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-suggestion";
+    button.textContent = tag;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      const next = normalizeTagInput(`${input.value} ${tag}`);
+      input.value = next;
+      renderTagSuggestions(input);
+    });
+    return button;
+  }));
 }
 
 function textEl(tag, className, text) {

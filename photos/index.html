@@ -14,6 +14,7 @@
           <a href="../mobile-pwa/">모바일</a>
           <a href="../sentences/">줍줍문장</a>
           <a href="../photos/" aria-current="page">줍줍사진</a>
+          <a href="../dictionary/">줍줍사전</a>
         </nav>
         <div class="hero-copy">
           <p class="eyebrow">image archive</p>
@@ -100,6 +101,7 @@
         <a href="../mobile-pwa/" title="모바일">M</a>
         <a href="../sentences/" title="줍줍문장">¶</a>
         <a href="../photos/" aria-current="page" title="줍줍사진">▧</a>
+        <a href="../dictionary/" title="줍줍사전">#</a>
         <button type="button" data-open-panel="import" title="필터와 가져오기">⇪</button>
       </nav>
     </main>
@@ -117,8 +119,30 @@
           <h2 id="detailTitle">이미지</h2>
           <p id="detailMeta"></p>
           <p id="detailReason"></p>
+          <div class="detail-edit">
+            <label>
+              제목
+              <input id="detailEditTitle" placeholder="이미지/동영상 제목">
+            </label>
+            <label>
+              출처 URL
+              <input id="detailEditSource" placeholder="https://...">
+            </label>
+            <label>
+              메모
+              <textarea id="detailEditReason" rows="3" placeholder="왜 주웠는지, 어디에 쓸지"></textarea>
+            </label>
+            <label>
+              태그
+              <input id="detailEditTags" placeholder="#레퍼런스 #이미지">
+            </label>
+          </div>
           <div id="detailLinks" class="detail-links"></div>
-          <button id="markReviewed" class="secondary" type="button">확인 완료</button>
+          <div class="detail-actions">
+            <button id="saveMediaDetail" type="button">수정 저장</button>
+            <button id="markReviewed" class="secondary" type="button">확인 완료</button>
+            <button id="deleteMediaDetail" class="danger" type="button">삭제</button>
+          </div>
           <section id="pinEditor" class="pin-editor" aria-label="이미지 핀 메모">
             <div>
               <p class="eyebrow">visual notes</p>

@@ -15,7 +15,7 @@ import {
 
 const DEPLOYED_MOBILE_URL = "https://allie1231.github.io/zzupzzup-note/mobile-pwa/";
 const STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
-const DISPLAY_LIMIT = 15;
+const PAGE_SIZE = 10;
 
 if (window.location.protocol === "file:") {
   redirectFilePageToDeployed();
@@ -65,6 +65,7 @@ const el = {
 
 let installPrompt = null;
 let favoriteOnly = false;
+let currentPage = 1;
 let imageDataUrl = "";
 let selectedImageFile = null;
 
@@ -94,14 +95,23 @@ el.removeImage.addEventListener("click", clearImage);
 el.save.addEventListener("click", saveClip);
 el.exportCsv.addEventListener("click", exportCsv);
 el.copyCsv.addEventListener("click", copyCsv);
-el.search.addEventListener("input", render);
+el.search.addEventListener("input", () => {
+  currentPage = 1;
+  render();
+});
+el.tags.addEventListener("input", () => renderTagSuggestions(el.tags));
+el.tags.addEventListener("blur", () => {
+  el.tags.value = normalizeTagInput(el.tags.value);
+});
 el.showStarred.addEventListener("click", () => {
   favoriteOnly = true;
+  currentPage = 1;
   render();
 });
 el.showAll.addEventListener("click", () => {
   favoriteOnly = false;
   el.search.value = "";
+  currentPage = 1;
   render();
 });
 document.querySelectorAll("[data-open-panel]").forEach((button) => {
@@ -294,6 +304,7 @@ async function saveClip(options = {}) {
     status: el.status.value,
     favorite: el.favorite.checked
   });
+  clip.tags = normalizeTagInput(clip.tags);
 
   setStatus("Supabase에 저장 중...");
   try {
@@ -356,19 +367,43 @@ async function copyCsv() {
 
 function render() {
   const clips = filteredClips();
-  const displayed = clips.slice(0, DISPLAY_LIMIT);
+  const pageCount = Math.max(1, Math.ceil(clips.length / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, currentPage), pageCount);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const displayed = clips.slice(start, start + PAGE_SIZE);
   el.clips.replaceChildren(...displayed.map(cardView));
   if (!clips.length) {
     const empty = document.createElement("li");
     empty.className = "empty";
     empty.textContent = hasCloudSession() ? "서버 저장함이 비어 있습니다. 저장하면 여기에 표시됩니다." : "Supabase에 로그인하면 서버 저장함을 불러옵니다.";
     el.clips.append(empty);
-  } else if (clips.length > DISPLAY_LIMIT) {
-    const more = document.createElement("li");
-    more.className = "empty";
-    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색으로 더 좁혀 보세요.`;
-    el.clips.append(more);
+  } else if (clips.length > PAGE_SIZE) {
+    el.clips.append(paginationView(clips.length, pageCount));
   }
+}
+
+function paginationView(total, pageCount) {
+  const item = document.createElement("li");
+  item.className = "pagination";
+  item.append(
+    pageButton("이전", currentPage - 1, currentPage <= 1),
+    textEl("span", "page-info", `${currentPage} / ${pageCount} · 전체 ${total}개`),
+    pageButton("다음", currentPage + 1, currentPage >= pageCount)
+  );
+  return item;
+}
+
+function pageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", () => {
+    currentPage = page;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  return button;
 }
 
 function toggleFloatingPanel(name) {
@@ -431,6 +466,13 @@ function sourceLink(clip) {
   link.rel = "noreferrer";
   link.textContent = "원본 열기";
   return link;
+}
+
+function textEl(tag, className, text) {
+  const node = document.createElement(tag);
+  node.className = className || "";
+  node.textContent = text || "";
+  return node;
 }
 
 function filteredClips() {
@@ -535,6 +577,51 @@ function inferType(source, imageUrl, textValue = "") {
   if (/\.(pdf|docx?|pptx?|xlsx?|zip)(\?|$)/.test(text)) return "자료";
   if (textValue && !source) return "문장";
   return "링크";
+}
+
+function normalizeTagInput(value) {
+  return [...new Set(String(value || "")
+    .split(/[,\s]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .join(" ");
+}
+
+function tagPool() {
+  return [...new Set(getClips()
+    .flatMap((clip) => String(Array.isArray(clip.tags) ? clip.tags.join(" ") : clip.tags || "").split(/[,\s]+/))
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+function renderTagSuggestions(input) {
+  if (!input) return;
+  let box = input.parentElement.querySelector(".tag-suggestions");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "tag-suggestions";
+    input.insertAdjacentElement("afterend", box);
+  }
+  const selected = new Set(normalizeTagInput(input.value).split(/\s+/).filter(Boolean));
+  const query = String(input.value || "").split(/[,\s]+/).pop().replace(/^#/, "").toLowerCase();
+  const tags = tagPool()
+    .filter((tag) => !selected.has(tag) && (!query || tag.toLowerCase().includes(query)))
+    .slice(0, 10);
+  box.replaceChildren(...tags.map((tag) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-suggestion";
+    button.textContent = tag;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      input.value = normalizeTagInput(`${input.value} ${tag}`);
+      renderTagSuggestions(input);
+    });
+    return button;
+  }));
 }
 
 function downloadText(filename, text, type) {

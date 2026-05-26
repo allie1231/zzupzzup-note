@@ -8,7 +8,6 @@ import {
   signInToCloud,
   upsertCloudClips
 } from "../shared/supabase-store.js";
-import { analyzeSentence } from "../shared/analyzer.js";
 
 const HEADERS = [
   "id",
@@ -38,11 +37,12 @@ const DB_STORE = "handles";
 const CSV_HANDLE_KEY = "sentenceCsv";
 const CATEGORY_MARKER = "[줍줍문장 분류]";
 const CATEGORIES = ["책", "아티클", "뉴스레터", "영화", "강연", "웹", "기타"];
-const DISPLAY_LIMIT = 15;
+const PAGE_SIZE = 10;
 
 const state = {
   clips: [],
   visible: [],
+  page: 1,
   csvHandle: null,
   csvFilename: "",
   notionRows: [],
@@ -123,6 +123,10 @@ el.notionCsvInput.addEventListener("change", loadNotionCsv);
 el.importNotion.addEventListener("click", importNotionRows);
 el.search.addEventListener("input", applyFilters);
 el.categoryFilter.addEventListener("change", applyFilters);
+el.tagsInput.addEventListener("input", () => renderTagSuggestions(el.tagsInput));
+el.tagsInput.addEventListener("blur", () => {
+  el.tagsInput.value = normalizeTags(el.tagsInput.value);
+});
 el.showAll.addEventListener("click", showAll);
 el.showInbox.addEventListener("click", showInbox);
 el.showReviewed.addEventListener("click", showReviewed);
@@ -134,6 +138,10 @@ el.detailDelete.addEventListener("click", deleteDetail);
 el.detailAnalyze.addEventListener("click", suggestTagsForDetail);
 el.detailImageSearch.addEventListener("click", searchSourceImage);
 el.detailImageUrl.addEventListener("input", () => renderDetailCover(el.detailImageUrl.value, el.detailTitle.value));
+el.detailTags.addEventListener("input", () => renderTagSuggestions(el.detailTags));
+el.detailTags.addEventListener("blur", () => {
+  el.detailTags.value = normalizeTags(el.detailTags.value);
+});
 el.cloudSave.addEventListener("click", saveCloudConfig);
 el.cloudLogin.addEventListener("click", loginCloud);
 el.cloudLogout.addEventListener("click", logoutCloud);
@@ -355,7 +363,8 @@ function suggestTagsForNewSentence() {
     : el.categoryInput.value;
   el.categoryInput.value = category;
   el.tagsInput.value = suggestTags(sentence, el.tagsInput.value, category);
-  notify("문장을 분석해 태그와 큰 분류를 제안했습니다.");
+  renderTagSuggestions(el.tagsInput);
+  notify("태그를 콤마 기준으로 정리했습니다. 기존 태그는 입력칸 아래에서 골라 넣을 수 있습니다.");
 }
 
 async function loadNotionCsv() {
@@ -459,6 +468,7 @@ function applyFilters() {
       categoryOf(clip)
     ].join(" ").toLowerCase().includes(query);
   }).sort(sortNewest);
+  state.page = 1;
   render();
 }
 
@@ -468,6 +478,7 @@ function showAll() {
   state.favoriteOnly = false;
   state.viewMode = "all";
   state.visible = [...state.clips].sort(sortNewest);
+  state.page = 1;
   render();
   notify(`전체 문장 ${state.visible.length}개를 보여줍니다.`);
 }
@@ -506,7 +517,10 @@ function shuffleOne() {
 
 function render() {
   el.count.textContent = String(state.visible.length);
-  const displayed = state.visible.slice(0, DISPLAY_LIMIT);
+  const pageCount = Math.max(1, Math.ceil(state.visible.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), pageCount);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const displayed = state.visible.slice(start, start + PAGE_SIZE);
   el.sentences.replaceChildren();
   if (!state.visible.length) {
     const empty = document.createElement("div");
@@ -517,12 +531,32 @@ function render() {
   }
 
   el.sentences.append(...displayed.map(sentenceCard));
-  if (state.visible.length > DISPLAY_LIMIT) {
-    const more = document.createElement("div");
-    more.className = "empty";
-    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
-    el.sentences.append(more);
-  }
+  if (state.visible.length > PAGE_SIZE) el.sentences.append(paginationView(state.visible.length, pageCount));
+}
+
+function paginationView(total, pageCount) {
+  const nav = document.createElement("nav");
+  nav.className = "pagination";
+  nav.setAttribute("aria-label", "페이지 이동");
+  nav.append(
+    pageButton("이전", state.page - 1, state.page <= 1),
+    textEl("span", "page-info", `${state.page} / ${pageCount} · 전체 ${total}개`),
+    pageButton("다음", state.page + 1, state.page >= pageCount)
+  );
+  return nav;
+}
+
+function pageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", () => {
+    state.page = page;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  return button;
 }
 
 function toggleFloatingPanel(name) {
@@ -635,6 +669,7 @@ function openDetail(id) {
   el.detailCategory.value = categoryOf(clip);
   el.detailReason.value = clip.reason || "";
   el.detailTags.value = clip.tags || "";
+  renderTagSuggestions(el.detailTags);
   el.detailTitle.value = clip.title || "";
   el.detailSource.value = clip.source || "";
   el.detailImageUrl.value = clip.imageUrl || "";
@@ -687,7 +722,8 @@ function suggestTagsForDetail() {
   });
   el.detailCategory.value = category;
   el.detailTags.value = suggestTags(sentence, el.detailTags.value, category);
-  notify("문장을 분석해 태그와 큰 분류를 제안했습니다.");
+  renderTagSuggestions(el.detailTags);
+  notify("태그를 콤마 기준으로 정리했습니다. 기존 태그는 입력칸 아래에서 골라 넣을 수 있습니다.");
 }
 
 function searchSourceImage() {
@@ -792,11 +828,10 @@ function rowToClip(row) {
 }
 
 function suggestTags(sentence, currentTags = "", category = "") {
-  const analyzed = analyzeSentence(sentence);
-  const base = normalizeTags(currentTags || analyzed.tags.join(" "));
+  const base = normalizeTags(currentTags);
   const extra = ["#문장"];
   if (category && category !== "자동") extra.push(`#${category}`);
-  return normalizeTags(`${base} ${analyzed.tags.join(" ")} ${extra.join(" ")}`);
+  return normalizeTags(`${base} ${extra.join(" ")}`);
 }
 
 function categoryOf(clip) {
@@ -1018,6 +1053,42 @@ function normalizeTags(value) {
     .map((tag) => tag.trim())
     .filter(Boolean)
     .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))].join(" ");
+}
+
+function tagPool() {
+  return [...new Set(state.clips
+    .flatMap((clip) => String(Array.isArray(clip.tags) ? clip.tags.join(" ") : clip.tags || "").split(/[,\s]+/))
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+function renderTagSuggestions(input) {
+  if (!input) return;
+  let box = input.parentElement.querySelector(".tag-suggestions");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "tag-suggestions";
+    input.insertAdjacentElement("afterend", box);
+  }
+  const selected = new Set(normalizeTags(input.value).split(/\s+/).filter(Boolean));
+  const query = String(input.value || "").split(/[,\s]+/).pop().replace(/^#/, "").toLowerCase();
+  const tags = tagPool()
+    .filter((tag) => !selected.has(tag) && (!query || tag.toLowerCase().includes(query)))
+    .slice(0, 10);
+  box.replaceChildren(...tags.map((tag) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-suggestion";
+    button.textContent = tag;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      input.value = normalizeTags(`${input.value} ${tag}`);
+      renderTagSuggestions(input);
+    });
+    return button;
+  }));
 }
 
 function deriveSiteName(url) {

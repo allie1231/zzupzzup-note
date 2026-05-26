@@ -1201,3 +1201,51 @@ button:hover,
   color: #fff;
   background: #000;
 }
+
+/* Shared app sizing and tag helper UI */
+:root {
+  --zz-page-max: 1180px;
+  --zz-page-gutter: clamp(16px, 4vw, 32px);
+}
+
+.app {
+  width: min(var(--zz-page-max), calc(100% - var(--zz-page-gutter) * 2));
+}
+
+.pagination {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.pagination .page-info {
+  border: 2px solid #000;
+  padding: 8px 12px;
+  background: #fff;
+  font: 13px/1 var(--pixel-font);
+}
+
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag-suggestion {
+  min-height: 28px;
+  border-radius: 0;
+  padding: 5px 8px;
+  color: #000;
+  background: #fff;
+}
+
+@media (max-width: 760px) {
+  .app {
+    width: min(var(--zz-page-max), calc(100% - 28px));
+  }
+}

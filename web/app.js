@@ -40,11 +40,12 @@ const MAX_HISTORY_ITEMS = 3;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
-const DISPLAY_LIMIT = 15;
+const PAGE_SIZE = 10;
 
 const state = {
   clips: [],
   visible: [],
+  page: 1,
   imageUrls: new Map(),
   csvHandle: null,
   imageFolderHandle: null,
@@ -177,6 +178,10 @@ el.refreshHistory.addEventListener("click", refreshHistory);
 el.historyList.addEventListener("click", handleHistoryAction);
 el.detailSave.addEventListener("click", saveDetail);
 el.detailDelete.addEventListener("click", deleteDetail);
+el.detailTags.addEventListener("input", () => renderTagSuggestions(el.detailTags));
+el.detailTags.addEventListener("blur", () => {
+  el.detailTags.value = normalizeTagInput(el.detailTags.value);
+});
 el.exportCsv.addEventListener("click", downloadCsv);
 el.copyNotion.addEventListener("click", copyNotionMarkdown);
 el.exportSentenceCsv.addEventListener("click", downloadSentenceCsv);
@@ -556,6 +561,7 @@ function applyFilters() {
     if (state.favoriteOnly && !clip.favorite) return false;
     return true;
   }).sort(sortNewest);
+  state.page = 1;
   render();
 }
 
@@ -653,7 +659,10 @@ function toggleCalendar() {
 
 function render() {
   const clips = state.visible.length || state.clips.length ? state.visible : [];
-  const displayed = clips.slice(0, DISPLAY_LIMIT);
+  const pageCount = Math.max(1, Math.ceil(clips.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), pageCount);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const displayed = clips.slice(start, start + PAGE_SIZE);
   renderStats();
   renderCalendar();
   el.cards.replaceChildren();
@@ -667,12 +676,32 @@ function render() {
   }
 
   el.cards.append(...displayed.map(cardView));
-  if (clips.length > DISPLAY_LIMIT) {
-    const more = document.createElement("div");
-    more.className = "empty";
-    more.textContent = `최근 ${DISPLAY_LIMIT}개만 표시 중입니다. 검색이나 필터로 더 좁혀 보세요.`;
-    el.cards.append(more);
-  }
+  if (clips.length > PAGE_SIZE) el.cards.append(paginationView(clips.length, pageCount));
+}
+
+function paginationView(total, pageCount) {
+  const nav = document.createElement("nav");
+  nav.className = "pagination";
+  nav.setAttribute("aria-label", "페이지 이동");
+  nav.append(
+    pageButton("이전", state.page - 1, state.page <= 1),
+    textEl("span", "page-info", `${state.page} / ${pageCount} · 전체 ${total}개`),
+    pageButton("다음", state.page + 1, state.page >= pageCount)
+  );
+  return nav;
+}
+
+function pageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", () => {
+    state.page = page;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  return button;
 }
 
 function toggleFloatingPanel(name) {
@@ -911,6 +940,7 @@ function openDetail(id) {
   el.detailUseFor.value = clip.useFor || "정리필요";
   el.detailAction.value = clip.action || "정리필요";
   el.detailTags.value = clip.tags || "";
+  renderTagSuggestions(el.detailTags);
   renderDetailEmbed(clip);
   el.detailDialog.showModal();
 }
@@ -953,7 +983,7 @@ function saveDetail(event) {
   clip.connection = el.detailConnection.value;
   clip.useFor = el.detailUseFor.value;
   clip.action = el.detailAction.value;
-  clip.tags = el.detailTags.value;
+  clip.tags = normalizeTagInput(el.detailTags.value);
   clip.reviewCount = Number(clip.reviewCount || 0) + 1;
   clip.lastReviewed = new Date().toISOString();
   el.detailDialog.close();
@@ -1005,6 +1035,51 @@ function textEl(tag, className, text) {
   item.className = className;
   item.textContent = text || "";
   return item;
+}
+
+function normalizeTagInput(value) {
+  return [...new Set(String(value || "")
+    .split(/[,\s]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .join(" ");
+}
+
+function tagPool() {
+  return [...new Set(state.clips
+    .flatMap((clip) => String(Array.isArray(clip.tags) ? clip.tags.join(" ") : clip.tags || "").split(/[,\s]+/))
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => tag.startsWith("#") ? tag : `#${tag}`))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+function renderTagSuggestions(input) {
+  if (!input) return;
+  let box = input.parentElement.querySelector(".tag-suggestions");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "tag-suggestions";
+    input.insertAdjacentElement("afterend", box);
+  }
+  const selected = new Set(normalizeTagInput(input.value).split(/\s+/).filter(Boolean));
+  const query = String(input.value || "").split(/[,\s]+/).pop().replace(/^#/, "").toLowerCase();
+  const tags = tagPool()
+    .filter((tag) => !selected.has(tag) && (!query || tag.toLowerCase().includes(query)))
+    .slice(0, 10);
+  box.replaceChildren(...tags.map((tag) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-suggestion";
+    button.textContent = tag;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      input.value = normalizeTagInput(`${input.value} ${tag}`);
+      renderTagSuggestions(input);
+    });
+    return button;
+  }));
 }
 
 function resolveImage(clip) {

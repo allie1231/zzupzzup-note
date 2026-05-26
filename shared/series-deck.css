@@ -1,12 +1,12 @@
 /* ZZupZZup series deck redesign
    A shared editorial layer for web, mobile, sentences, photos, dictionary, and memo. */
 :root {
-  --zz-bg: #f6f5f0;
+  --zz-bg: #fbfbf8;
   --zz-ink: #101010;
   --zz-muted: #66645f;
   --zz-line: #1a1a1a;
-  --zz-paper: #fffefa;
-  --zz-soft: #efeee9;
+  --zz-paper: #fffffc;
+  --zz-soft: #f3f4f2;
   --zz-max: 1240px;
   --zz-gap: clamp(14px, 2vw, 22px);
   --zz-ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
@@ -34,7 +34,35 @@ body::before,
 .topbar::before,
 .topbar::after,
 header::before,
-header::after {
+header::after,
+section::before,
+section::after,
+.control-panel::before,
+.control-panel::after,
+.control-strip::before,
+.control-strip::after,
+.guide::before,
+.guide::after,
+.bookmarklet-panel::before,
+.bookmarklet-panel::after,
+.editor::before,
+.editor::after,
+.library::before,
+.library::after,
+.add-panel::before,
+.add-panel::after,
+.notion-panel::before,
+.notion-panel::after,
+.reader-tools::before,
+.reader-tools::after,
+.paste-panel::before,
+.paste-panel::after,
+.history-panel::before,
+.history-panel::after,
+.export-panel::before,
+.export-panel::after,
+.calendar-board::before,
+.calendar-board::after {
   content: none !important;
   display: none !important;
 }
@@ -755,6 +783,11 @@ dialog,
   .grid {
     grid-template-columns: 1fr !important;
   }
+
+  .gallery,
+  #gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }
 
 @media (max-width: 620px) {
@@ -788,4 +821,178 @@ dialog,
 #clips {
   grid-template-columns: 1fr !important;
 }
+}
+
+/* Web home refinements: folded help, compact sidebar status, and safer card text. */
+.onboarding::before,
+.onboarding::after {
+  content: none !important;
+  display: none !important;
+}
+
+.onboarding[hidden] {
+  display: none !important;
+}
+
+.help-toggle {
+  justify-self: start !important;
+  width: fit-content !important;
+}
+
+.cloud-panel .stats {
+  grid-column: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--zz-line) !important;
+  margin-top: 6px !important;
+  padding: 12px 0 0 !important;
+  background: transparent !important;
+}
+
+.cloud-panel .stat {
+  min-height: 72px !important;
+  display: grid !important;
+  align-content: space-between !important;
+  gap: 8px !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 10px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-soft) !important;
+  text-align: left !important;
+}
+
+.cloud-panel .stat:hover,
+.cloud-panel .stat:focus {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+.cloud-panel .stat strong {
+  color: inherit !important;
+  font: 600 26px/1 var(--zz-ui) !important;
+}
+
+.cloud-panel .stat span {
+  color: inherit !important;
+  opacity: .75 !important;
+  font: 700 11px/1.2 var(--zz-ui) !important;
+}
+
+.card,
+a.card,
+.photo-card,
+.sentence-card,
+.entry-card,
+.memo-card,
+.clip {
+  position: relative !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.card *,
+.photo-card *,
+.sentence-card *,
+.entry-card *,
+.memo-card *,
+.clip * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: keep-all !important;
+}
+
+.card-embed,
+.source,
+.meta,
+.reason,
+.sentence,
+.memo-body,
+.clip blockquote,
+.clip p {
+  overflow: hidden !important;
+}
+
+.card-embed span,
+.source,
+.meta {
+  text-overflow: ellipsis !important;
+}
+
+.tags {
+  overflow: hidden !important;
+}
+
+.gallery,
+#gallery {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.photo-card,
+.photo-card:nth-child(5n + 1),
+.photo-card:nth-child(7n + 4) {
+  grid-column: auto !important;
+  min-height: 380px !important;
+}
+
+.photo-card img,
+.photo-card video,
+.photo-card:nth-child(5n + 1) img,
+.photo-card:nth-child(7n + 4) img {
+  aspect-ratio: 4 / 3 !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: cover !important;
+}
+
+.sentence-card {
+  height: 460px !important;
+  min-height: 460px !important;
+  grid-template-rows: auto auto auto auto auto 1fr !important;
+}
+
+.sentence-card .meta a {
+  min-height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 500 13px/1.4 var(--zz-ui) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
+.sentence-card .meta a:hover {
+  color: var(--zz-muted) !important;
+  background: transparent !important;
+}
+
+.sentence-card.is-expanded .deck-clamp-target {
+  max-height: 190px !important;
+  overflow: auto !important;
+}
+
+.has-card-toggle {
+  padding-top: clamp(42px, 4vw, 52px) !important;
+}
+
+.card-toggle {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 8 !important;
+  border-radius: 999px !important;
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+.card-toggle:hover,
+.card-toggle:focus {
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
 }

@@ -28,16 +28,17 @@ function setupCard(card) {
 
   requestAnimationFrame(() => {
     if (!shouldToggle(target)) return;
+    card.classList.add("has-card-toggle");
     const button = document.createElement("button");
     button.type = "button";
     button.className = BUTTON_CLASS;
-    button.textContent = "펼치기";
+    button.textContent = "+ 펼치기";
     button.setAttribute("aria-expanded", "false");
     button.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const expanded = card.classList.toggle("is-expanded");
-      button.textContent = expanded ? "접기" : "펼치기";
+      button.textContent = expanded ? "- 접기" : "+ 펼치기";
       button.setAttribute("aria-expanded", String(expanded));
     });
     card.append(button);

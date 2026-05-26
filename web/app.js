@@ -633,11 +633,11 @@ function hideOnboarding() {
 function showOnboarding() {
   el.onboarding.hidden = false;
   el.showOnboarding.hidden = true;
-  localStorage.removeItem("zzupzzup:onboardingHidden");
+  localStorage.setItem("zzupzzup:onboardingHidden", "0");
 }
 
 function restoreOnboarding() {
-  const hidden = localStorage.getItem("zzupzzup:onboardingHidden") === "1";
+  const hidden = localStorage.getItem("zzupzzup:onboardingHidden") !== "0";
   el.onboarding.hidden = hidden;
   el.showOnboarding.hidden = !hidden;
 }

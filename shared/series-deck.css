@@ -1,0 +1,791 @@
+/* ZZupZZup series deck redesign
+   A shared editorial layer for web, mobile, sentences, photos, dictionary, and memo. */
+:root {
+  --zz-bg: #f6f5f0;
+  --zz-ink: #101010;
+  --zz-muted: #66645f;
+  --zz-line: #1a1a1a;
+  --zz-paper: #fffefa;
+  --zz-soft: #efeee9;
+  --zz-max: 1240px;
+  --zz-gap: clamp(14px, 2vw, 22px);
+  --zz-ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --zz-mono: Monaco, "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--zz-bg);
+}
+
+body {
+  padding-top: 0 !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-bg) !important;
+  background-image: none !important;
+  font: 14px/1.55 var(--zz-ui) !important;
+  letter-spacing: 0 !important;
+}
+
+body::before,
+.topbar::before,
+.topbar::after,
+header::before,
+header::after {
+  content: none !important;
+  display: none !important;
+}
+
+.app,
+main.app,
+body > main:not(.app) {
+  width: min(var(--zz-max), calc(100% - clamp(28px, 6vw, 72px))) !important;
+  max-width: var(--zz-max) !important;
+  margin: 0 auto !important;
+  padding: clamp(28px, 5vw, 64px) 0 96px !important;
+}
+
+.app,
+main.app {
+  display: grid !important;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) !important;
+  gap: var(--zz-gap) !important;
+  align-items: start !important;
+}
+
+.topbar,
+body > main > header:not(.topbar) {
+  grid-column: 1 / -1 !important;
+  position: relative !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: clamp(20px, 4vw, 48px) !important;
+  align-items: start !important;
+  margin: 0 0 clamp(18px, 3vw, 30px) !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: clamp(26px, 5vw, 56px) !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.topbar .hero-board,
+.topbar .brand-note,
+.topbar .hero-copy,
+.topbar > div:first-child,
+body > main > header:not(.topbar) > div:first-child {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.topbar h1,
+header h1,
+h1 {
+  margin: 0 !important;
+  color: var(--zz-ink) !important;
+  font: 500 clamp(44px, 9vw, 124px)/.86 var(--zz-ui) !important;
+  letter-spacing: -.02em !important;
+  text-shadow: none !important;
+}
+
+.topbar .lead,
+.lead {
+  max-width: 780px !important;
+  margin: clamp(16px, 2vw, 26px) 0 0 !important;
+  color: var(--zz-muted) !important;
+  font: 18px/1.75 var(--zz-ui) !important;
+  word-break: keep-all !important;
+}
+
+.eyebrow {
+  margin: 0 0 10px !important;
+  color: var(--zz-muted) !important;
+  font: 700 11px/1.2 var(--zz-mono) !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.nav-actions,
+.page-switcher,
+.top-actions,
+.top-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+}
+
+.topbar > .nav-actions,
+.topbar > .page-switcher,
+.topbar > .top-actions,
+.topbar > .top-meta {
+  order: 2 !important;
+}
+
+.topbar > .hero-copy,
+.topbar > .hero-board,
+.topbar > div:first-child {
+  order: 1 !important;
+}
+
+.top-meta {
+  max-width: 460px !important;
+}
+
+.nav-actions a,
+.page-switcher a,
+.button-link,
+a.button-link {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 8px 14px !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 12px/1 var(--zz-ui) !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+}
+
+.nav-actions a:hover,
+.page-switcher a:hover,
+.nav-actions a[aria-current="page"],
+.page-switcher a[aria-current="page"],
+.button-link:hover {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+.cloud-panel {
+  grid-column: 1 !important;
+  grid-row: 2 / span 24 !important;
+  position: sticky !important;
+  top: 24px !important;
+  z-index: 3 !important;
+  display: grid !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 18px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+}
+
+.cloud-panel h2 {
+  margin: 0 !important;
+  font: 700 18px/1.2 var(--zz-ui) !important;
+}
+
+.cloud-panel p:not(.eyebrow),
+.cloud-status,
+.status,
+.file-status,
+.helper {
+  color: var(--zz-muted) !important;
+  font-size: 13px !important;
+}
+
+.cloud-grid,
+.grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.cloud-panel .cloud-grid,
+.cloud-panel .grid {
+  grid-template-columns: 1fr !important;
+}
+
+.cloud-advanced {
+  border-top: 1px solid var(--zz-line) !important;
+  padding-top: 10px !important;
+}
+
+.cloud-advanced summary {
+  cursor: pointer !important;
+  color: var(--zz-muted) !important;
+  font: 700 12px/1.2 var(--zz-mono) !important;
+}
+
+.cloud-actions,
+.actions,
+.section-actions,
+.paste-actions,
+.export-actions,
+.detail-actions,
+.history-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.cloud-panel ~ section,
+.cloud-panel ~ p,
+.file-status,
+.help-toggle,
+.status,
+.control-strip,
+.control-panel,
+.guide,
+.bookmarklet-panel,
+.editor,
+.library,
+.toolbar,
+.reader-tools,
+.notion-panel,
+.add-panel,
+.dictionary-layout,
+.memo-list,
+.gallery,
+.cards,
+.stats,
+.calendar-board,
+.paste-panel,
+.history-panel,
+.export-panel,
+#sentences,
+#entries,
+#memoList,
+#gallery,
+#cards,
+#clips {
+  grid-column: 2 !important;
+}
+
+.links {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  border-top: 1px solid var(--zz-line) !important;
+  border-left: 1px solid var(--zz-line) !important;
+  background: var(--zz-paper) !important;
+}
+
+.control-strip,
+.control-panel,
+.guide,
+.bookmarklet-panel,
+.editor,
+.library,
+.toolbar,
+.reader-tools,
+.notion-panel,
+.add-panel,
+.paste-panel,
+.history-panel,
+.export-panel,
+.stats,
+.dictionary-layout,
+.memo-list,
+.gallery,
+.cards,
+.sentences,
+.entries {
+  margin: 0 !important;
+}
+
+.control-strip,
+.control-panel,
+.guide,
+.bookmarklet-panel,
+.editor,
+.library,
+.toolbar,
+.reader-tools,
+.notion-panel,
+.add-panel,
+.paste-panel,
+.history-panel,
+.export-panel,
+.onboarding,
+.stats,
+.dictionary-layout {
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: clamp(16px, 2.2vw, 24px) !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+}
+
+.toolbar,
+.reader-tools,
+.control-strip {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+button,
+.file-button,
+.tag-suggestion,
+input,
+textarea,
+select {
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+button,
+.file-button,
+.tag-suggestion {
+  min-height: 36px !important;
+  padding: 9px 14px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  font: 700 13px/1 var(--zz-ui) !important;
+}
+
+button:hover,
+.file-button:hover,
+.tag-suggestion:hover,
+button:not(.secondary) {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+button.secondary,
+.secondary,
+.file-button.secondary {
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+}
+
+button.secondary:hover,
+.secondary:hover,
+.file-button.secondary:hover {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+input,
+textarea,
+select {
+  min-height: 40px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 10px 12px !important;
+  color: var(--zz-ink) !important;
+  background: #fff !important;
+  font: 14px/1.45 var(--zz-ui) !important;
+}
+
+textarea {
+  min-height: 108px !important;
+  resize: vertical !important;
+  white-space: pre-wrap !important;
+}
+
+label {
+  color: var(--zz-ink) !important;
+  font: 700 12px/1.2 var(--zz-mono) !important;
+}
+
+.stats {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+.stats article {
+  min-height: 132px !important;
+  display: grid !important;
+  align-content: space-between !important;
+  border: 0 !important;
+  border-right: 1px solid var(--zz-line) !important;
+  border-bottom: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 18px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.stats article strong {
+  font: 500 clamp(30px, 5vw, 58px)/1 var(--zz-ui) !important;
+}
+
+.stats article span {
+  color: var(--zz-muted) !important;
+  font: 700 12px/1.2 var(--zz-ui) !important;
+}
+
+.cards,
+.gallery,
+.sentences,
+.entries,
+.memo-list,
+#cards,
+#gallery,
+#sentences,
+#entries,
+#memoList,
+#clips {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  list-style: none !important;
+  border-top: 1px solid var(--zz-line) !important;
+  border-left: 1px solid var(--zz-line) !important;
+  background: var(--zz-paper) !important;
+  padding: 0 !important;
+}
+
+.card,
+a.card,
+.item-card,
+.photo-card,
+.sentence-card,
+.entry-card,
+.memo-card,
+.clip-card,
+.clip,
+.note-card {
+  min-height: 260px !important;
+  display: grid !important;
+  align-content: start !important;
+  gap: 12px !important;
+  border: 0 !important;
+  border-right: 1px solid var(--zz-line) !important;
+  border-bottom: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: clamp(16px, 2vw, 22px) !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.card:hover,
+a.card:hover,
+.item-card:hover,
+.photo-card:hover,
+.sentence-card:hover,
+.entry-card:hover,
+.memo-card:hover,
+.clip-card:hover,
+.clip:hover,
+.note-card:hover {
+  background: #f1f0eb !important;
+  transform: none !important;
+}
+
+.photo-card img,
+.media-thumb img,
+.card img,
+.entry-card img {
+  width: 100% !important;
+  aspect-ratio: 4 / 3 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+  background: var(--zz-soft) !important;
+}
+
+.photo-card video,
+.media-thumb video {
+  width: 100% !important;
+  aspect-ratio: 4 / 3 !important;
+  object-fit: cover !important;
+  background: var(--zz-soft) !important;
+}
+
+.card h2,
+.card h3,
+.item-card h2,
+.item-card h3,
+.photo-card h2,
+.photo-card h3,
+.sentence-card h2,
+.sentence-card h3,
+.entry-card h2,
+.entry-card h3,
+.memo-card h2,
+.memo-card h3 {
+  margin: 0 !important;
+  color: var(--zz-ink) !important;
+  font: 700 20px/1.25 var(--zz-ui) !important;
+  letter-spacing: 0 !important;
+}
+
+.deck-clamp-target {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  white-space: pre-wrap !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 5 !important;
+}
+
+.is-expanded > .deck-clamp-target,
+.is-expanded .deck-clamp-target {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+}
+
+.card-toggle {
+  justify-self: start !important;
+  align-self: end !important;
+  min-height: 30px !important;
+  margin-top: 2px !important;
+  border-radius: 999px !important;
+  padding: 7px 11px !important;
+  font-size: 12px !important;
+}
+
+.type,
+.tags span,
+.tag,
+.pill,
+.badge {
+  width: fit-content !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 4px 9px !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  font: 700 11px/1 var(--zz-ui) !important;
+}
+
+.tags,
+.tag-suggestions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.pagination {
+  grid-column: 2 !important;
+}
+
+.floating-dock {
+  position: fixed !important;
+  right: 18px !important;
+  bottom: 18px !important;
+  z-index: 100 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 6px !important;
+  background: rgba(255, 254, 250, .92) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.floating-dock a,
+.floating-dock button {
+  position: relative !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  padding: 7px 9px !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  font: 700 12px/1 var(--zz-ui) !important;
+  text-decoration: none !important;
+}
+
+.floating-dock a:hover,
+.floating-dock button:hover,
+.floating-dock a[aria-current="page"] {
+  color: var(--zz-paper) !important;
+  background: var(--zz-ink) !important;
+}
+
+.floating-dock a[title]:hover::after,
+.floating-dock button[title]:hover::after {
+  content: attr(title) !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 8px) !important;
+  width: max-content !important;
+  max-width: 180px !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 999px !important;
+  padding: 7px 10px !important;
+  color: var(--zz-ink) !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+  font: 700 12px/1 var(--zz-ui) !important;
+  pointer-events: none !important;
+}
+
+[data-floating-panel] {
+  display: none !important;
+}
+
+[data-floating-panel].is-open {
+  position: fixed !important;
+  right: 18px !important;
+  bottom: 76px !important;
+  z-index: 90 !important;
+  display: grid !important;
+  width: min(620px, calc(100vw - 36px)) !important;
+  max-height: min(74vh, 720px) !important;
+  overflow: auto !important;
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 18px !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+}
+
+dialog,
+.detail-dialog,
+.sentence-dialog {
+  border: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  background: var(--zz-paper) !important;
+  box-shadow: none !important;
+}
+
+.detail-panel,
+.sentence-detail {
+  gap: 24px !important;
+}
+
+.detail-dialog::backdrop,
+.sentence-dialog::backdrop {
+  background: rgba(0, 0, 0, .48) !important;
+}
+
+.close-button {
+  border-radius: 999px !important;
+}
+
+@media (max-width: 1080px) {
+  .app,
+  main.app {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .topbar,
+  .cloud-panel,
+  .file-status,
+  .help-toggle,
+  .status,
+  .cloud-panel ~ section,
+  .cloud-panel ~ p,
+  .control-strip,
+  .control-panel,
+  .guide,
+  .bookmarklet-panel,
+  .editor,
+  .library,
+  .toolbar,
+  .reader-tools,
+  .notion-panel,
+  .add-panel,
+  .dictionary-layout,
+  .memo-list,
+  .gallery,
+  .cards,
+  .stats,
+  .calendar-board,
+  .paste-panel,
+  .history-panel,
+  .export-panel,
+  #sentences,
+#entries,
+#memoList,
+#gallery,
+#cards,
+#clips {
+  grid-column: 1 !important;
+}
+
+  .cloud-panel {
+    position: static !important;
+    grid-row: auto !important;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .nav-actions,
+  .page-switcher,
+  .top-actions,
+  .top-meta {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .cards,
+  .links,
+  .gallery,
+  .sentences,
+  .entries,
+  .memo-list,
+  #cards,
+  #gallery,
+#sentences,
+#entries,
+#memoList,
+#clips {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+  .cloud-grid,
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .app,
+  main.app {
+    width: min(100% - 24px, var(--zz-max)) !important;
+    padding-top: 24px !important;
+  }
+
+  .topbar {
+    padding: 24px !important;
+  }
+
+  .topbar h1,
+  header h1,
+  h1 {
+    font-size: clamp(40px, 18vw, 76px) !important;
+  }
+
+  .cards,
+  .links,
+  .gallery,
+  .sentences,
+  .entries,
+  .memo-list,
+  #cards,
+  #gallery,
+#sentences,
+#entries,
+#memoList,
+#clips {
+  grid-template-columns: 1fr !important;
+}
+}

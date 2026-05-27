@@ -577,6 +577,28 @@ a.card:hover,
   letter-spacing: 0 !important;
 }
 
+.card h2,
+.card h3,
+.item-card h2,
+.item-card h3,
+.photo-card h2,
+.photo-card h3,
+.sentence-card h2,
+.sentence-card h3,
+.entry-card h2,
+.entry-card h3,
+.memo-card h2,
+.memo-card h3,
+.clip > strong,
+.card-body .sentence,
+.entry-card .sentence,
+.entry-card .reason {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 5 !important;
+}
+
 .deck-clamp-target {
   display: -webkit-box !important;
   overflow: hidden !important;
@@ -1187,8 +1209,8 @@ a.card,
 }
 
 .photo-card .tags {
-  padding-top: 8px !important;
-  border-top: 1px dashed color-mix(in srgb, var(--zz-line) 55%, transparent) !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
 .photo-card .tags span {
@@ -1336,4 +1358,69 @@ a.card,
 .entry-actions button[data-action="detail"] {
   color: var(--zz-paper) !important;
   background: var(--zz-ink) !important;
+}
+
+button.card-toggle,
+.has-card-toggle > button.card-toggle {
+  display: inline !important;
+  appearance: none !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  font: 900 26px/1 var(--zz-ui) !important;
+  line-height: 1 !important;
+}
+
+button.card-toggle::before,
+.has-card-toggle > button.card-toggle::before {
+  display: none !important;
+  content: none !important;
+}
+
+button.card-toggle:hover,
+button.card-toggle:focus {
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+}
+
+.card-body .reason:empty,
+.card-body .meta:empty,
+.card-body .source:empty,
+.card-body .card-links:empty,
+.source:empty,
+.meta:empty,
+.reason:empty,
+.tags:empty {
+  display: none !important;
+}
+
+.card-body .reason,
+.card-body .meta,
+.card-body .source {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.check-row,
+label.check-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.check-row input[type="checkbox"],
+label.check-row input[type="checkbox"] {
+  width: auto !important;
+  min-width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  margin: 0 !important;
 }

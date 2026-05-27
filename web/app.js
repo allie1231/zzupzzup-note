@@ -40,7 +40,7 @@ const MAX_HISTORY_ITEMS = 3;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 const state = {
   clips: [],
@@ -670,7 +670,7 @@ function render() {
   if (!clips.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "줍줍노트.csv를 열면 문장, 링크, 이미지, 동영상, 자료가 여기에 모입니다.";
+    empty.textContent = "줍줍노트.csv를 열면 문장, 링크, 이미지, 동영상, 자료, 메모가 여기에 모입니다.";
     el.cards.append(empty);
     return;
   }
@@ -731,7 +731,8 @@ function renderStats() {
     statView("링크", countByType("링크"), () => showType("링크")),
     statView("이미지", countByType("이미지"), () => showType("이미지")),
     statView("동영상", countByType("동영상"), () => showType("동영상")),
-    statView("자료", countByType("자료"), () => showType("자료"))
+    statView("자료", countByType("자료"), () => showType("자료")),
+    statView("메모", countByType("메모"), () => showType("메모"))
   );
 }
 
@@ -852,6 +853,7 @@ function sourceLinkLabel(clip) {
   if (clip.contentType === "문장") return "출처 열기";
   if (clip.contentType === "동영상") return "동영상 열기";
   if (clip.contentType === "자료") return "자료 열기";
+  if (clip.contentType === "메모") return "메모 열기";
   return "링크 열기";
 }
 

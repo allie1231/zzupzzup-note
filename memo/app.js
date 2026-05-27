@@ -138,7 +138,7 @@ async function saveMemo() {
   const memo = {
     id: editingId || crypto.randomUUID(),
     createdAt: editingId ? currentMemo()?.createdAt || new Date().toISOString() : new Date().toISOString(),
-    contentType: "자료",
+    contentType: "메모",
     sentence: body,
     reason: "",
     connection: "",

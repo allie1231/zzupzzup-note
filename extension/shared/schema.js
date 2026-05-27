@@ -1,6 +1,6 @@
 export const DEFAULT_ACTIONS = ["정리필요", "확장", "고쳐쓰기", "연결", "인용", "참고", "조사", "보관"];
 export const DEFAULT_USE_FOR = ["정리필요", "에세이", "일기", "카피라이팅", "연설", "리서치", "레퍼런스", "아이디어"];
-export const DEFAULT_CONTENT_TYPES = ["문장", "링크", "이미지", "동영상", "자료"];
+export const DEFAULT_CONTENT_TYPES = ["문장", "링크", "이미지", "동영상", "자료", "메모"];
 
 const USE_FOR_LABELS = {
   needs_sorting: "정리필요",
@@ -40,7 +40,9 @@ const CONTENT_TYPE_LABELS = {
   link: "링크",
   image: "이미지",
   video: "동영상",
-  material: "자료"
+  material: "자료",
+  memo: "메모",
+  note: "메모"
 };
 
 export function createClip(input = {}) {

@@ -10,19 +10,25 @@
   <body>
     <main class="app">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">quick notes</p>
-          <h1>줍줍멤모</h1>
-          <p class="lead">흘러가는 생각을 짧게 적어두고, 필요하면 서버 보관함에도 남기는 작은 메모장입니다.</p>
+        <div class="hero-board">
+          <div class="brand-note">
+            <h1>줍줍노트</h1>
+          </div>
         </div>
-        <nav class="nav-actions" aria-label="페이지 이동">
-          <a href="../web/">웹홈</a>
-          <a href="../mobile-pwa/">모바일</a>
-          <a href="../sentences/">줍줍문장</a>
-          <a href="../photos/">줍줍사진</a>
-          <a href="../dictionary/">줍줍사전</a>
-          <a href="../memo/" aria-current="page">줍줍멤모</a>
-        </nav>
+        <div class="top-meta">
+          <time class="clock-panel" id="clockPanel">
+            <span id="todayText">----.--.--</span>
+            <strong id="clockText">--:--</strong>
+          </time>
+          <nav class="page-switcher" aria-label="줍줍노트 페이지 이동">
+            <a href="../web/">웹홈</a>
+            <a href="../mobile-pwa/">모바일</a>
+            <a href="../sentences/">줍줍문장</a>
+            <a href="../photos/">줍줍사진</a>
+            <a href="../dictionary/">줍줍사전</a>
+            <a href="../memo/" aria-current="page">줍줍멤모</a>
+          </nav>
+        </div>
       </header>
 
       <section class="cloud-panel">
@@ -106,6 +112,7 @@
       </nav>
     </main>
     <script type="module" src="app.js"></script>
+    <script type="module" src="../shared/header-clock.js"></script>
     <script type="module" src="../shared/card-toggle.js"></script>
   </body>
 </html>

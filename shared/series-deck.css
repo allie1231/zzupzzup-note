@@ -153,13 +153,19 @@ h1 {
 
 .nav-actions,
 .page-switcher,
-.top-actions,
-.top-meta {
+.top-actions {
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
   align-items: flex-start !important;
   justify-content: flex-end !important;
+}
+
+.top-meta {
+  display: grid !important;
+  gap: 18px !important;
+  justify-items: end !important;
+  align-items: start !important;
 }
 
 .topbar > .nav-actions,
@@ -177,6 +183,24 @@ h1 {
 
 .top-meta {
   max-width: 460px !important;
+}
+
+.clock-panel {
+  display: grid !important;
+  gap: 2px !important;
+  justify-items: end !important;
+  color: var(--zz-ink) !important;
+}
+
+.clock-panel span {
+  color: var(--zz-muted) !important;
+  font: 700 12px/1.2 var(--zz-mono) !important;
+}
+
+.clock-panel strong {
+  color: var(--zz-ink) !important;
+  font: 700 clamp(32px, 4vw, 46px)/1 var(--zz-ui) !important;
+  letter-spacing: 0 !important;
 }
 
 .nav-actions a,
@@ -656,11 +680,16 @@ a.card:hover,
 
 .pagination {
   grid-column: 1 / -1 !important;
+  justify-self: end !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
   width: 100% !important;
   margin: 16px 0 0 !important;
   padding: 14px 0 0 !important;
   border-top: 1px solid var(--zz-line) !important;
-  justify-content: flex-start !important;
+  justify-content: flex-end !important;
 }
 
 .floating-dock {
@@ -813,9 +842,13 @@ dialog,
 
   .nav-actions,
   .page-switcher,
-  .top-actions,
-  .top-meta {
+  .top-actions {
     justify-content: flex-start !important;
+  }
+
+  .top-meta,
+  .clock-panel {
+    justify-items: start !important;
   }
 }
 

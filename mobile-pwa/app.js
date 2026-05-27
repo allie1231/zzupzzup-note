@@ -15,7 +15,7 @@ import {
 
 const DEPLOYED_MOBILE_URL = "https://allie1231.github.io/zzupzzup-note/mobile-pwa/";
 const STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 if (window.location.protocol === "file:") {
   redirectFilePageToDeployed();

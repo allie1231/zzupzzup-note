@@ -37,7 +37,7 @@ const DB_STORE = "handles";
 const CSV_HANDLE_KEY = "sentenceCsv";
 const CATEGORY_MARKER = "[줍줍문장 분류]";
 const CATEGORIES = ["책", "아티클", "뉴스레터", "영화", "강연", "웹", "기타"];
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 const state = {
   clips: [],

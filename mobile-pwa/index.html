@@ -12,11 +12,16 @@
   <body>
     <main class="app">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">모바일 줍줍하기</p>
-          <h1>줍줍노트</h1>
+        <div class="hero-board">
+          <div class="brand-note">
+            <h1>줍줍노트</h1>
+          </div>
         </div>
-        <div class="top-actions">
+        <div class="top-meta">
+          <time class="clock-panel" id="clockPanel">
+            <span id="todayText">----.--.--</span>
+            <strong id="clockText">--:--</strong>
+          </time>
           <nav class="page-switcher" aria-label="줍줍노트 페이지 이동">
             <a href="../web/">웹홈</a>
             <a href="../mobile-pwa/" aria-current="page">모바일</a>
@@ -108,6 +113,7 @@
               <option value="이미지">이미지</option>
               <option value="동영상">동영상</option>
               <option value="자료">자료</option>
+              <option value="메모">메모</option>
             </select>
           </label>
           <label>
@@ -232,6 +238,7 @@
       </nav>
     </main>
     <script type="module" src="app.js"></script>
+    <script type="module" src="../shared/header-clock.js"></script>
     <script type="module" src="../shared/card-toggle.js"></script>
   </body>
 </html>

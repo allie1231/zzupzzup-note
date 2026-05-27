@@ -898,7 +898,8 @@ button:hover,
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  width: 100%;
   list-style: none;
 }
 

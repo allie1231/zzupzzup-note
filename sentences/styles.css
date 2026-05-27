@@ -1032,12 +1032,14 @@ input[type="checkbox"] {
 
 .pagination {
   grid-column: 1 / -1;
+  justify-self: end;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   margin-top: 18px;
+  width: 100%;
 }
 
 .pagination .page-info {

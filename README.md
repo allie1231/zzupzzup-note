@@ -1,14 +1,16 @@
-# 줍줍노트 MVP
+# 줍줍노트
 
-Browser extension and local web home for collecting links, images, videos, and materials into a personal CSV archive.
+Browser extension, mobile web capture page, and web homes for collecting links, images, videos, sentences, materials, and memos into Supabase or CSV.
 
 ## Structure
 
-- `extension/`: Chrome extension for collecting links, images, videos, and materials.
-- `web/`: local web home for opening `줍줍노트.csv` and organizing collected cards.
-- `ios/ZZupZZupNote/`: SwiftUI iPhone/iPad app that reads and writes the same Supabase `zzup_clips` data.
-- `safari/`: Safari Web Extension packaging notes and generated Xcode project location.
-- `tools/package_safari_extension.mjs`: helper script for creating a Safari Web Extension Xcode project when Xcode is installed.
+- `extension/`: Chrome extension for collecting links, images, videos, sentences, materials, and memos.
+- `mobile-pwa/`: mobile web capture page for iPhone/iPad bookmarklets and share workflows.
+- `web/`: main web home for organizing collected cards.
+- `sentences/`: sentence-only reading and organizing page.
+- `photos/`: image and video archive page.
+- `dictionary/`: tag-based wiki view.
+- `memo/`: quick memo page.
 - `apps-script/`: Google Apps Script Web App endpoint for appending rows to Google Sheets.
 - `shared/`: shared schema, tag suggestion, and CSV helpers.
 
@@ -87,19 +89,3 @@ http://127.0.0.1:4175/web/
 ```
 
 Use `CSV 열기` to load `줍줍노트.csv`. If you collected local images, use `이미지 함께 열기` and select the files inside the `images/` folder so cards can show thumbnails.
-
-## Safari Extension
-
-Apple packages Safari Web Extensions inside a macOS/iOS app. After installing full Xcode, run:
-
-```sh
-node tools/package_safari_extension.mjs
-```
-
-The generated Xcode project is written to:
-
-```text
-safari/
-```
-
-Then open the Xcode project, select your signing team, run the app, and enable 줍줍노트 in Safari Settings > Extensions.

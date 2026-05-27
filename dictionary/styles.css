@@ -3,7 +3,7 @@
   --paper: #fff;
   --soft: #bdbdbd;
   --muted: #5f5f5f;
-  --shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+  --shadow: none;
   --pixel-font: Monaco, "Courier New", monospace;
   --zz-page-max: 1180px;
   --zz-page-gutter: clamp(16px, 4vw, 32px);
@@ -50,7 +50,7 @@ body::before {
   border: 2px solid #000;
   border-radius: 0;
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .topbar,
@@ -256,7 +256,7 @@ label {
   border: 2px solid #000;
   padding: 6px;
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .floating-dock a {
@@ -275,7 +275,7 @@ label {
   border-radius: 0;
   padding: 0;
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .detail-dialog::backdrop {
@@ -399,7 +399,7 @@ select {
   padding: 6px 8px;
   color: #000;
   background: #fff;
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+  box-shadow: none;
   font: 12px/1.2 var(--pixel-font);
   pointer-events: none;
 }

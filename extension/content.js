@@ -27,7 +27,7 @@ function showButton() {
       "border:2px solid #111",
       "background:#e1e1df",
       "color:#111",
-      "box-shadow:0 6px 18px rgba(0,0,0,.24)",
+      "box-shadow:none",
       "cursor:pointer"
     ].join(";");
     button.addEventListener("click", async () => {

@@ -9,6 +9,13 @@
         box-sizing: border-box;
       }
 
+      *,
+      *::before,
+      *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+
       body {
         margin: 0;
         color: #111;
@@ -31,7 +38,7 @@
         border: 1px solid #111;
         border-radius: 14px;
         background: #f7f7f1;
-        box-shadow: 16px 16px 0 rgba(0, 0, 0, .2);
+        box-shadow: none;
       }
 
       header::after {
@@ -44,7 +51,7 @@
         padding: 6px 10px;
         color: #111;
         background: #f7f7f1;
-        box-shadow: 6px 6px 0 rgba(0, 0, 0, .2);
+        box-shadow: none;
         font: 18px/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
         transform: rotate(4deg);
       }
@@ -89,7 +96,7 @@
         color: #151515;
         background: #f7f7f1;
         text-decoration: none;
-        box-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
+        box-shadow: none;
         transition: border-color .16s ease, transform .16s ease;
       }
 
@@ -131,7 +138,7 @@
         border-radius: 14px;
         color: #666;
         background: #f7f7f1;
-        box-shadow: 16px 16px 0 rgba(0, 0, 0, .18);
+        box-shadow: none;
       }
 
       @media (max-width: 680px) {
@@ -179,7 +186,7 @@
         border-radius: 0;
         color: #000;
         background: #fff;
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, .42);
+        box-shadow: none;
       }
 
       header {
@@ -204,7 +211,7 @@
         border: 2px solid #000;
         border-radius: 0;
         background: #fff;
-        box-shadow: 3px 3px 0 rgba(0, 0, 0, .38);
+        box-shadow: none;
         font: 13px/1 Monaco, "Courier New", monospace;
       }
 

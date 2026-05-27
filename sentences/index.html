@@ -77,6 +77,26 @@
           <button id="cloudLogout" class="secondary">로그아웃</button>
         </div>
         <p id="cloudStatus" class="cloud-status" role="status"></p>
+
+        <section class="reader-tools">
+          <input id="search" placeholder="문장, 이유, 출처, 태그 검색">
+          <select id="categoryFilter" aria-label="큰 분류 필터">
+            <option value="">분류 전체</option>
+            <option>책</option>
+            <option>아티클</option>
+            <option>뉴스레터</option>
+            <option>영화</option>
+            <option>강연</option>
+            <option>웹</option>
+            <option>기타</option>
+          </select>
+          <button id="showAll" class="secondary">전체</button>
+          <button id="showInbox" class="secondary">인박스</button>
+          <button id="showReviewed" class="secondary">확인함</button>
+          <button id="showFavorites" class="secondary">기억 문장</button>
+          <button id="shuffleOne" class="secondary">하나 꺼내기</button>
+          <strong id="count">0</strong>
+        </section>
       </section>
 
       <p id="status" class="status" role="status">줍줍노트-문장.csv를 열면 문장들이 여기에 나타납니다.</p>
@@ -167,26 +187,6 @@
           </label>
           <button id="importNotion">매핑해서 가져오기</button>
         </div>
-      </section>
-
-      <section class="reader-tools">
-        <input id="search" placeholder="문장, 이유, 출처, 태그 검색">
-        <select id="categoryFilter" aria-label="큰 분류 필터">
-          <option value="">분류 전체</option>
-          <option>책</option>
-          <option>아티클</option>
-          <option>뉴스레터</option>
-          <option>영화</option>
-          <option>강연</option>
-          <option>웹</option>
-          <option>기타</option>
-        </select>
-        <button id="showAll" class="secondary">전체</button>
-        <button id="showInbox" class="secondary">인박스</button>
-        <button id="showReviewed" class="secondary">확인함</button>
-        <button id="showFavorites" class="secondary">기억 문장</button>
-        <button id="shuffleOne" class="secondary">하나 꺼내기</button>
-        <strong id="count">0</strong>
       </section>
 
       <section id="sentences" class="sentences" aria-label="문장 목록"></section>

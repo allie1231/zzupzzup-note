@@ -364,6 +364,17 @@ a.button-link {
   box-shadow: none;
 }
 
+.section-head,
+.detail-header,
+.history-item,
+.paste-actions,
+.history-actions,
+.export-actions {
+  background: var(--zz-soft) !important;
+  border: 1px solid color-mix(in srgb, var(--zz-line) 55%, transparent) !important;
+  padding: 12px !important;
+}
+
 .toolbar,
 .reader-tools,
 .control-strip {
@@ -584,11 +595,14 @@ a.card:hover,
 .card-toggle {
   justify-self: start !important;
   align-self: end !important;
-  min-height: 30px !important;
+  min-height: auto !important;
   margin-top: 2px !important;
-  border-radius: 999px !important;
-  padding: 7px 11px !important;
-  font-size: 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  font-size: 22px !important;
 }
 
 .type,
@@ -874,7 +888,8 @@ dialog,
 
 .cloud-panel .dictionary-search,
 .cloud-panel .guide,
-.cloud-panel .bookmarklet-panel {
+.cloud-panel .bookmarklet-panel,
+.cloud-panel .reader-tools {
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: 8px !important;
@@ -1014,6 +1029,34 @@ a.card,
   overflow: hidden !important;
 }
 
+.card-embed,
+.sentence-card .meta,
+.entry-card .sentence,
+.entry-card .reason,
+.memo-card .memo-body,
+.clip blockquote,
+.clip p {
+  border: 1px solid color-mix(in srgb, var(--zz-line) 55%, transparent) !important;
+  padding: 10px !important;
+  background: var(--zz-soft) !important;
+}
+
+.card-body .reason,
+.card-body .meta,
+.card-body .source {
+  border-top: 1px solid color-mix(in srgb, var(--zz-line) 45%, transparent) !important;
+  padding-top: 10px !important;
+}
+
+.card-actions,
+.entry-actions,
+.detail-actions,
+.card-links,
+.detail-links {
+  border-top: 1px solid color-mix(in srgb, var(--zz-line) 55%, transparent) !important;
+  padding-top: 10px !important;
+}
+
 .card-embed span,
 .source,
 .meta {
@@ -1033,7 +1076,9 @@ a.card,
 .photo-card:nth-child(5n + 1),
 .photo-card:nth-child(7n + 4) {
   grid-column: auto !important;
-  min-height: 380px !important;
+  min-height: 0 !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
 }
 
 .photo-card img,
@@ -1098,22 +1143,22 @@ a.card,
   display: grid !important;
   gap: 10px !important;
   border-top: 1px solid var(--zz-line) !important;
-  padding-top: 14px !important;
+  padding: 12px !important;
+  background: var(--zz-soft) !important;
 }
 
 .photo-meta {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   gap: 12px !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--zz-line) 55%, transparent) !important;
+  padding-bottom: 10px !important;
 }
 
 .photo-source {
-  overflow: hidden !important;
-  color: var(--zz-ink) !important;
-  font-weight: 500 !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  display: none !important;
 }
 
 .state-chip,
@@ -1128,6 +1173,7 @@ a.card,
 }
 
 .photo-card .state-chip {
+  order: 0 !important;
   border-radius: 0 !important;
   padding: 5px 7px !important;
   color: var(--zz-paper) !important;
@@ -1160,7 +1206,7 @@ a.card,
 }
 
 .has-card-toggle {
-  padding-top: clamp(42px, 4vw, 52px) !important;
+  padding-top: clamp(34px, 3vw, 42px) !important;
 }
 
 .card-toggle {
@@ -1168,21 +1214,22 @@ a.card,
   top: 10px !important;
   left: 10px !important;
   z-index: 8 !important;
-  min-width: 34px !important;
-  width: 34px !important;
-  height: 34px !important;
-  min-height: 34px !important;
+  min-width: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  border: 0 !important;
   border-radius: 0 !important;
   padding: 0 !important;
-  color: var(--zz-paper) !important;
-  background: var(--zz-ink) !important;
-  font: 700 18px/1 var(--zz-ui) !important;
+  color: var(--zz-ink) !important;
+  background: transparent !important;
+  font: 900 26px/1 var(--zz-ui) !important;
 }
 
 .card-toggle:hover,
 .card-toggle:focus {
   color: var(--zz-ink) !important;
-  background: var(--zz-paper) !important;
+  background: transparent !important;
 }
 
 .star-toggle,

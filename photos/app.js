@@ -391,7 +391,6 @@ function photoCard(item) {
   const copy = document.createElement("div");
   copy.className = "photo-meta";
   copy.append(
-    textEl("span", "photo-source", item.siteName || (isVideoItem(item) ? "video archive" : "image archive")),
     textEl("span", isReviewedItem(item) ? "state-chip is-reviewed" : "state-chip", isReviewedItem(item) ? "확인함" : "인박스")
   );
   footer.append(copy, tagsView(item.tags || (isVideoItem(item) ? "#동영상" : "#이미지")));

@@ -13,8 +13,11 @@ const state = {
   clips: [],
   activeTag: "",
   query: "",
-  editingId: ""
+  editingId: "",
+  page: 1
 };
+
+const PAGE_SIZE = 10;
 
 const el = {
   cloudUrl: document.querySelector("#cloudUrl"),
@@ -55,10 +58,12 @@ el.cloudLogout.addEventListener("click", logoutCloud);
 el.cloudPull.addEventListener("click", pullCloud);
 el.search.addEventListener("input", () => {
   state.query = el.search.value.trim().toLowerCase();
+  state.page = 1;
   render();
 });
 el.showAll.addEventListener("click", () => {
   state.activeTag = "";
+  state.page = 1;
   render();
 });
 el.entries.addEventListener("click", handleEntryClick);
@@ -146,14 +151,20 @@ function render() {
   }
 
   const entries = filteredEntries();
+  const pageCount = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), pageCount);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const pageEntries = entries.slice(start, start + PAGE_SIZE);
   el.activeTag.textContent = state.activeTag || "전체 태그";
   el.count.textContent = String(entries.length);
-  el.entries.replaceChildren(...entries.map(entryCard));
+  el.entries.replaceChildren(...pageEntries.map(entryCard));
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = "연결된 항목이 없습니다.";
     el.entries.append(empty);
+  } else if (entries.length > PAGE_SIZE) {
+    el.entries.append(paginationView(entries.length, pageCount));
   }
 }
 
@@ -172,6 +183,7 @@ function tagButton([tag, count]) {
   button.append(textEl("span", "", tag), textEl("strong", "", String(count)));
   button.addEventListener("click", () => {
     state.activeTag = tag;
+    state.page = 1;
     render();
   });
   return button;
@@ -182,6 +194,31 @@ function filteredEntries() {
   return source
     .filter((clip) => !state.query || matchesQuery(clip))
     .slice(0, 120);
+}
+
+function paginationView(total, pageCount) {
+  const nav = document.createElement("nav");
+  nav.className = "pagination";
+  nav.setAttribute("aria-label", "줍줍사전 페이지");
+  nav.append(
+    pageButton("이전", state.page - 1, state.page <= 1),
+    textEl("span", "page-info", `${state.page} / ${pageCount} · 전체 ${total}개`),
+    pageButton("다음", state.page + 1, state.page >= pageCount)
+  );
+  return nav;
+}
+
+function pageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", () => {
+    state.page = page;
+    render();
+    window.scrollTo({ top: el.entries.offsetTop - 24, behavior: "smooth" });
+  });
+  return button;
 }
 
 function entriesForTag(tag) {

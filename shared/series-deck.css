@@ -214,6 +214,8 @@ a.button-link {
   top: auto !important;
   z-index: 3 !important;
   display: grid !important;
+  grid-template-columns: 1fr !important;
+  align-items: start !important;
   gap: 12px !important;
   width: 100% !important;
   margin: 0 !important;
@@ -223,6 +225,10 @@ a.button-link {
   color: var(--zz-ink) !important;
   background: var(--zz-paper) !important;
   box-shadow: none;
+}
+
+.cloud-panel > * {
+  min-width: 0 !important;
 }
 
 .cloud-panel h2 {
@@ -649,7 +655,12 @@ a.card:hover,
 }
 
 .pagination {
-  grid-column: 2 !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin: 16px 0 0 !important;
+  padding: 14px 0 0 !important;
+  border-top: 1px solid var(--zz-line) !important;
+  justify-content: flex-start !important;
 }
 
 .floating-dock {
@@ -915,6 +926,28 @@ dialog,
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: 8px !important;
+}
+
+.cloud-panel .reader-tools {
+  grid-column: auto !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--zz-line) !important;
+  border-radius: 0 !important;
+  padding: 14px 0 0 !important;
+  background: transparent !important;
+}
+
+.cloud-panel .reader-tools input,
+.cloud-panel .reader-tools select,
+.cloud-panel .reader-tools button {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+.cloud-panel .reader-tools strong {
+  justify-self: end !important;
+  font: 800 28px/1 var(--zz-ui) !important;
 }
 
 .cloud-panel .dictionary-search #showAll {
@@ -1342,12 +1375,13 @@ a.card,
 .detail-actions button,
 .card-links a,
 .detail-links a {
+  display: inline-flex !important;
   width: auto !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  height: auto !important;
-  min-height: 34px !important;
-  padding: 8px 12px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
   align-items: center !important;
   justify-content: center !important;
   font: 700 12px/1.1 var(--zz-ui) !important;
@@ -1361,7 +1395,8 @@ a.card,
 }
 
 button.card-toggle,
-.has-card-toggle > button.card-toggle {
+.has-card-toggle > button.card-toggle,
+body button.card-toggle {
   display: inline !important;
   appearance: none !important;
   min-width: 0 !important;
@@ -1380,15 +1415,19 @@ button.card-toggle,
 }
 
 button.card-toggle::before,
-.has-card-toggle > button.card-toggle::before {
+.has-card-toggle > button.card-toggle::before,
+body button.card-toggle::before {
   display: none !important;
   content: none !important;
 }
 
 button.card-toggle:hover,
-button.card-toggle:focus {
+button.card-toggle:focus,
+button.card-toggle[aria-expanded="true"] {
   color: var(--zz-ink) !important;
-  background: transparent !important;
+  outline: 1px solid color-mix(in srgb, var(--zz-line) 28%, transparent) !important;
+  outline-offset: 5px !important;
+  background: color-mix(in srgb, var(--zz-soft) 62%, transparent) !important;
 }
 
 .card-body .reason:empty,
@@ -1407,6 +1446,24 @@ button.card-toggle:focus {
 .card-body .source {
   border-top: 0 !important;
   padding-top: 0 !important;
+}
+
+.tags,
+.card .tags,
+.item-card .tags,
+.photo-card .tags,
+.sentence-card .tags,
+.entry-card .tags,
+.memo-card .tags,
+.clip .tags {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+.photo-meta {
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .check-row,

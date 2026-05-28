@@ -729,6 +729,53 @@ section::before {
   content: "□ Bookmarklet";
 }
 
+.bookmarklet-panel {
+  padding-bottom: 18px;
+}
+
+.bookmarklet-panel > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.bookmarklet-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.bookmarklet-panel .toggle-label {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid #000;
+  padding: 6px 12px;
+  color: #000;
+  background: #fff;
+  font: 700 13px/1 Monaco, "Courier New", monospace;
+}
+
+.bookmarklet-panel[open] .toggle-label {
+  color: #fff;
+  background: #000;
+}
+
+.bookmarklet-panel[open] .toggle-label::before {
+  content: "접기";
+}
+
+.bookmarklet-panel[open] .toggle-label {
+  font-size: 0;
+}
+
+.bookmarklet-panel[open] .toggle-label::before {
+  font-size: 13px;
+}
+
+.bookmarklet-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
 .editor::before {
   content: "□ Capture";
 }

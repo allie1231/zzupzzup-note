@@ -1,4 +1,4 @@
-const CACHE_NAME = "zzupzzup-mobile-v19";
+const CACHE_NAME = "zzupzzup-mobile-v20";
 const ASSETS = [
   "./",
   "./index.html",

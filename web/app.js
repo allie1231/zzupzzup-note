@@ -40,6 +40,7 @@ const MAX_HISTORY_ITEMS = 3;
 const CSV_HANDLE_KEY = "csv";
 const IMAGE_FOLDER_HANDLE_KEY = "imageFolder";
 const EXCLUDE_DONE_KEY = "zzupzzup:excludeDone";
+const MOBILE_STORAGE_KEY = "zzupzzup-mobile-cloud-mirror";
 const PAGE_SIZE = 12;
 
 const state = {
@@ -109,6 +110,7 @@ const el = {
   showSentence: document.querySelector("#showSentence"),
   showCalendar: document.querySelector("#showCalendar"),
   pasteCsvText: document.querySelector("#pasteCsvText"),
+  importMobileStorage: document.querySelector("#importMobileStorage"),
   connectCsvFromPaste: document.querySelector("#connectCsvFromPaste"),
   readClipboardCsv: document.querySelector("#readClipboardCsv"),
   mergePastedCsv: document.querySelector("#mergePastedCsv"),
@@ -169,6 +171,7 @@ el.showDone.addEventListener("click", showDone);
 el.showStarred.addEventListener("click", showStarred);
 el.showSentence.addEventListener("click", () => showType("문장"));
 el.showCalendar.addEventListener("click", toggleCalendar);
+el.importMobileStorage.addEventListener("click", importMobileStorage);
 el.connectCsvFromPaste.addEventListener("click", connectCsvFile);
 el.readClipboardCsv.addEventListener("click", readClipboardCsv);
 el.mergePastedCsv.addEventListener("click", mergePastedCsv);
@@ -475,6 +478,32 @@ function mergePastedCsv() {
 function clearPastedCsv() {
   el.pasteCsvText.value = "";
   setFileStatus("붙여넣기 칸을 비웠습니다.");
+}
+
+function importMobileStorage() {
+  let mobileClips = [];
+  try {
+    mobileClips = JSON.parse(localStorage.getItem(MOBILE_STORAGE_KEY) || "[]");
+  } catch {
+    setFileStatus("모바일 저장함 데이터를 읽지 못했습니다.");
+    return;
+  }
+
+  if (!Array.isArray(mobileClips) || !mobileClips.length) {
+    setFileStatus("이 브라우저에서 찾은 모바일 저장함 자료가 없습니다. 아이폰 Safari에서 같은 웹홈 주소를 열어 주세요.");
+    return;
+  }
+
+  const before = state.clips.length;
+  state.clips = mergeClips(state.clips, mobileClips);
+  resetFilters();
+  applyFilters();
+  scheduleAutoSave();
+  const added = state.clips.length - before;
+  setFileStatus(`모바일 저장함 ${mobileClips.length}개를 확인했고, 새 항목 ${added}개를 웹홈에 합쳤습니다.`);
+  if (hasCloudSession()) {
+    setCloudStatus("새 Supabase에 저장하려면 현재 항목 올리기를 눌러 주세요.");
+  }
 }
 
 function mergeCsvText(text, label) {

@@ -81,18 +81,23 @@
           </ol>
         </section>
 
-        <section class="bookmarklet-panel">
-          <div class="section-head">
+        <details class="bookmarklet-panel">
+          <summary class="section-head">
             <div>
               <p class="eyebrow">Safari Bookmarklet</p>
               <h2>아이폰/아이패드 문장 줍줍 버튼</h2>
             </div>
-            <button id="copyBookmarklet" class="secondary" type="button">북마클릿 복사</button>
+            <span class="toggle-label" aria-hidden="true">열기</span>
+          </summary>
+          <div class="bookmarklet-body">
+            <p class="helper">아래 코드를 Safari 책갈피 URL에 넣어두면, 선택한 문장이 Supabase 서버에 바로 저장됩니다.</p>
+            <div class="section-actions">
+              <button id="copyBookmarklet" class="secondary" type="button">북마클릿 복사</button>
+              <a id="bookmarkletLink" class="button-link" href="#">줍줍하기 북마클릿</a>
+            </div>
+            <textarea id="bookmarkletCode" rows="4" readonly></textarea>
           </div>
-          <p class="helper">아래 코드를 Safari 책갈피 URL에 넣어두면, 선택한 문장이 Supabase 서버에 바로 저장됩니다.</p>
-          <a id="bookmarkletLink" class="button-link" href="#">줍줍하기 북마클릿</a>
-          <textarea id="bookmarkletCode" rows="4" readonly></textarea>
-        </section>
+        </details>
       </section>
 
       <section class="editor">

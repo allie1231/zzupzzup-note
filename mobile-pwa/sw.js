@@ -1,11 +1,10 @@
-const CACHE_NAME = "zzupzzup-mobile-v20";
+const CACHE_NAME = "zzupzzup-mobile-v21";
 const ASSETS = [
   "./",
   "./index.html",
   "./app.css",
   "./app.js",
   "./manifest.webmanifest",
-  "./icon.svg",
   "./icon-192.png",
   "./icon-512.png",
   "./shared/analyzer.js",
